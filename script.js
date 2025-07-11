@@ -114,6 +114,139 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Scale word timeline
 
+  //   // Long scroll animation with progress variables
+  //   const longScrollSection = document.querySelector("[data-gsap='long-scroll']");
+  //   const stickyContent = document.querySelector("[data-gsap='sticky-content']");
+  //   const textTop = document.querySelector("[data-gsap='text-top']");
+  //   const textMiddle = document.querySelector("[data-gsap='text-middle']");
+  //   const textBottom = document.querySelector("[data-gsap='text-bottom']");
+  //   const textWrapper = document.querySelector("[data-gsap='text-wrapper']");
+  //   const pivotElement = textMiddle
+  //     ? textMiddle.querySelector("[data-gsap='pivot']")
+  //     : null;
+  //   const pivotOffsetX = -200; // Change this value to adjust pivot position horizontally
+  //   const pivotOffsetY = 0; // Change this value to adjust pivot position vertically
+
+  //   // let initialTransformOrigin = "45% 50%";
+  //   let initialTransformOrigin = "51% 40%";
+  //   if (textMiddle && pivotElement) {
+  //     const textMiddleRect = textMiddle.getBoundingClientRect();
+  //     const pivotRect = pivotElement.getBoundingClientRect();
+
+  //     const pivotCenterX =
+  //       pivotRect.left + pivotRect.width / 2 - textMiddleRect.left;
+  //     const pivotCenterY =
+  //       pivotRect.top + pivotRect.height / 2 - textMiddleRect.top;
+
+  //     const adjustedPivotX = pivotCenterX + pivotOffsetX;
+  //     const adjustedPivotY = pivotCenterY + pivotOffsetY;
+
+  //     const pivotPercentX = (adjustedPivotX / textMiddleRect.width) * 100;
+  //     const pivotPercentY = (adjustedPivotY / textMiddleRect.height) * 100;
+
+  //     initialTransformOrigin = `${pivotPercentX}% ${pivotPercentY}%`;
+
+  //     // Set the transform origin using direct style manipulation
+  //     textMiddle.style.transformOrigin = initialTransformOrigin;
+
+  //     // console.log('Transform origin set to:', initialTransformOrigin);
+  //   }
+
+  //   // Set initial CSS variables
+  //   gsap.set(longScrollSection, {
+  //     "--progress1": 0,
+  //     "--progress2": 0,
+  //   });
+
+  //   if (textMiddle) {
+  //     gsap.set(textMiddle, {
+  //       scale: 0,
+  //     });
+  //   }
+
+  //   // Pin the sticky content
+  //   ScrollTrigger.create({
+  //     trigger: longScrollSection,
+  //     start: "top top",
+  //     end: "bottom bottom",
+  //     pin: stickyContent,
+  //     pinSpacing: false,
+  //     // markers: true, // Remove in production
+  //   });
+
+  //   // Create the long scroll animation with progress tracking
+  //   ScrollTrigger.create({
+  //     trigger: longScrollSection,
+  //     start: "top top",
+  //     end: "bottom bottom",
+  //     markers: true,
+  //     scrub: true,
+  //     onUpdate: (self) => {
+  //       const progress = self.progress;
+  //       console.log(progress)
+
+  //       // Calculate progress1: reaches 1 when overall progress is 0.6 (60%)
+  //     const progress1 = Math.min(progress / 0.55, 1);
+
+  //     // Calculate progress2: starts at 60% progress, reaches 1 at 100%
+  //     const progress2 = progress >= 0.5 ? (progress - 0.5) / 0.5 : 0;
+
+  //       // console.log(progress);
+  //       // Update CSS variables
+  //       gsap.set(longScrollSection, {
+  //         "--progress1": progress1,
+  //         "--progress2": progress2,
+  //       });
+
+  // // Apply transforms using the progress variables
+
+  //       // text-top: translateY(calc(var(--progress1) * -100%))
+  //       if (textTop) {
+  //         gsap.set(textTop, {
+  //           y: `${progress1 * -100}%`,
+  //         });
+  //       }
+
+  //       if (textBottom) {
+  //         gsap.set(textBottom, {
+  //           y: `${progress1 * 100}%`,
+  //         });
+  //       }
+
+  //       // text-middle: transform: translate(-50%, -50%) scale(calc(var(--progress1) * 8.5))
+  //       // transform-origin: 50% calc(50% - var (--progress1) * 25%)
+  //       if (textMiddle) {
+
+  //         const rotationProgress = Math.min(progress2 / 0.1, 1);
+  //         const rotation = rotationProgress * 7.8;
+
+  //         gsap.set(textMiddle, {
+  //           scale: progress1 * 2.25,
+  //           // scale: progress1 * 4,
+  //           rotation: rotation,
+  //         });
+  //       }
+
+  //       // text-wrapper: transform: scale(calc(1 + (var(--progress1)) * 3))
+  //       if (textWrapper) {
+  //         gsap.set(textWrapper, {
+  //           scale: 1 + progress1 * 8,
+  //         });
+  //       }
+
+  //       if (progress2 > 0) {
+  //         // Do something with progress2 (from 80% to 100% of scroll)
+  //         // console.log('Progress2 active:', progress2);
+  //         gsap.set(stickyContent, {
+  //           color: "var(--swatch--pink)",
+  //         })
+  //       }
+
+  //     },
+  //   });
+
+  /////////////////// The Text Animation ///////////////////
+
   // Long scroll animation with progress variables
   const longScrollSection = document.querySelector("[data-gsap='long-scroll']");
   const stickyContent = document.querySelector("[data-gsap='sticky-content']");
@@ -124,11 +257,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const pivotElement = textMiddle
     ? textMiddle.querySelector("[data-gsap='pivot']")
     : null;
-  const pivotOffsetX = -200; // Change this value to adjust pivot position horizontally
+  const beforePivot = textMiddle
+    ? textMiddle.querySelector("[data-gsap='before-pivot']")
+    : null;
+  const afterPivot = textMiddle
+    ? textMiddle.querySelector("[data-gsap='after-pivot']")
+    : null;
+
+  const pivotOffsetX = 125; // Change this value to adjust pivot position horizontally
   const pivotOffsetY = 0; // Change this value to adjust pivot position vertically
 
-  // let initialTransformOrigin = "45% 50%";
-  let initialTransformOrigin = "51% 10%";
+  // Initial and target transform origins
+  let initialOriginX = 50; // 50%
+  let initialOriginY = 50; // 50%
+  let pivotOriginX = 51; // Default fallback
+  let pivotOriginY = 40; // Default fallback
+
+  // Calculate pivot-based transform origin
   if (textMiddle && pivotElement) {
     const textMiddleRect = textMiddle.getBoundingClientRect();
     const pivotRect = pivotElement.getBoundingClientRect();
@@ -141,15 +286,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const adjustedPivotX = pivotCenterX + pivotOffsetX;
     const adjustedPivotY = pivotCenterY + pivotOffsetY;
 
-    const pivotPercentX = (adjustedPivotX / textMiddleRect.width) * 100;
-    const pivotPercentY = (adjustedPivotY / textMiddleRect.height) * 100;
-
-    // initialTransformOrigin = `${pivotPercentX}% ${pivotPercentY}%`;
-
-    // Set the transform origin using direct style manipulation
-    textMiddle.style.transformOrigin = initialTransformOrigin;
-
-    // console.log('Transform origin set to:', initialTransformOrigin);
+    pivotOriginX = (adjustedPivotX / textMiddleRect.width) * 100;
+    pivotOriginY = (adjustedPivotY / textMiddleRect.height) * 100;
   }
 
   // Set initial CSS variables
@@ -161,6 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (textMiddle) {
     gsap.set(textMiddle, {
       scale: 0,
+      transformOrigin: `${initialOriginX}% ${initialOriginY}%`,
     });
   }
 
@@ -183,22 +322,29 @@ document.addEventListener("DOMContentLoaded", function () {
     scrub: true,
     onUpdate: (self) => {
       const progress = self.progress;
-      console.log(progress)
+      console.log(progress);
 
-      // Calculate progress1: reaches 1 when overall progress is 0.6 (60%)
-    const progress1 = Math.min(progress / 0.55, 1);
+      // Calculate progress1: reaches 1 when overall progress is 0.55 (55%)
+      const progress1 = Math.min(progress / 0.55, 1);
 
-    // Calculate progress2: starts at 60% progress, reaches 1 at 100%
-    const progress2 = progress >= 0.5 ? (progress - 0.5) / 0.5 : 0;
+      // Calculate progress2: starts at 50% progress, reaches 1 at 100%
+      const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
 
-      // console.log(progress);
+      // Calculate progress3: starts at 40% progress, reaches 1 at 55%
+      const progress3 =
+        progress >= 0.4 && progress <= 0.55
+          ? (progress - 0.4) / 0.15
+          : progress > 0.55
+          ? 1
+          : 0;
+
       // Update CSS variables
       gsap.set(longScrollSection, {
         "--progress1": progress1,
         "--progress2": progress2,
       });
-      
-// Apply transforms using the progress variables
+
+      // Apply transforms using the progress variables
 
       // text-top: translateY(calc(var(--progress1) * -100%))
       if (textTop) {
@@ -213,39 +359,40 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
 
-      // text-middle: transform: translate(-50%, -50%) scale(calc(var(--progress1) * 8.5))
-      // transform-origin: 50% calc(50% - var (--progress1) * 25%)
+      // Handle middle text animation with smooth origin interpolation
       if (textMiddle) {
+        // Interpolate transform origin based on progress1
+        const currentOriginX =
+          initialOriginX + (pivotOriginX - initialOriginX) * progress1;
+        const currentOriginY =
+          initialOriginY + (pivotOriginY - initialOriginY) * progress1;
 
-        const rotationProgress = Math.min(progress2 / 0.1, 1);
-        const rotation = rotationProgress * 7.8;
+        // Set the interpolated transform origin
+        textMiddle.style.transformOrigin = `${currentOriginX}% ${currentOriginY}%`;
 
         gsap.set(textMiddle, {
-          scale: progress1 * 2.25,
-          // scale: progress1 * 4,
-          rotation: rotation,
+          scale: progress1 * 2.1,
+        });
+        gsap.set(beforePivot, {
+          xPercent: progress3 * -5,
+        });
+        gsap.set(afterPivot, {
+          xPercent: progress3 * 20,
         });
       }
-
       // text-wrapper: transform: scale(calc(1 + (var(--progress1)) * 3))
       if (textWrapper) {
         gsap.set(textWrapper, {
           scale: 1 + progress1 * 8,
         });
       }
-      
 
       if (progress2 > 0) {
-        // Do something with progress2 (from 80% to 100% of scroll)
-        // console.log('Progress2 active:', progress2);
+        // Do something with progress2 (from 50% to 100% of scroll)
         gsap.set(stickyContent, {
           color: "var(--swatch--pink)",
-        })
+        });
       }
-
     },
   });
-
-
-
 });
