@@ -395,4 +395,41 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     },
   });
+
+
+    const accordionContainer = document.querySelector('[data-gsap="inview"]');
+    const accordionHeaders = document.querySelectorAll('.accordion_header');
+    const headerHeight = 8.5; // rem
+    
+    if (accordionContainer && accordionHeaders.length > 0) {
+        const totalItemsCount = accordionHeaders.length;
+        
+        // Set CSS custom properties only
+        accordionHeaders.forEach((header, index) => {
+            const itemPosition = index + 1;
+            header.style.setProperty('--total-items', totalItemsCount);
+            header.style.setProperty('--item-position', itemPosition);
+        });
+        
+        // Simple GSAP ScrollTrigger - exactly like original Intersection Observer
+        ScrollTrigger.create({
+            trigger: accordionContainer,
+            start: "top bottom",
+            end: "top top",
+            markers: true,
+            
+            onUpdate: (self) => {
+                const containerRect = accordionContainer.getBoundingClientRect();
+                
+                // Exact same logic as original
+                if (containerRect.top < 0) {
+                    accordionContainer.classList.add('inview');
+                } else {
+                    accordionContainer.classList.remove('inview');
+                }
+            }
+        });
+    }
+
+
 });
