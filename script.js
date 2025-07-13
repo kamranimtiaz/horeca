@@ -396,40 +396,113 @@ document.addEventListener("DOMContentLoaded", function () {
     },
   });
 
+  const accordionContainer = document.querySelector('[data-gsap="inview"]');
+  const accordionHeaders = document.querySelectorAll(".accordion_header");
+  const accordionWrapper = document.querySelector('[data-gsap="accordion-wrapper"]');
 
-    const accordionContainer = document.querySelector('[data-gsap="inview"]');
-    const accordionHeaders = document.querySelectorAll('.accordion_header');
-    const headerHeight = 8.5; // rem
-    
-    if (accordionContainer && accordionHeaders.length > 0) {
-        const totalItemsCount = accordionHeaders.length;
-        
-        // Set CSS custom properties only
-        accordionHeaders.forEach((header, index) => {
-            const itemPosition = index + 1;
-            header.style.setProperty('--total-items', totalItemsCount);
-            header.style.setProperty('--item-position', itemPosition);
-        });
-        
-        // Simple GSAP ScrollTrigger - exactly like original Intersection Observer
-        ScrollTrigger.create({
-            trigger: accordionContainer,
-            start: "top bottom",
-            end: "top top",
-            markers: true,
-            
-            onUpdate: (self) => {
-                const containerRect = accordionContainer.getBoundingClientRect();
-                
-                // Exact same logic as original
-                if (containerRect.top < 0) {
-                    accordionContainer.classList.add('inview');
-                } else {
-                    accordionContainer.classList.remove('inview');
-                }
-            }
-        });
+  let headerHeight = "8.75rem"; // rem
+
+  if (accordionContainer && accordionHeaders.length > 0 && accordionWrapper) {
+    const totalItemsCount = accordionHeaders.length;
+    const sectionHeight = accordionContainer.getBoundingClientRect().height;
+    const wrapperHeight = accordionWrapper.offsetHeight;
+    const headerHeightPx = wrapperHeight / totalItemsCount;
+    const sectionHeightPx = `${sectionHeight}px`;
+
+
+     // Set global CSS variables on :root
+    document.documentElement.style.setProperty('--total-items', totalItemsCount);
+    document.documentElement.style.setProperty('--section-height', sectionHeightPx);
+    document.documentElement.style.setProperty('--header-height', headerHeight);
+
+
+    // headerHeight = `${headerHeightPx}px`;
+
+    // Set CSS custom properties only
+    accordionHeaders.forEach((header, index) => {
+      const itemPosition = index + 1;
+      // header.style.setProperty("--total-items", totalItemsCount);
+      header.style.setProperty("--item-position", itemPosition);
+      // header.style.setProperty("--header-height", headerHeight);
+      // accordionContainer.style.setProperty('--section-height', sectionHeightPx);
+    });
+
+    // Simple GSAP ScrollTrigger - exactly like original Intersection Observer
+    // ScrollTrigger.create({
+    //     trigger: accordionContainer,
+    //     start: "top bottom",
+    //     end: "top top",
+    //     markers: true,
+
+    //     onUpdate: (self) => {
+    //         const containerRect = accordionContainer.getBoundingClientRect();
+
+    //         // Exact same logic as original
+    //         if (containerRect.top <= 1) {
+    //             accordionContainer.classList.add('inview');
+    //         } else {
+    //             accordionContainer.classList.remove('inview');
+    //         }
+    //     }
+    // });
+    const accordionContainers = document.querySelectorAll("[data-accordion]");
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const container = entry.target;
+            // Exact same logic as reference
+            entry.boundingClientRect.top < 0
+              ? container.classList.add("inview")
+              : container.classList.remove("inview");
+          });
+        },
+        {
+          root: null,
+          rootMargin: "0px 0px -100% 0px", // Critical setting
+          threshold: 0,
+        }
+      );
+
+      accordionContainers.forEach((container) => {
+        observer.observe(container);
+      });
     }
+  }
+
+
+    const slides = document.querySelectorAll('[data-gsap="pinned-slides"] .slide')
+
+    slides.forEach(slide => {
+        const contentWrapper = slide.querySelector('.slide-wrapper')
+        const content = slide.querySelector('.card_stack_component')
+
+        gsap.to(content, {
+            rotationZ: (Math.random() - 0.5) * 10, // RotationZ between -5 and 5 degrees
+            scale: 0.7, // Slight reduction of the content
+            rotationX: 40,
+            ease: 'power1.in', // Starts gradually
+            scrollTrigger: {
+                pin: contentWrapper, // contentWrapper is pinned during the animation
+                trigger: slide, // Listens to the slide’s position
+                start: 'top 0%', // Starts when its top reaches the top of the viewport
+                end: '+=' + window.innerHeight, // Ends 100vh later
+                scrub: true // Progresses with the scroll
+            }
+        })
+
+        gsap.to(content, {
+            autoAlpha: 0, // Ends at opacity: 0 and visibility: hidden
+            ease: 'power1.in', // Starts gradually
+            scrollTrigger: {
+                trigger: content, // Listens to the position of content
+                start: 'top -80%', // Starts when the top exceeds 80% of the viewport
+                end: '+=' + 0.2 * window.innerHeight, // Ends 20% later
+                scrub: true // Progresses with the scroll
+            }
+        })
+    })
 
 
 });
