@@ -209,164 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  // const longScrollSection = document.querySelector(
-  //   "[data-gsap-section='long-scroll']"
-  // );
-  // const stickyContent = longScrollSection.querySelector(
-  //   "[data-gsap-state='pinned']"
-  // );
-  // const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
-  // const textMiddle = longScrollSection.querySelector(
-  //   "[data-gsap-text='middle']"
-  // );
-  // const textBottom = longScrollSection.querySelector(
-  //   "[data-gsap-text='bottom']"
-  // );
-  // const textWrapper = longScrollSection.querySelector(
-  //   "[data-gsap-wrapper='text-wrapper']"
-  // );
-  // const pivotElement = textMiddle
-  //   ? textMiddle.querySelector("[data-gsap-pivot='pivot']")
-  //   : null;
-  // const beforePivot = textMiddle
-  //   ? textMiddle.querySelector("[data-gsap-pivot='before']")
-  //   : null;
-  // const afterPivot = textMiddle
-  //   ? textMiddle.querySelector("[data-gsap-pivot='after']")
-  //   : null;
-
-  // const pivotOffsetX = 125; // Change this value to adjust pivot position horizontally
-  // const pivotOffsetY = 0; // Change this value to adjust pivot position vertically
-
-  // // Initial and target transform origins
-  // let initialOriginX = 50; // 50%
-  // let initialOriginY = 50; // 50%
-  // let pivotOriginX = 51; // Default fallback
-  // let pivotOriginY = 40; // Default fallback
-
-  // // Calculate pivot-based transform origin
-  // if (textMiddle && pivotElement) {
-  //   const textMiddleRect = textMiddle.getBoundingClientRect();
-  //   const pivotRect = pivotElement.getBoundingClientRect();
-
-  //   const pivotCenterX =
-  //     pivotRect.left + pivotRect.width / 2 - textMiddleRect.left;
-  //   const pivotCenterY =
-  //     pivotRect.top + pivotRect.height / 2 - textMiddleRect.top;
-
-  //   const adjustedPivotX = pivotCenterX + pivotOffsetX;
-  //   const adjustedPivotY = pivotCenterY + pivotOffsetY;
-
-  //   pivotOriginX = (adjustedPivotX / textMiddleRect.width) * 100;
-  //   pivotOriginY = (adjustedPivotY / textMiddleRect.height) * 100;
-  // }
-
-  // // Set initial CSS variables
-  // gsap.set(longScrollSection, {
-  //   "--progress1": 0,
-  //   "--progress2": 0,
-  // });
-
-  // if (textMiddle) {
-  //   gsap.set(textMiddle, {
-  //     scale: 0,
-  //     transformOrigin: `${initialOriginX}% ${initialOriginY}%`,
-  //   });
-  // }
-
-  // // Pin the sticky content
-  // ScrollTrigger.create({
-  //   trigger: longScrollSection,
-  //   start: "top top",
-  //   end: "bottom bottom",
-  //   pin: stickyContent,
-  //   pinSpacing: false,
-  //   // markers: true, // Remove in production
-  // });
-
-  // // Create the long scroll animation with progress tracking
-  // ScrollTrigger.create({
-  //   trigger: longScrollSection,
-  //   start: "top top",
-  //   end: "bottom bottom",
-  //   markers: true,
-  //   scrub: true,
-  //   onUpdate: (self) => {
-  //     const progress = self.progress;
-  //     console.log(progress);
-
-  //     // Calculate progress1: reaches 1 when overall progress is 0.55 (55%)
-  //     const progress1 = Math.min(progress / 0.55, 1);
-
-  //     // Calculate progress2: starts at 50% progress, reaches 1 at 100%
-  //     const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
-
-  //     // Calculate progress3: starts at 40% progress, reaches 1 at 55%
-  //     const progress3 =
-  //       progress >= 0.4 && progress <= 0.55
-  //         ? (progress - 0.4) / 0.15
-  //         : progress > 0.55
-  //         ? 1
-  //         : 0;
-
-  //     // Update CSS variables
-  //     gsap.set(longScrollSection, {
-  //       "--progress1": progress1,
-  //       "--progress2": progress2,
-  //     });
-
-  //     // Apply transforms using the progress variables
-
-  //     // text-top: translateY(calc(var(--progress1) * -100%))
-  //     if (textTop) {
-  //       gsap.set(textTop, {
-  //         y: `${progress1 * -100}%`,
-  //       });
-  //     }
-
-  //     if (textBottom) {
-  //       gsap.set(textBottom, {
-  //         y: `${progress1 * 100}%`,
-  //       });
-  //     }
-
-  //     // Handle middle text animation with smooth origin interpolation
-  //     if (textMiddle) {
-  //       // Interpolate transform origin based on progress1
-  //       const currentOriginX =
-  //         initialOriginX + (pivotOriginX - initialOriginX) * progress1;
-  //       const currentOriginY =
-  //         initialOriginY + (pivotOriginY - initialOriginY) * progress1;
-
-  //       // Set the interpolated transform origin
-  //       textMiddle.style.transformOrigin = `${currentOriginX}% ${currentOriginY}%`;
-
-  //       gsap.set(textMiddle, {
-  //         scale: progress1 * 2.1,
-  //       });
-  //       gsap.set(beforePivot, {
-  //         xPercent: progress3 * -5,
-  //       });
-  //       gsap.set(afterPivot, {
-  //         xPercent: progress3 * 20,
-  //       });
-  //     }
-  //     // text-wrapper: transform: scale(calc(1 + (var(--progress1)) * 3))
-  //     if (textWrapper) {
-  //       gsap.set(textWrapper, {
-  //         scale: 1 + progress1 * 8,
-  //       });
-  //     }
-
-  //     if (progress2 > 0) {
-  //       // Do something with progress2 (from 50% to 100% of scroll)
-  //       gsap.set(stickyContent, {
-  //         color: "var(--swatch--pink)",
-  //       });
-  //     }
-  //   },
-  // });
-
   // Function to initialize long scroll animation for a single instance
   function initializeLongScrollAnimation(longScrollSection, index) {
     if (!longScrollSection) return;
@@ -566,7 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalItemsCount = accordionHeaders.length;
     const sectionHeight = accordionContainer.getBoundingClientRect().height;
     const wrapperHeight = accordionWrapper.offsetHeight;
-    const headerHeightPx = wrapperHeight / totalItemsCount;
+    const headerHeightPx = `${wrapperHeight / totalItemsCount}px`;
     const sectionHeightPx = `${sectionHeight}px`;
 
     // Set global CSS variables on :root
@@ -578,7 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "--section-height",
       sectionHeightPx
     );
-    document.documentElement.style.setProperty("--header-height", headerHeight);
+    document.documentElement.style.setProperty("--header-height", headerHeightPx);
 
     accordionHeaders.forEach((header, index) => {
       const itemPosition = index + 1;
@@ -588,27 +430,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const accordionContainers = document.querySelectorAll("[data-accordion]");
 
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const container = entry.target;
-            // Exact same logic as reference
-            entry.boundingClientRect.top < 0
-              ? container.classList.add("inview")
-              : container.classList.remove("inview");
-          });
-        },
-        {
-          root: null,
-          rootMargin: "0px 0px -100% 0px", // Critical setting
-          threshold: 0,
-        }
-      );
+    // if ("IntersectionObserver" in window) {
+    //   const observer = new IntersectionObserver(
+    //     (entries) => {
+    //       entries.forEach((entry) => {
+    //         const container = entry.target;
+    //         // Exact same logic as reference
+    //         entry.boundingClientRect.top < 0
+    //           ? container.classList.add("inview")
+    //           : container.classList.remove("inview");
+    //       });
+    //     },
+    //     {
+    //       root: null,
+    //       rootMargin: "0px 0px -100% 0px", // Critical setting
+    //       threshold: 0,
+    //     }
+    //   );
 
+    //   accordionContainers.forEach((container) => {
+    //     observer.observe(container);
+    //   });
+    // }
+
+
+  ScrollTrigger.create({
+    trigger: accordionWrapper,
+    start: `top bottom-=${wrapperHeight}`,
+    onEnter: () => {
       accordionContainers.forEach((container) => {
-        observer.observe(container);
+        container.classList.add("inview");
       });
-    }
+    },
+    onLeaveBack: () => {
+      accordionContainers.forEach((container) => {
+        container.classList.remove("inview");
+      });
+    },
+  });
   }
 });
