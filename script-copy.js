@@ -50,7 +50,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Also observe the body for overall layout changes
   resizeObserver.observe(document.body);
 
-  // STACKED CARDS //
+  /////////////////////////////////
+  /////////////////////////////////
+  /* Slides Pinned at Top and Video Scaling */
+  /////////////////////////////////
+  /////////////////////////////////
 
   const cardsWrappers = gsap.utils.toArray(".slide-wrapper").slice(0, -1);
   const cards = gsap.utils.toArray(".card_stack_component");
@@ -80,78 +84,125 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-
   // Image scaling animation for all cards (including the last one)
-const allCardsWrappers = gsap.utils.toArray(".slide-wrapper");
+  const allCardsWrappers = gsap.utils.toArray(".slide-wrapper");
 
-allCardsWrappers.forEach((wrapper, i) => {
-  const imageElement = wrapper.querySelector("[data-gsap-image]");
-  
-  if (imageElement) {
-    // Set initial scale
-    gsap.set(imageElement, {
-      scale: 0.3
-    });
+  allCardsWrappers.forEach((wrapper, i) => {
+    const imageElement = wrapper.querySelector("[data-gsap-image]");
+
+    if (imageElement) {
+      // Set initial scale
+      gsap.set(imageElement, {
+        scale: 0.3,
+      });
+
+      // Create the scaling animation
+      gsap.to(imageElement, {
+        scale: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: wrapper,
+          start: "top 80%", // When card top hits 90% from top
+          end: "top 30%", // When card reaches center (50% from top)
+          scrub: true,
+          // Optional: uncomment to see markers for debugging
+          // markers: {
+          //   indent: 150 * i,
+          //   startColor: "#ff6b6b",
+          //   endColor: "#4ecdc4",
+          //   fontSize: "12px"
+          // }
+        },
+      });
+    }
+  });
+
+  /////////////////////////////////
+  /////////////////////////////////
+  /* Animtate background */
+  /////////////////////////////////
+  /////////////////////////////////
+
+  const animateElements = document.querySelectorAll("[data-animate-to]");
+
+  animateElements.forEach(function(element) {
+    const themeKey = element.getAttribute("data-animate-to");
     
-    // Create the scaling animation
-    gsap.to(imageElement, {
-      scale: 1,
-      ease: "none",
-      scrollTrigger: {
-        trigger: wrapper,
-        start: "top 80%", // When card top hits 90% from top
-        end: "top 30%",   // When card reaches center (50% from top)
-        scrub: true,
-        // Optional: uncomment to see markers for debugging
-        // markers: {
-        //   indent: 150 * i,
-        //   startColor: "#ff6b6b",
-        //   endColor: "#4ecdc4",
-        //   fontSize: "12px"
-        // }
+    if (!themeKey) {
+      console.warn("Element has data-animate-to attribute but no value");
+      return;
+    }
+
+    const themeClass = `u-theme-${themeKey}`;
+
+    ScrollTrigger.create({
+      trigger: element,
+      start: "top center",
+      end: "bottom center",
+      onEnter: () => {
+        // Remove all existing theme classes
+        document.body.className = document.body.className.replace(/\bu-theme-\S+/g, '');
+        // Add the new theme class
+        document.body.classList.add(themeClass);
+      },
+      onEnterBack: () => {
+        // Remove all existing theme classes
+        document.body.className = document.body.className.replace(/\bu-theme-\S+/g, '');
+        // Add the new theme class
+        document.body.classList.add(themeClass);
       }
     });
-  }
-});
+  });
 
   /////////////////////////////////
   /////////////////////////////////
   /* Squeesed H2 ANIMATION */
   /////////////////////////////////
   /////////////////////////////////
-  
-  // Text squeeze animation for elements with data-gsap-squeeze attribute
+
+ // Basic Line-by-Line Squeeze using GSAP SplitText plugin
 const squeezeElements = gsap.utils.toArray("[data-gsap-squeeze]");
 
 squeezeElements.forEach((element, i) => {
-  // Set initial transform origin and scale
-  gsap.set(element, {
-    transformOrigin: "0 0", // Origin at top-left (0,0)
-    scaleX: 1,
-    scaleY: 0 // Start from scale 1,0
+  // Split the text into lines using SplitText plugin
+  const splitText = new SplitText(element, {
+    type: "lines",
+    linesClass: "squeeze-line"
   });
   
-  // Create the squeeze animation
-  gsap.to(element, {
-    scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
-    ease: "none",
-    scrollTrigger: {
-      trigger: element,
-      start: "top bottom", // When element top hits viewport bottom
-      end: "top 75%",     // When element top hits 65% from top
-      scrub: true,
-      // Optional: uncomment to see markers for debugging
-      // markers: {
-      //   indent: 100 * i,
-      //   startColor: "#ff9800",
-      //   endColor: "#2196f3",
-      //   fontSize: "12px"
-      // }
-    }
+  // Get the line elements
+  const lines = splitText.lines;
+  
+  // Set initial transform origin and scale for each line
+  gsap.set(lines, {
+    transformOrigin: "0 0", // Origin at top-left (0,0)
+    scaleX: 1,
+    scaleY: 0, // Start from scale 1,0
+  });
+  
+  // Create the squeeze animation for each line
+  lines.forEach((line, lineIndex) => {
+    gsap.to(line, {
+      scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
+      ease: "none",
+      scrollTrigger: {
+        trigger: element, // Use the parent element as trigger
+        start: "top bottom", // When element top hits viewport bottom
+        end: "top 75%", // When element top hits 75% from top
+        scrub: true,
+        // Add a slight delay for each line to create stagger effect
+        // delay: lineIndex * 0.1,
+        // Optional: uncomment to see markers for debugging
+        // markers: {
+        //   indent: 100 * i + lineIndex * 20,
+        //   startColor: "#ff9800",
+        //   endColor: "#2196f3",
+        //   fontSize: "12px"
+        // }
+      },
+    });
   });
 });
-
-
 
   /////////////////////////////////
   /////////////////////////////////
@@ -452,9 +503,7 @@ squeezeElements.forEach((element, i) => {
   // }
 
   function initializeLongScrollAnimation(section, index) {
-     const stickyContent = section.querySelector(
-      "[data-gsap-state='pinned']"
-    );
+    const stickyContent = section.querySelector("[data-gsap-state='pinned']");
     const middleText = section.querySelector("[data-gsap='middle-text']");
     if (!middleText) return;
 
@@ -465,12 +514,12 @@ squeezeElements.forEach((element, i) => {
 
     const tl = gsap.timeline({
       scrollTrigger: {
-      trigger: longScrollSection,
-      start: "top top",
-      end: "bottom bottom",
-      markers: true,
-      scrub: true,
-      pin: stickyContent,
+        trigger: longScrollSection,
+        start: "top top",
+        end: "bottom bottom",
+        markers: true,
+        scrub: true,
+        pin: stickyContent,
       },
     });
 
