@@ -28,28 +28,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to refresh ScrollTrigger instances
   function refreshScrollTriggers() {
     ScrollTrigger.refresh();
+    lenis.resize()
+
   }
-
-  // Set up ResizeObserver to watch for content changes
-  const resizeObserver = new ResizeObserver((entries) => {
-    // Debounce the refresh to avoid excessive calls
-    clearTimeout(window.scrollTriggerRefreshTimeout);
-    window.scrollTriggerRefreshTimeout = setTimeout(() => {
-      refreshScrollTriggers();
-    }, 100);
-  });
-
-  // Observe all sections that might change size
-  const observedSections = document.querySelectorAll(
-    "section, .section, [data-observe-resize]"
-  );
-  observedSections.forEach((section) => {
-    resizeObserver.observe(section);
-  });
-
-  // Also observe the body for overall layout changes
-  resizeObserver.observe(document.body);
-
+window.addEventListener('resize', refreshScrollTriggers)
   /////////////////////////////////
   /////////////////////////////////
   /* Slides Pinned at Top and Video Scaling */
@@ -74,12 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
         scrub: true,
         pin: wrapper,
         pinSpacing: false,
-        // markers: {
-        //   indent: 100 * i,
-        //   startColor: "#0ae448",
-        //   endColor: "#fec5fb",
-        //   fontSize: "14px"
-        // },
       },
     });
   });
@@ -123,36 +99,60 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  const animateElements = document.querySelectorAll("[data-animate-to]");
+//   const animateElements = document.querySelectorAll("[data-animate-to]");
 
-  animateElements.forEach(function(element) {
-    const themeKey = element.getAttribute("data-animate-to");
+// animateElements.forEach(function(element) {
+//   const themeKey = element.getAttribute("data-animate-to");
+  
+//   if (!themeKey) {
+//     console.warn("Element has data-animate-to attribute but no value");
+//     return;
+//   }
+  
+//   const themeClass = `u-theme-${themeKey}`;
+  
+//   function applyTheme() {
+//     // Get current theme class
+//     const currentThemeClass = Array.from(document.body.classList)
+//       .find(className => className.startsWith('u-theme-'));
     
-    if (!themeKey) {
-      console.warn("Element has data-animate-to attribute but no value");
-      return;
-    }
-
-    const themeClass = `u-theme-${themeKey}`;
+//     if (currentThemeClass === themeClass) {
+//       return; // Already has this theme, no need to change
+//     }
+    
+//     if (currentThemeClass) {
+//       // Replace the old theme class with the new one directly
+//       document.body.classList.replace(currentThemeClass, themeClass);
+//     } else {
+//       // No existing theme class, just add the new one
+//       document.body.classList.add(themeClass);
+//     }
+//   }
+  
+//   ScrollTrigger.create({
+//     trigger: element,
+//     start: "top center",
+//     end: "bottom center",
+//     onEnter: applyTheme,
+//     onEnterBack: applyTheme
+//   });
+// });
+document.addEventListener("colorThemesReady", () => {
+  $("[data-animate-theme-to]").each(function () {
+    let theme = $(this).attr("data-animate-theme-to");
+    let brand = $(this).attr("data-animate-brand-to");
 
     ScrollTrigger.create({
-      trigger: element,
+      trigger: $(this),
       start: "top center",
       end: "bottom center",
-      onEnter: () => {
-        // Remove all existing theme classes
-        document.body.className = document.body.className.replace(/\bu-theme-\S+/g, '');
-        // Add the new theme class
-        document.body.classList.add(themeClass);
-      },
-      onEnterBack: () => {
-        // Remove all existing theme classes
-        document.body.className = document.body.className.replace(/\bu-theme-\S+/g, '');
-        // Add the new theme class
-        document.body.classList.add(themeClass);
+      onToggle: ({ self, isActive }) => {
+        if (isActive) gsap.to("body", { ...colorThemes.getTheme(theme) });
       }
     });
   });
+});
+
 
   /////////////////////////////////
   /////////////////////////////////
@@ -186,7 +186,7 @@ squeezeElements.forEach((element, i) => {
       scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
       ease: "none",
       scrollTrigger: {
-        trigger: element, // Use the parent element as trigger
+        trigger: line, // Use the parent element as trigger
         start: "top bottom", // When element top hits viewport bottom
         end: "top 75%", // When element top hits 75% from top
         scrub: true,
@@ -590,6 +590,7 @@ squeezeElements.forEach((element, i) => {
       const itemPosition = index + 1;
 
       header.style.setProperty("--item-position", itemPosition);
+      header.style.position = "absolute";
     });
 
     const accordionContainers = document.querySelectorAll("[data-accordion]");
