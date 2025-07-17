@@ -28,10 +28,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to refresh ScrollTrigger instances
   function refreshScrollTriggers() {
     ScrollTrigger.refresh();
-    lenis.resize()
-
+    lenis.resize();
   }
-window.addEventListener('resize', refreshScrollTriggers)
+  window.addEventListener("resize", refreshScrollTriggers);
   /////////////////////////////////
   /////////////////////////////////
   /* Slides Pinned at Top and Video Scaling */
@@ -99,60 +98,72 @@ window.addEventListener('resize', refreshScrollTriggers)
   /////////////////////////////////
   /////////////////////////////////
 
-//   const animateElements = document.querySelectorAll("[data-animate-to]");
+  //   const animateElements = document.querySelectorAll("[data-animate-to]");
 
-// animateElements.forEach(function(element) {
-//   const themeKey = element.getAttribute("data-animate-to");
-  
-//   if (!themeKey) {
-//     console.warn("Element has data-animate-to attribute but no value");
-//     return;
-//   }
-  
-//   const themeClass = `u-theme-${themeKey}`;
-  
-//   function applyTheme() {
-//     // Get current theme class
-//     const currentThemeClass = Array.from(document.body.classList)
-//       .find(className => className.startsWith('u-theme-'));
-    
-//     if (currentThemeClass === themeClass) {
-//       return; // Already has this theme, no need to change
-//     }
-    
-//     if (currentThemeClass) {
-//       // Replace the old theme class with the new one directly
-//       document.body.classList.replace(currentThemeClass, themeClass);
-//     } else {
-//       // No existing theme class, just add the new one
-//       document.body.classList.add(themeClass);
-//     }
-//   }
-  
-//   ScrollTrigger.create({
-//     trigger: element,
-//     start: "top center",
-//     end: "bottom center",
-//     onEnter: applyTheme,
-//     onEnterBack: applyTheme
-//   });
-// });
-document.addEventListener("colorThemesReady", () => {
-  $("[data-animate-theme-to]").each(function () {
-    let theme = $(this).attr("data-animate-theme-to");
-    let brand = $(this).attr("data-animate-brand-to");
+  // animateElements.forEach(function(element) {
+  //   const themeKey = element.getAttribute("data-animate-to");
 
-    ScrollTrigger.create({
-      trigger: $(this),
-      start: "top center",
-      end: "bottom center",
-      onToggle: ({ self, isActive }) => {
-        if (isActive) gsap.to("body", { ...colorThemes.getTheme(theme) });
-      }
+  //   if (!themeKey) {
+  //     console.warn("Element has data-animate-to attribute but no value");
+  //     return;
+  //   }
+
+  //   const themeClass = `u-theme-${themeKey}`;
+
+  //   function applyTheme() {
+  //     // Get current theme class
+  //     const currentThemeClass = Array.from(document.body.classList)
+  //       .find(className => className.startsWith('u-theme-'));
+
+  //     if (currentThemeClass === themeClass) {
+  //       return; // Already has this theme, no need to change
+  //     }
+
+  //     if (currentThemeClass) {
+  //       // Replace the old theme class with the new one directly
+  //       document.body.classList.replace(currentThemeClass, themeClass);
+  //     } else {
+  //       // No existing theme class, just add the new one
+  //       document.body.classList.add(themeClass);
+  //     }
+  //   }
+
+  //   ScrollTrigger.create({
+  //     trigger: element,
+  //     start: "top center",
+  //     end: "bottom center",
+  //     onEnter: applyTheme,
+  //     onEnterBack: applyTheme
+  //   });
+  // });
+  document.addEventListener("colorThemesReady", () => {
+    $("[data-animate-theme-to]").each(function () {
+      let theme = $(this).attr("data-animate-theme-to");
+      let endTheme = $(this).attr("data-animate-theme-end") || "default";
+
+      ScrollTrigger.create({
+        trigger: $(this),
+        start: "top center",
+        end: "bottom center",
+        toggleActions: "restart none none reverse",
+        invalidateOnRefresh: true,
+        onEnter: () => {
+          gsap.to("body", {
+            ...colorThemes.getTheme(theme),
+            duration: 0.5, // ← Add duration here
+            ease: "Quad.easeInOut",
+          });
+        },
+        onEnterBack: () => {
+          gsap.to("body", {
+            ...colorThemes.getTheme(theme),
+            duration: 0.5, // ← Add duration here
+            ease: "Quad.easeInOut",
+          });
+        },
+      });
     });
   });
-});
-
 
   /////////////////////////////////
   /////////////////////////////////
@@ -160,49 +171,49 @@ document.addEventListener("colorThemesReady", () => {
   /////////////////////////////////
   /////////////////////////////////
 
- // Basic Line-by-Line Squeeze using GSAP SplitText plugin
-const squeezeElements = gsap.utils.toArray("[data-gsap-squeeze]");
+  // Basic Line-by-Line Squeeze using GSAP SplitText plugin
+  const squeezeElements = gsap.utils.toArray("[data-gsap-squeeze]");
 
-squeezeElements.forEach((element, i) => {
-  // Split the text into lines using SplitText plugin
-  const splitText = new SplitText(element, {
-    type: "lines",
-    linesClass: "squeeze-line"
-  });
-  
-  // Get the line elements
-  const lines = splitText.lines;
-  
-  // Set initial transform origin and scale for each line
-  gsap.set(lines, {
-    transformOrigin: "0 0", // Origin at top-left (0,0)
-    scaleX: 1,
-    scaleY: 0, // Start from scale 1,0
-  });
-  
-  // Create the squeeze animation for each line
-  lines.forEach((line, lineIndex) => {
-    gsap.to(line, {
-      scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
-      ease: "none",
-      scrollTrigger: {
-        trigger: line, // Use the parent element as trigger
-        start: "top bottom", // When element top hits viewport bottom
-        end: "top 75%", // When element top hits 75% from top
-        scrub: true,
-        // Add a slight delay for each line to create stagger effect
-        // delay: lineIndex * 0.1,
-        // Optional: uncomment to see markers for debugging
-        // markers: {
-        //   indent: 100 * i + lineIndex * 20,
-        //   startColor: "#ff9800",
-        //   endColor: "#2196f3",
-        //   fontSize: "12px"
-        // }
-      },
+  squeezeElements.forEach((element, i) => {
+    // Split the text into lines using SplitText plugin
+    const splitText = new SplitText(element, {
+      type: "lines",
+      linesClass: "squeeze-line",
+    });
+
+    // Get the line elements
+    const lines = splitText.lines;
+
+    // Set initial transform origin and scale for each line
+    gsap.set(lines, {
+      transformOrigin: "0 0", // Origin at top-left (0,0)
+      scaleX: 1,
+      scaleY: 0, // Start from scale 1,0
+    });
+
+    // Create the squeeze animation for each line
+    lines.forEach((line, lineIndex) => {
+      gsap.to(line, {
+        scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
+        ease: "none",
+        scrollTrigger: {
+          trigger: line, // Use the parent element as trigger
+          start: "top bottom", // When element top hits viewport bottom
+          end: "top 75%", // When element top hits 75% from top
+          scrub: true,
+          // Add a slight delay for each line to create stagger effect
+          // delay: lineIndex * 0.1,
+          // Optional: uncomment to see markers for debugging
+          // markers: {
+          //   indent: 100 * i + lineIndex * 20,
+          //   startColor: "#ff9800",
+          //   endColor: "#2196f3",
+          //   fontSize: "12px"
+          // }
+        },
+      });
     });
   });
-});
 
   /////////////////////////////////
   /////////////////////////////////
@@ -502,41 +513,67 @@ squeezeElements.forEach((element, i) => {
   //   });
   // }
 
-  function initializeLongScrollAnimation(section, index) {
-    const stickyContent = section.querySelector("[data-gsap-state='pinned']");
-    const middleText = section.querySelector("[data-gsap='middle-text']");
-    if (!middleText) return;
-
-    const viewportCenterX = window.innerWidth / 2;
-    const middleTextBox = middleText.getBoundingClientRect();
-    const middleTextCenterX = middleTextBox.left + middleTextBox.width / 2;
-    const deltaX = viewportCenterX - middleTextCenterX;
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: longScrollSection,
-        start: "top top",
-        end: "bottom bottom",
-        markers: true,
-        scrub: true,
-        pin: stickyContent,
-      },
-    });
-
-    tl.to(middleText, {
-      x: deltaX,
-      duration: 1,
-      ease: "power2.out",
-    }).to(
-      middleText,
-      {
-        scale: 3,
-        ease: "power2.inOut",
-        transformOrigin: "center center",
-      },
-      "<" // Start scale at the same time as translation
-    );
+ function initializeLongScrollAnimation(section, index) {
+  const stickyContent = section.querySelector("[data-gsap-state='pinned']");
+  const middleText = section.querySelector("[data-gsap-text='middle']");
+  const pivotElement = middleText ? middleText.querySelector("[data-gsap-pivot='pivot']") : null;
+  
+  if (!middleText || !pivotElement) {
+    console.warn("Middle text or pivot element not found");
+    return;
   }
+// Calculate initial pivot offset (when scale = 1)
+  const viewportCenterX = window.innerWidth / 2;
+  
+  // We need to temporarily set scale to 1 to get accurate measurements
+  gsap.set(middleText, { scale: 1 });
+  
+  const middleTextRect = middleText.getBoundingClientRect();
+  const pivotRect = pivotElement.getBoundingClientRect();
+  
+  // Get pivot position relative to middleText center at scale 1
+  const basePivotRelativeX = pivotRect.left + pivotRect.width / 2 - (middleTextRect.left + middleTextRect.width / 2);
+  
+  // Set initial state
+  gsap.set(middleText, {
+    scale: 0,
+    x: 0,
+    transformOrigin: "50% 50%"
+  });
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      markers: true,
+      scrub: true,
+      pin: stickyContent,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        
+        // Constant scaling from 0 to 20 throughout entire scroll
+        const currentScale = progress * 20;
+        
+        // The pivot's relative position scales with the element
+        // At scale 1, pivot is at basePivotRelativeX
+        // At current scale, pivot is at basePivotRelativeX * currentScale
+        const currentPivotRelativeX = basePivotRelativeX * currentScale;
+        
+        // Calculate the offset needed to keep pivot centered at current scale
+        const currentX = currentScale > 0 ? -currentPivotRelativeX : 0;
+        console.log(currentX)
+        // Apply the transformations
+        gsap.set(middleText, {
+          scale: currentScale,
+          x: currentX
+        });
+      }
+    },
+  });
+
+  return tl;
+}
 
   // Initialize all long scroll sections
   const longScrollSections = document.querySelectorAll(
