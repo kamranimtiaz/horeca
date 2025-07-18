@@ -30,67 +30,247 @@ document.addEventListener("DOMContentLoaded", function () {
     ScrollTrigger.refresh();
     lenis.resize();
   }
+
+
   window.addEventListener("resize", refreshScrollTriggers);
-  /////////////////////////////////
-  /////////////////////////////////
-  /* Slides Pinned at Top and Video Scaling */
-  /////////////////////////////////
-  /////////////////////////////////
+  
+  
+  
 
-  const cardsWrappers = gsap.utils.toArray(".slide-wrapper").slice(0, -1);
-  const cards = gsap.utils.toArray(".card_stack_component");
-
-  cardsWrappers.forEach((wrapper, i) => {
-    const card = cards[i];
-    gsap.to(card, {
-      rotationZ: (Math.random() - 0.5) * 10, // RotationZ between -5 and 5 degrees
-      scale: 0.7, // Slight reduction of the content
-      rotationX: 40,
-      ease: "none",
-      scrollTrigger: {
-        trigger: wrapper,
-        start: "top top",
-        end: "bottom bottom",
-        endTrigger: ".g_component_layout",
-        scrub: true,
-        pin: wrapper,
-        pinSpacing: false,
-      },
+  /////////////////////////////////
+  /////////////////////////////////
+  /* 2ND Hero Slider */
+  /////////////////////////////////
+  /////////////////////////////////
+  
+  const heroSlides = document.querySelectorAll('.hero_slide');
+  if (!heroSlides.length) return;
+  
+  let currentIndex = 0;
+  let splitInstances = [];
+  let isFirstAnimation = true;
+  
+  // Initialize - move all heading and text out of screen
+  heroSlides.forEach((slide) => {
+    const heading = slide.querySelector('[data-animate-heading="h1"]');
+    const text = slide.querySelector('[data-animate-text="hero-sub"]');
+    const textElement = text ? text.querySelector("p") : null;
+    
+    // Split text and store instances
+    if (heading) {
+      const headingSplit = new SplitText(heading, { type: "chars" });
+      splitInstances.push({ element: heading, split: headingSplit, type: 'heading' });
+      
+      // Move heading and its chars out of screen initially
+      gsap.set(heading, { yPercent: 100, y: '50vh' });
+      gsap.set(headingSplit.chars, { yPercent: 100, y: '50vh' });
+    }
+    
+    if (textElement) {
+      const textSplit = new SplitText(textElement, { type: "words" });
+      splitInstances.push({ element: textElement, split: textSplit, type: 'text' });
+      
+      // Move text and its words out of screen initially
+      gsap.set(textElement, { yPercent: 100, y: '50vh' });
+      gsap.set(textSplit.words, { yPercent: 100, y: '50vh' });
+    }
+  });
+  
+  // Get split instance for an element
+  function getSplitInstance(element) {
+    return splitInstances.find(instance => instance.element === element);
+  }
+  
+  // Reset slide to bottom position
+  function resetSlideToBottom(slideIndex) {
+    const slide = heroSlides[slideIndex];
+    const heading = slide.querySelector('[data-animate-heading="h1"]');
+    const text = slide.querySelector('[data-animate-text="hero-sub"]');
+    const textElement = text ? text.querySelector("p") : null;
+    
+    if (heading) {
+      const headingInstance = getSplitInstance(heading);
+      gsap.set(heading, { yPercent: 100, y: '50vh' });
+      if (headingInstance && headingInstance.split.chars) {
+        gsap.set(headingInstance.split.chars, { yPercent: 100, y: '50vh' });
+      }
+    }
+    
+    if (textElement) {
+      const textInstance = getSplitInstance(textElement);
+      gsap.set(textElement, { yPercent: 100, y: '50vh' });
+      if (textInstance && textInstance.split.words) {
+        gsap.set(textInstance.split.words, { yPercent: 100, y: '50vh' });
+      }
+    }
+  }
+  
+  // Single timeline for slide transitions
+  function changeSlide() {
+    const nextIndex = (currentIndex + 1) % heroSlides.length;
+    
+    // Get current and next slide elements
+    const currentSlide = heroSlides[currentIndex];
+    const nextSlide = heroSlides[nextIndex];
+    
+    const currentHeading = currentSlide?.querySelector('[data-animate-heading="h1"]');
+    const currentText = currentSlide?.querySelector('[data-animate-text="hero-sub"]');
+    const currentTextElement = currentText ? currentText.querySelector("p") : null;
+    
+    const nextHeading = nextSlide.querySelector('[data-animate-heading="h1"]');
+    const nextText = nextSlide.querySelector('[data-animate-text="hero-sub"]');
+    const nextTextElement = nextText ? nextText.querySelector("p") : null;
+    
+    console.log(`Transitioning from slide ${currentIndex} to slide ${nextIndex}`);
+    
+    // Create single timeline
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Reset outgoing slide to bottom (if not first animation)
+        if (!isFirstAnimation) {
+          resetSlideToBottom(currentIndex);
+        }
+        currentIndex = nextIndex;
+        isFirstAnimation = false;
+        console.log(`Current slide is now: ${currentIndex}`);
+      }
+    });
+    
+    // SLIDE IN ANIMATIONS (always happen)
+    // Animate next heading from bottom to center
+    if (nextHeading) {
+      const nextHeadingInstance = getSplitInstance(nextHeading);
+      
+      tl.fromTo(nextHeading, {
+        yPercent: 100,
+        y: '50vh'
+      }, {
+        yPercent: 0,
+        y: '0vh',
+        ease: 'power2.out',
+        duration: 1
+      }, 0);
+      
+      // Animate next heading chars with stagger
+      if (nextHeadingInstance && nextHeadingInstance.split.chars) {
+        tl.fromTo(nextHeadingInstance.split.chars, {
+          yPercent: 100,
+          y: '50vh'
+        }, {
+          yPercent: 0,
+          y: '0vh',
+          ease: 'power2.out',
+          stagger: 0.04,
+          duration: 1
+        }, 0);
+      }
+    }
+    
+    // Animate next text from bottom to center (slight delay)
+    if (nextTextElement) {
+      const nextTextInstance = getSplitInstance(nextTextElement);
+      
+      tl.fromTo(nextTextElement, {
+        yPercent: 100,
+        y: '50vh'
+      }, {
+        yPercent: 0,
+        y: '0vh',
+        ease: 'power2.out',
+        duration: 0.8
+      }, 0.2);
+      
+      // Animate next text words with stagger
+      if (nextTextInstance && nextTextInstance.split.words) {
+        tl.fromTo(nextTextInstance.split.words, {
+          yPercent: 100,
+          y: '50vh'
+        }, {
+          yPercent: 0,
+          y: '0vh',
+          ease: 'power2.out',
+          stagger: 0.03,
+          duration: 0.8
+        }, 0.2);
+      }
+    }
+    
+    // SLIDE OUT ANIMATIONS (only if NOT first animation)
+    if (!isFirstAnimation) {
+      // Move current heading to top (starts at 0.5s)
+      if (currentHeading) {
+        const currentHeadingInstance = getSplitInstance(currentHeading);
+        
+        tl.to(currentHeading, {
+          yPercent: -100,
+          y: '-50vh',
+          ease: 'power2.in',
+          duration: 0.8
+        }, 0.1);
+        
+        // Move current heading chars to top with stagger
+        if (currentHeadingInstance && currentHeadingInstance.split.chars) {
+          tl.to(currentHeadingInstance.split.chars, {
+            yPercent: -100,
+            y: '-50vh',
+            ease: 'power2.in',
+            stagger: -0.02,
+            duration: 0.6
+          }, 0.1);
+        }
+      }
+      
+      // Move current text to top
+      if (currentTextElement) {
+        const currentTextInstance = getSplitInstance(currentTextElement);
+        
+        tl.to(currentTextElement, {
+          yPercent: -100,
+          y: '-50vh',
+          ease: 'power2.in',
+          duration: .8
+        }, 0.1);
+        
+        // Move current text words to top with stagger
+        if (currentTextInstance && currentTextInstance.split.words) {
+          tl.to(currentTextInstance.split.words, {
+            yPercent: -100,
+            y: '-50vh',
+            ease: 'power2.in',
+            stagger: -0.03,
+            duration: 0.6
+          }, 0.1);
+        }
+      }
+    }
+    
+    return tl;
+  }
+  
+  // Start when hero section hits 20% from top
+  ScrollTrigger.create({
+    trigger: '.section_hero',
+    start: "top 20%",
+    once: true,
+    onEnter: () => {
+      console.log('Hero section triggered, starting slideshow');
+      // Start first animation
+      changeSlide();
+      
+      // Start changing slides every 4s
+      setInterval(changeSlide, 4000);
+    }
+  });
+  
+  // Cleanup
+  window.addEventListener('beforeunload', () => {
+    splitInstances.forEach(instance => {
+      if (instance.split && instance.split.revert) {
+        instance.split.revert();
+      }
     });
   });
 
-  // Image scaling animation for all cards (including the last one)
-  const allCardsWrappers = gsap.utils.toArray(".slide-wrapper");
-
-  allCardsWrappers.forEach((wrapper, i) => {
-    const imageElement = wrapper.querySelector("[data-gsap-image]");
-
-    if (imageElement) {
-      // Set initial scale
-      gsap.set(imageElement, {
-        scale: 0.3,
-      });
-
-      // Create the scaling animation
-      gsap.to(imageElement, {
-        scale: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: wrapper,
-          start: "top 80%", // When card top hits 90% from top
-          end: "top 30%", // When card reaches center (50% from top)
-          scrub: true,
-          // Optional: uncomment to see markers for debugging
-          // markers: {
-          //   indent: 150 * i,
-          //   startColor: "#ff6b6b",
-          //   endColor: "#4ecdc4",
-          //   fontSize: "12px"
-          // }
-        },
-      });
-    }
-  });
 
   /////////////////////////////////
   /////////////////////////////////
@@ -98,44 +278,6 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  //   const animateElements = document.querySelectorAll("[data-animate-to]");
-
-  // animateElements.forEach(function(element) {
-  //   const themeKey = element.getAttribute("data-animate-to");
-
-  //   if (!themeKey) {
-  //     console.warn("Element has data-animate-to attribute but no value");
-  //     return;
-  //   }
-
-  //   const themeClass = `u-theme-${themeKey}`;
-
-  //   function applyTheme() {
-  //     // Get current theme class
-  //     const currentThemeClass = Array.from(document.body.classList)
-  //       .find(className => className.startsWith('u-theme-'));
-
-  //     if (currentThemeClass === themeClass) {
-  //       return; // Already has this theme, no need to change
-  //     }
-
-  //     if (currentThemeClass) {
-  //       // Replace the old theme class with the new one directly
-  //       document.body.classList.replace(currentThemeClass, themeClass);
-  //     } else {
-  //       // No existing theme class, just add the new one
-  //       document.body.classList.add(themeClass);
-  //     }
-  //   }
-
-  //   ScrollTrigger.create({
-  //     trigger: element,
-  //     start: "top center",
-  //     end: "bottom center",
-  //     onEnter: applyTheme,
-  //     onEnterBack: applyTheme
-  //   });
-  // });
   document.addEventListener("colorThemesReady", () => {
     $("[data-animate-theme-to]").each(function () {
       let theme = $(this).attr("data-animate-theme-to");
@@ -631,29 +773,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const accordionContainers = document.querySelectorAll("[data-accordion]");
-
-    // if ("IntersectionObserver" in window) {
-    //   const observer = new IntersectionObserver(
-    //     (entries) => {
-    //       entries.forEach((entry) => {
-    //         const container = entry.target;
-    //         // Exact same logic as reference
-    //         entry.boundingClientRect.top < 0
-    //           ? container.classList.add("inview")
-    //           : container.classList.remove("inview");
-    //       });
-    //     },
-    //     {
-    //       root: null,
-    //       rootMargin: "0px 0px -100% 0px", // Critical setting
-    //       threshold: 0,
-    //     }
-    //   );
-
-    //   accordionContainers.forEach((container) => {
-    //     observer.observe(container);
-    //   });
-    // }
 
     ScrollTrigger.create({
       trigger: accordionWrapper,
