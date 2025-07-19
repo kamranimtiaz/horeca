@@ -318,8 +318,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-  
- /////////////////////////////////
+
+  /////////////////////////////////
   /////////////////////////////////
   /* Slides Pinned at Top and Video Scaling */
   /////////////////////////////////
@@ -471,123 +471,123 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  // Get the fold panel element
-  const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
+  // // Get the fold panel element
+  // const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
 
-  // Get the top fold panel element
-  const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
+  // // Get the top fold panel element
+  // const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
 
-  const topFlapContent = topFoldPanel.querySelector(
-    "[data-gsap-content='flap']"
-  );
+  // const topFlapContent = topFoldPanel.querySelector(
+  //   "[data-gsap-content='flap']"
+  // );
 
-  const bottomFlapContent = bottomFoldPanel.querySelector(
-    "[data-gsap-content='flap']"
-  );
+  // const bottomFlapContent = bottomFoldPanel.querySelector(
+  //   "[data-gsap-content='flap']"
+  // );
 
-  // Set initial styles for top panel
-  gsap.set(topFoldPanel, {
-    transformOrigin: "center top",
-    transformPerspective: "100vw",
-    overflow: "hidden",
-    transformStyle: "preserve-3d",
-  });
-  // Set initial styles
-  gsap.set(bottomFoldPanel, {
-    transformPerspective: "100vw",
-    overflow: "hidden",
-    transformStyle: "preserve-3d",
-    transformOrigin: "center bottom",
-  });
-  // Set initial styles for content to counter perspective effects
-  gsap.set(topFlapContent, {
-    transformStyle: "preserve-3d",
-    transformOrigin: "center top",
-    transformPerspective: "100vw", // Remove perspective inheritance
-    backfaceVisibility: "hidden", // Ensure content stays visible
-  });
+  // // Set initial styles for top panel
+  // gsap.set(topFoldPanel, {
+  //   transformOrigin: "center top",
+  //   transformPerspective: "100vw",
+  //   overflow: "hidden",
+  //   transformStyle: "preserve-3d",
+  // });
+  // // Set initial styles
+  // gsap.set(bottomFoldPanel, {
+  //   transformPerspective: "100vw",
+  //   overflow: "hidden",
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center bottom",
+  // });
+  // // Set initial styles for content to counter perspective effects
+  // gsap.set(topFlapContent, {
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center top",
+  //   transformPerspective: "100vw", // Remove perspective inheritance
+  //   backfaceVisibility: "hidden", // Ensure content stays visible
+  // });
 
-  gsap.set(bottomFlapContent, {
-    transformStyle: "preserve-3d",
-    transformOrigin: "center bottom",
-    transformPerspective: "100vw", // Remove perspective inheritance
-    backfaceVisibility: "hidden", // Ensure content stays visible
-  });
+  // gsap.set(bottomFlapContent, {
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center bottom",
+  //   transformPerspective: "100vw", // Remove perspective inheritance
+  //   backfaceVisibility: "hidden", // Ensure content stays visible
+  // });
 
-  // Create timeline for fold panels
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: topFoldPanel,
-      markers: true,
-      start: "top top",
-      end: "bottom 1%",
-      scrub: 0.1,
-    },
-  });
+  // // Create timeline for fold panels
+  // const tl = gsap.timeline({
+  //   scrollTrigger: {
+  //     trigger: topFoldPanel,
+  //     markers: true,
+  //     start: "top top",
+  //     end: "bottom 1%",
+  //     scrub: 0.1,
+  //   },
+  // });
 
-  // Phase 1: 0% to 50% - Initial rotation
-  tl.to(topFoldPanel, {
-    duration: 6,
-    rotationX: -15,
-  })
-    .to(
-      topFlapContent,
-      {
-        rotationX: 15, // Counter the parent's -15
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
-    .to(
-      bottomFoldPanel,
-      {
-        rotationX: 15,
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
-    .to(
-      bottomFlapContent,
-      {
-        rotationX: -15, // Counter the parent's +15
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
+  // // Phase 1: 0% to 50% - Initial rotation
+  // tl.to(topFoldPanel, {
+  //   duration: 6,
+  //   rotationX: -15,
+  // })
+  //   .to(
+  //     topFlapContent,
+  //     {
+  //       rotationX: 15, // Counter the parent's -15
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
+  //   .to(
+  //     bottomFoldPanel,
+  //     {
+  //       rotationX: 15,
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
+  //   .to(
+  //     bottomFlapContent,
+  //     {
+  //       rotationX: -15, // Counter the parent's +15
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
 
-    // Phase 2: 50% to 100% - Final rotation
-    .to(
-      topFoldPanel,
-      {
-        rotationX: -40, // Goes from -15 to -40
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      topFlapContent,
-      {
-        rotationX: 40, // Counter the parent's -40
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      bottomFoldPanel,
-      {
-        rotationX: 0, // Goes from +15 to 0
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      bottomFlapContent,
-      {
-        rotationX: 0, // Counter the parent's 0 (no rotation needed)
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
-    );
+  //   // Phase 2: 50% to 100% - Final rotation
+  //   .to(
+  //     topFoldPanel,
+  //     {
+  //       rotationX: -40, // Goes from -15 to -40
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     topFlapContent,
+  //     {
+  //       rotationX: 40, // Counter the parent's -40
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     bottomFoldPanel,
+  //     {
+  //       rotationX: 0, // Goes from +15 to 0
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     bottomFlapContent,
+  //     {
+  //       rotationX: 0, // Counter the parent's 0 (no rotation needed)
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
+  //   );
 
   /////////////////////////////////
   /////////////////////////////////
@@ -765,55 +765,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function initializeLongScrollAnimation(section, index) {
     const stickyContent = section.querySelector("[data-gsap-state='pinned']");
-const middleText = section.querySelector("[data-gsap-text='middle']");
-const pivotElement = middleText
-  ? middleText.querySelector("[data-gsap-pivot='pivot']")
-  : null;
+    const middleText = section.querySelector("[data-gsap-text='middle']");
+    const pivotElement = middleText
+      ? middleText.querySelector("[data-gsap-pivot='pivot']")
+      : null;
 
-if (!middleText || !pivotElement) {
-  console.warn("Middle text or pivot element not found");
-  return;
-}
+    if (!middleText || !pivotElement) {
+      console.warn("Middle text or pivot element not found");
+      return;
+    }
 
-// Step 1: Initial measurements
-gsap.set(middleText, { scale: 1, x: 0 });
+    // Step 1: Initial measurements
+    gsap.set(middleText, { scale: 1, x: 0 });
 
-const pivotRect = pivotElement.getBoundingClientRect();
-const pivotAbsoluteCenterX = pivotRect.left + pivotRect.width / 2;
-const viewportCenterX = window.innerWidth / 2;
-const offsetToCenter = pivotAbsoluteCenterX - viewportCenterX;
+    const pivotRect = pivotElement.getBoundingClientRect();
+    const pivotAbsoluteCenterX = pivotRect.left + pivotRect.width / 2;
+    const viewportCenterX = window.innerWidth / 2;
+    const offsetToCenter = pivotAbsoluteCenterX - viewportCenterX;
 
-gsap.set(middleText, {
-  scale: 0,
-  x: 0,
-  transformOrigin: "50% 50%",
-});
+    gsap.set(middleText, {
+      scale: 0,
+      x: 0,
+      transformOrigin: "50% 50%",
+    });
 
-// Step 2: GSAP timeline
-const tl = gsap.timeline({
-  scrollTrigger: {
-    trigger: section,
-    start: "top top",
-    end: "bottom bottom",
-    markers: true,
-    scrub: true,
-    pin: stickyContent,
-    onUpdate: (self) => {
-      const progress = self.progress;
-      const currentScale = progress * 20;
-      const currentX = -offsetToCenter * currentScale;
+    // Step 2: GSAP timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        markers: true,
+        scrub: true,
+        pin: stickyContent,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          const currentScale = progress * 20;
+          const currentX = -offsetToCenter * currentScale;
 
-      gsap.set(middleText, {
-        scale: currentScale,
-        x: currentX,
-      });
-    },
-  },
-});
+          gsap.set(middleText, {
+            scale: currentScale,
+            x: currentX,
+          });
+        },
+      },
+    });
 
-return tl;
-
-
+    return tl;
   }
 
   // Initialize all long scroll sections
@@ -847,7 +845,7 @@ return tl;
     const totalItemsCount = accordionHeaders.length;
     const sectionHeight = accordionContainer.getBoundingClientRect().height;
     const wrapperHeight = accordionWrapper.offsetHeight;
-    const headerHeightPx = `${wrapperHeight / totalItemsCount}px`;
+    const headerHeightPx = window.innerWidth > 768 ? `${wrapperHeight / totalItemsCount}px`: headerHeight;
     const sectionHeightPx = `${sectionHeight}px`;
 
     // Set global CSS variables on :root
@@ -868,10 +866,11 @@ return tl;
       const itemPosition = index + 1;
 
       header.style.setProperty("--item-position", itemPosition);
-      setTimeout(() => {
-        header.style.position = "absolute";
-      }, 1000);
-      
+      if (window.matchMedia("(min-width: 769px)").matches) {
+        setTimeout(() => {
+          header.style.position = "absolute";
+        }, 1000);
+      }
     });
 
     const accordionContainers = document.querySelectorAll("[data-accordion]");
@@ -883,14 +882,12 @@ return tl;
         accordionContainers.forEach((container) => {
           container.classList.add("inview");
         });
-        
-          // setTimeout(()=>{
-          //   lenis.resize(); // Update Lenis dimensions
-          //   ScrollTrigger.refresh(true); // Force immediate refresh
 
-          // }, 50)
-            
-        
+        // setTimeout(()=>{
+        //   lenis.resize(); // Update Lenis dimensions
+        //   ScrollTrigger.refresh(true); // Force immediate refresh
+
+        // }, 50)
       },
       onLeaveBack: () => {
         accordionContainers.forEach((container) => {
