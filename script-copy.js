@@ -318,6 +318,67 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+  
+ /////////////////////////////////
+  /////////////////////////////////
+  /* Slides Pinned at Top and Video Scaling */
+  /////////////////////////////////
+  /////////////////////////////////
+
+  const cardsWrappers = gsap.utils.toArray(".slide-wrapper").slice(0, -1);
+  const cards = gsap.utils.toArray(".card_stack_component");
+
+  cardsWrappers.forEach((wrapper, i) => {
+    const card = cards[i];
+    gsap.to(card, {
+      rotationZ: (Math.random() - 0.5) * 10, // RotationZ between -5 and 5 degrees
+      scale: 0.7, // Slight reduction of the content
+      rotationX: 40,
+      ease: "none",
+      scrollTrigger: {
+        trigger: wrapper,
+        start: "top top",
+        end: "bottom bottom",
+        endTrigger: ".g_component_layout",
+        scrub: true,
+        pin: wrapper,
+        pinSpacing: false,
+      },
+    });
+  });
+
+  // Image scaling animation for all cards (including the last one)
+  const allCardsWrappers = gsap.utils.toArray(".slide-wrapper");
+
+  allCardsWrappers.forEach((wrapper, i) => {
+    const imageElement = wrapper.querySelector("[data-gsap-image]");
+
+    if (imageElement) {
+      // Set initial scale
+      gsap.set(imageElement, {
+        scale: 0.3,
+      });
+
+      // Create the scaling animation
+      gsap.to(imageElement, {
+        scale: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: wrapper,
+          start: "top 80%", // When card top hits 90% from top
+          end: "top 30%", // When card reaches center (50% from top)
+          scrub: true,
+          // Optional: uncomment to see markers for debugging
+          // markers: {
+          //   indent: 150 * i,
+          //   startColor: "#ff6b6b",
+          //   endColor: "#4ecdc4",
+          //   fontSize: "12px"
+          // }
+        },
+      });
+    }
+  });
 
   /////////////////////////////////
   /////////////////////////////////
