@@ -31,98 +31,110 @@ document.addEventListener("DOMContentLoaded", function () {
     lenis.resize();
   }
 
-
   window.addEventListener("resize", refreshScrollTriggers);
-  
-  
-  
 
   /////////////////////////////////
   /////////////////////////////////
   /* 2ND Hero Slider */
   /////////////////////////////////
   /////////////////////////////////
-  
-  const heroSlides = document.querySelectorAll('.hero_slide');
+
+  const heroSlides = document.querySelectorAll(".hero_slide");
   if (!heroSlides.length) return;
-  
+
   let currentIndex = 0;
   let splitInstances = [];
   let isFirstAnimation = true;
-  
+
   // Initialize - move all heading and text out of screen
   heroSlides.forEach((slide) => {
     const heading = slide.querySelector('[data-animate-heading="h1"]');
     const text = slide.querySelector('[data-animate-text="hero-sub"]');
     const textElement = text ? text.querySelector("p") : null;
-    
+
     // Split text and store instances
     if (heading) {
       const headingSplit = new SplitText(heading, { type: "chars" });
-      splitInstances.push({ element: heading, split: headingSplit, type: 'heading' });
-      
+      splitInstances.push({
+        element: heading,
+        split: headingSplit,
+        type: "heading",
+      });
+
       // Move heading and its chars out of screen initially
-      gsap.set(heading, { yPercent: 100, y: '50vh' });
-      gsap.set(headingSplit.chars, { yPercent: 100, y: '50vh' });
+      gsap.set(heading, { yPercent: 100, y: "50vh" });
+      gsap.set(headingSplit.chars, { yPercent: 100, y: "50vh" });
     }
-    
+
     if (textElement) {
       const textSplit = new SplitText(textElement, { type: "words" });
-      splitInstances.push({ element: textElement, split: textSplit, type: 'text' });
-      
+      splitInstances.push({
+        element: textElement,
+        split: textSplit,
+        type: "text",
+      });
+
       // Move text and its words out of screen initially
-      gsap.set(textElement, { yPercent: 100, y: '50vh' });
-      gsap.set(textSplit.words, { yPercent: 100, y: '50vh' });
+      gsap.set(textElement, { yPercent: 100, y: "50vh" });
+      gsap.set(textSplit.words, { yPercent: 100, y: "50vh" });
     }
   });
-  
+
   // Get split instance for an element
   function getSplitInstance(element) {
-    return splitInstances.find(instance => instance.element === element);
+    return splitInstances.find((instance) => instance.element === element);
   }
-  
+
   // Reset slide to bottom position
   function resetSlideToBottom(slideIndex) {
     const slide = heroSlides[slideIndex];
     const heading = slide.querySelector('[data-animate-heading="h1"]');
     const text = slide.querySelector('[data-animate-text="hero-sub"]');
     const textElement = text ? text.querySelector("p") : null;
-    
+
     if (heading) {
       const headingInstance = getSplitInstance(heading);
-      gsap.set(heading, { yPercent: 100, y: '50vh' });
+      gsap.set(heading, { yPercent: 100, y: "50vh" });
       if (headingInstance && headingInstance.split.chars) {
-        gsap.set(headingInstance.split.chars, { yPercent: 100, y: '50vh' });
+        gsap.set(headingInstance.split.chars, { yPercent: 100, y: "50vh" });
       }
     }
-    
+
     if (textElement) {
       const textInstance = getSplitInstance(textElement);
-      gsap.set(textElement, { yPercent: 100, y: '50vh' });
+      gsap.set(textElement, { yPercent: 100, y: "50vh" });
       if (textInstance && textInstance.split.words) {
-        gsap.set(textInstance.split.words, { yPercent: 100, y: '50vh' });
+        gsap.set(textInstance.split.words, { yPercent: 100, y: "50vh" });
       }
     }
   }
-  
+
   // Single timeline for slide transitions
   function changeSlide() {
     const nextIndex = (currentIndex + 1) % heroSlides.length;
-    
+
     // Get current and next slide elements
     const currentSlide = heroSlides[currentIndex];
     const nextSlide = heroSlides[nextIndex];
-    
-    const currentHeading = currentSlide?.querySelector('[data-animate-heading="h1"]');
-    const currentText = currentSlide?.querySelector('[data-animate-text="hero-sub"]');
-    const currentTextElement = currentText ? currentText.querySelector("p") : null;
-    
+
+    const currentHeading = currentSlide?.querySelector(
+      '[data-animate-heading="h1"]'
+    );
+    const currentText = currentSlide?.querySelector(
+      '[data-animate-text="hero-sub"]'
+    );
+    const currentTextElement = currentText
+      ? currentText.querySelector("p")
+      : null;
+
     const nextHeading = nextSlide.querySelector('[data-animate-heading="h1"]');
     const nextText = nextSlide.querySelector('[data-animate-text="hero-sub"]');
     const nextTextElement = nextText ? nextText.querySelector("p") : null;
-    
-    console.log(`Transitioning from slide ${currentIndex} to slide ${nextIndex}`);
-    
+
+    console.log(
+      `Transitioning from slide ${currentIndex} to slide ${nextIndex}`
+    );
+
     // Create single timeline
     const tl = gsap.timeline({
       onComplete: () => {
@@ -133,144 +145,179 @@ document.addEventListener("DOMContentLoaded", function () {
         currentIndex = nextIndex;
         isFirstAnimation = false;
         console.log(`Current slide is now: ${currentIndex}`);
-      }
+      },
     });
-    
+
     // SLIDE IN ANIMATIONS (always happen)
     // Animate next heading from bottom to center
     if (nextHeading) {
       const nextHeadingInstance = getSplitInstance(nextHeading);
-      
-      tl.fromTo(nextHeading, {
-        yPercent: 100,
-        y: '50vh'
-      }, {
-        yPercent: 0,
-        y: '0vh',
-        ease: 'power2.out',
-        duration: 1
-      }, 0);
-      
+
+      tl.fromTo(
+        nextHeading,
+        {
+          yPercent: 100,
+          y: "50vh",
+        },
+        {
+          yPercent: 0,
+          y: "0vh",
+          ease: "power2.out",
+          duration: 1,
+        },
+        0
+      );
+
       // Animate next heading chars with stagger
       if (nextHeadingInstance && nextHeadingInstance.split.chars) {
-        tl.fromTo(nextHeadingInstance.split.chars, {
-          yPercent: 100,
-          y: '50vh'
-        }, {
-          yPercent: 0,
-          y: '0vh',
-          ease: 'power2.out',
-          stagger: 0.04,
-          duration: 1
-        }, 0);
+        tl.fromTo(
+          nextHeadingInstance.split.chars,
+          {
+            yPercent: 100,
+            y: "50vh",
+          },
+          {
+            yPercent: 0,
+            y: "0vh",
+            ease: "power2.out",
+            stagger: 0.04,
+            duration: 1,
+          },
+          0
+        );
       }
     }
-    
+
     // Animate next text from bottom to center (slight delay)
     if (nextTextElement) {
       const nextTextInstance = getSplitInstance(nextTextElement);
-      
-      tl.fromTo(nextTextElement, {
-        yPercent: 100,
-        y: '50vh'
-      }, {
-        yPercent: 0,
-        y: '0vh',
-        ease: 'power2.out',
-        duration: 0.8
-      }, 0.2);
-      
+
+      tl.fromTo(
+        nextTextElement,
+        {
+          yPercent: 100,
+          y: "50vh",
+        },
+        {
+          yPercent: 0,
+          y: "0vh",
+          ease: "power2.out",
+          duration: 0.8,
+        },
+        0.2
+      );
+
       // Animate next text words with stagger
       if (nextTextInstance && nextTextInstance.split.words) {
-        tl.fromTo(nextTextInstance.split.words, {
-          yPercent: 100,
-          y: '50vh'
-        }, {
-          yPercent: 0,
-          y: '0vh',
-          ease: 'power2.out',
-          stagger: 0.03,
-          duration: 0.8
-        }, 0.2);
+        tl.fromTo(
+          nextTextInstance.split.words,
+          {
+            yPercent: 100,
+            y: "50vh",
+          },
+          {
+            yPercent: 0,
+            y: "0vh",
+            ease: "power2.out",
+            stagger: 0.03,
+            duration: 0.8,
+          },
+          0.2
+        );
       }
     }
-    
+
     // SLIDE OUT ANIMATIONS (only if NOT first animation)
     if (!isFirstAnimation) {
       // Move current heading to top (starts at 0.5s)
       if (currentHeading) {
         const currentHeadingInstance = getSplitInstance(currentHeading);
-        
-        tl.to(currentHeading, {
-          yPercent: -100,
-          y: '-50vh',
-          ease: 'power2.in',
-          duration: 0.8
-        }, 0.1);
-        
+
+        tl.to(
+          currentHeading,
+          {
+            yPercent: -100,
+            y: "-50vh",
+            ease: "power2.in",
+            duration: 0.8,
+          },
+          0.1
+        );
+
         // Move current heading chars to top with stagger
         if (currentHeadingInstance && currentHeadingInstance.split.chars) {
-          tl.to(currentHeadingInstance.split.chars, {
-            yPercent: -100,
-            y: '-50vh',
-            ease: 'power2.in',
-            stagger: -0.02,
-            duration: 0.6
-          }, 0.1);
+          tl.to(
+            currentHeadingInstance.split.chars,
+            {
+              yPercent: -100,
+              y: "-50vh",
+              ease: "power2.in",
+              stagger: -0.02,
+              duration: 0.6,
+            },
+            0.1
+          );
         }
       }
-      
+
       // Move current text to top
       if (currentTextElement) {
         const currentTextInstance = getSplitInstance(currentTextElement);
-        
-        tl.to(currentTextElement, {
-          yPercent: -100,
-          y: '-50vh',
-          ease: 'power2.in',
-          duration: .8
-        }, 0.1);
-        
+
+        tl.to(
+          currentTextElement,
+          {
+            yPercent: -100,
+            y: "-50vh",
+            ease: "power2.in",
+            duration: 0.8,
+          },
+          0.1
+        );
+
         // Move current text words to top with stagger
         if (currentTextInstance && currentTextInstance.split.words) {
-          tl.to(currentTextInstance.split.words, {
-            yPercent: -100,
-            y: '-50vh',
-            ease: 'power2.in',
-            stagger: -0.03,
-            duration: 0.6
-          }, 0.1);
+          tl.to(
+            currentTextInstance.split.words,
+            {
+              yPercent: -100,
+              y: "-50vh",
+              ease: "power2.in",
+              stagger: -0.03,
+              duration: 0.6,
+            },
+            0.1
+          );
         }
       }
     }
-    
+
     return tl;
   }
-  
+
   // Start when hero section hits 20% from top
   ScrollTrigger.create({
-    trigger: '.section_hero',
+    trigger: ".section_hero",
     start: "top 20%",
     once: true,
     onEnter: () => {
-      console.log('Hero section triggered, starting slideshow');
+      console.log("Hero section triggered, starting slideshow");
       // Start first animation
       changeSlide();
-      
+
       // Start changing slides every 4s
       setInterval(changeSlide, 4000);
-    }
+    },
   });
-  
+
   // Cleanup
-  window.addEventListener('beforeunload', () => {
-    splitInstances.forEach(instance => {
+  window.addEventListener("beforeunload", () => {
+    splitInstances.forEach((instance) => {
       if (instance.split && instance.split.revert) {
         instance.split.revert();
       }
     });
   });
-
 
   /////////////////////////////////
   /////////////////////////////////
@@ -655,67 +702,72 @@ document.addEventListener("DOMContentLoaded", function () {
   //   });
   // }
 
- function initializeLongScrollAnimation(section, index) {
-  const stickyContent = section.querySelector("[data-gsap-state='pinned']");
-  const middleText = section.querySelector("[data-gsap-text='middle']");
-  const pivotElement = middleText ? middleText.querySelector("[data-gsap-pivot='pivot']") : null;
-  
-  if (!middleText || !pivotElement) {
-    console.warn("Middle text or pivot element not found");
-    return;
+  function initializeLongScrollAnimation(section, index) {
+    const stickyContent = section.querySelector("[data-gsap-state='pinned']");
+    const middleText = section.querySelector("[data-gsap-text='middle']");
+    const pivotElement = middleText
+      ? middleText.querySelector("[data-gsap-pivot='pivot']")
+      : null;
+
+    if (!middleText || !pivotElement) {
+      console.warn("Middle text or pivot element not found");
+      return;
+    }
+    // Calculate initial pivot offset (when scale = 1)
+    const viewportCenterX = window.innerWidth / 2;
+
+    // We need to temporarily set scale to 1 to get accurate measurements
+    gsap.set(middleText, { scale: 1 });
+
+    const middleTextRect = middleText.getBoundingClientRect();
+    const pivotRect = pivotElement.getBoundingClientRect();
+
+    // Get pivot position relative to middleText center at scale 1
+    const basePivotRelativeX =
+      pivotRect.left +
+      pivotRect.width / 2 -
+      (middleTextRect.left + middleTextRect.width / 2);
+
+    // Set initial state
+    gsap.set(middleText, {
+      scale: 0,
+      x: 0,
+      transformOrigin: "50% 50%",
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        markers: true,
+        scrub: true,
+        pin: stickyContent,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          // Constant scaling from 0 to 20 throughout entire scroll
+          const currentScale = progress * 20;
+
+          // The pivot's relative position scales with the element
+          // At scale 1, pivot is at basePivotRelativeX
+          // At current scale, pivot is at basePivotRelativeX * currentScale
+          const currentPivotRelativeX = basePivotRelativeX * currentScale;
+
+          // Calculate the offset needed to keep pivot centered at current scale
+          const currentX = currentScale > 0 ? -currentPivotRelativeX : 0;
+          console.log(currentX);
+          // Apply the transformations
+          gsap.set(middleText, {
+            scale: currentScale,
+            x: currentX,
+          });
+        },
+      },
+    });
+
+    return tl;
   }
-// Calculate initial pivot offset (when scale = 1)
-  const viewportCenterX = window.innerWidth / 2;
-  
-  // We need to temporarily set scale to 1 to get accurate measurements
-  gsap.set(middleText, { scale: 1 });
-  
-  const middleTextRect = middleText.getBoundingClientRect();
-  const pivotRect = pivotElement.getBoundingClientRect();
-  
-  // Get pivot position relative to middleText center at scale 1
-  const basePivotRelativeX = pivotRect.left + pivotRect.width / 2 - (middleTextRect.left + middleTextRect.width / 2);
-  
-  // Set initial state
-  gsap.set(middleText, {
-    scale: 0,
-    x: 0,
-    transformOrigin: "50% 50%"
-  });
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: "top top",
-      end: "bottom bottom",
-      markers: true,
-      scrub: true,
-      pin: stickyContent,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        
-        // Constant scaling from 0 to 20 throughout entire scroll
-        const currentScale = progress * 20;
-        
-        // The pivot's relative position scales with the element
-        // At scale 1, pivot is at basePivotRelativeX
-        // At current scale, pivot is at basePivotRelativeX * currentScale
-        const currentPivotRelativeX = basePivotRelativeX * currentScale;
-        
-        // Calculate the offset needed to keep pivot centered at current scale
-        const currentX = currentScale > 0 ? -currentPivotRelativeX : 0;
-        console.log(currentX)
-        // Apply the transformations
-        gsap.set(middleText, {
-          scale: currentScale,
-          x: currentX
-        });
-      }
-    },
-  });
-
-  return tl;
-}
 
   // Initialize all long scroll sections
   const longScrollSections = document.querySelectorAll(
@@ -780,6 +832,12 @@ document.addEventListener("DOMContentLoaded", function () {
       onEnter: () => {
         accordionContainers.forEach((container) => {
           container.classList.add("inview");
+        });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            lenis.resize(); // Update Lenis dimensions
+            ScrollTrigger.refresh(true); // Force immediate refresh
+          });
         });
       },
       onLeaveBack: () => {
