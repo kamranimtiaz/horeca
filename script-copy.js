@@ -704,69 +704,55 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function initializeLongScrollAnimation(section, index) {
     const stickyContent = section.querySelector("[data-gsap-state='pinned']");
-    const middleText = section.querySelector("[data-gsap-text='middle']");
-    const pivotElement = middleText
-      ? middleText.querySelector("[data-gsap-pivot='pivot']")
-      : null;
+const middleText = section.querySelector("[data-gsap-text='middle']");
+const pivotElement = middleText
+  ? middleText.querySelector("[data-gsap-pivot='pivot']")
+  : null;
 
-    if (!middleText || !pivotElement) {
-      console.warn("Middle text or pivot element not found");
-      return;
-    }
-    // Calculate initial pivot offset (when scale = 1)
-    const viewportCenterX = window.innerWidth / 2;
+if (!middleText || !pivotElement) {
+  console.warn("Middle text or pivot element not found");
+  return;
+}
 
-    // We need to temporarily set scale to 1 to get accurate measurements
-    gsap.set(middleText, { scale: 1 });
+// Step 1: Initial measurements
+gsap.set(middleText, { scale: 1, x: 0 });
 
-    const middleTextRect = middleText.getBoundingClientRect();
-    const pivotRect = pivotElement.getBoundingClientRect();
+const pivotRect = pivotElement.getBoundingClientRect();
+const pivotAbsoluteCenterX = pivotRect.left + pivotRect.width / 2;
+const viewportCenterX = window.innerWidth / 2;
+const offsetToCenter = pivotAbsoluteCenterX - viewportCenterX;
 
-    // Get pivot position relative to middleText center at scale 1
-    const basePivotRelativeX =
-      pivotRect.left +
-      pivotRect.width / 2 -
-      (middleTextRect.left + middleTextRect.width / 2);
+gsap.set(middleText, {
+  scale: 0,
+  x: 0,
+  transformOrigin: "50% 50%",
+});
 
-    // Set initial state
-    gsap.set(middleText, {
-      scale: 0,
-      x: 0,
-      transformOrigin: "50% 50%",
-    });
+// Step 2: GSAP timeline
+const tl = gsap.timeline({
+  scrollTrigger: {
+    trigger: section,
+    start: "top top",
+    end: "bottom bottom",
+    markers: true,
+    scrub: true,
+    pin: stickyContent,
+    onUpdate: (self) => {
+      const progress = self.progress;
+      const currentScale = progress * 20;
+      const currentX = -offsetToCenter * currentScale;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "bottom bottom",
-        markers: true,
-        scrub: true,
-        pin: stickyContent,
-        onUpdate: (self) => {
-          const progress = self.progress;
+      gsap.set(middleText, {
+        scale: currentScale,
+        x: currentX,
+      });
+    },
+  },
+});
 
-          // Constant scaling from 0 to 20 throughout entire scroll
-          const currentScale = progress * 20;
+return tl;
 
-          // The pivot's relative position scales with the element
-          // At scale 1, pivot is at basePivotRelativeX
-          // At current scale, pivot is at basePivotRelativeX * currentScale
-          const currentPivotRelativeX = basePivotRelativeX * currentScale;
 
-          // Calculate the offset needed to keep pivot centered at current scale
-          const currentX = currentScale > 0 ? -currentPivotRelativeX : 0;
-          console.log(currentX);
-          // Apply the transformations
-          gsap.set(middleText, {
-            scale: currentScale,
-            x: currentX,
-          });
-        },
-      },
-    });
-
-    return tl;
   }
 
   // Initialize all long scroll sections
@@ -823,7 +809,7 @@ document.addEventListener("DOMContentLoaded", function () {
       header.style.setProperty("--item-position", itemPosition);
       setTimeout(() => {
         header.style.position = "absolute";
-      }, 100);
+      }, 1000);
       
     });
 
@@ -837,10 +823,12 @@ document.addEventListener("DOMContentLoaded", function () {
           container.classList.add("inview");
         });
         
-          requestAnimationFrame(() => {
-            lenis.resize(); // Update Lenis dimensions
-            ScrollTrigger.refresh(true); // Force immediate refresh
-          });
+          // setTimeout(()=>{
+          //   lenis.resize(); // Update Lenis dimensions
+          //   ScrollTrigger.refresh(true); // Force immediate refresh
+
+          // }, 50)
+            
         
       },
       onLeaveBack: () => {
