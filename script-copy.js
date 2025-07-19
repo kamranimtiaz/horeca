@@ -821,7 +821,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const itemPosition = index + 1;
 
       header.style.setProperty("--item-position", itemPosition);
-      header.style.position = "absolute";
+      setTimeout(() => {
+        header.style.position = "absolute";
+      }, 100);
+      
     });
 
     const accordionContainers = document.querySelectorAll("[data-accordion]");
@@ -833,12 +836,12 @@ document.addEventListener("DOMContentLoaded", function () {
         accordionContainers.forEach((container) => {
           container.classList.add("inview");
         });
-        requestAnimationFrame(() => {
+        
           requestAnimationFrame(() => {
             lenis.resize(); // Update Lenis dimensions
             ScrollTrigger.refresh(true); // Force immediate refresh
           });
-        });
+        
       },
       onLeaveBack: () => {
         accordionContainers.forEach((container) => {
