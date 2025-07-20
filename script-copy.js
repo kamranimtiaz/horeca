@@ -368,13 +368,6 @@ document.addEventListener("DOMContentLoaded", function () {
           start: "top 80%", // When card top hits 90% from top
           end: "top 30%", // When card reaches center (50% from top)
           scrub: true,
-          // Optional: uncomment to see markers for debugging
-          // markers: {
-          //   indent: 150 * i,
-          //   startColor: "#ff6b6b",
-          //   endColor: "#4ecdc4",
-          //   fontSize: "12px"
-          // }
         },
       });
     }
@@ -401,14 +394,14 @@ document.addEventListener("DOMContentLoaded", function () {
           gsap.to("body", {
             ...colorThemes.getTheme(theme),
             duration: 0.5, // ← Add duration here
-            ease: "Quad.easeInOut",
+            ease: "sine.inOut",
           });
         },
         onEnterBack: () => {
           gsap.to("body", {
             ...colorThemes.getTheme(theme),
             duration: 0.5, // ← Add duration here
-            ease: "Quad.easeInOut",
+            ease: "sine.inOut",
           });
         },
       });
@@ -451,15 +444,6 @@ document.addEventListener("DOMContentLoaded", function () {
           start: "top bottom", // When element top hits viewport bottom
           end: "top 75%", // When element top hits 75% from top
           scrub: true,
-          // Add a slight delay for each line to create stagger effect
-          // delay: lineIndex * 0.1,
-          // Optional: uncomment to see markers for debugging
-          // markers: {
-          //   indent: 100 * i + lineIndex * 20,
-          //   startColor: "#ff9800",
-          //   endColor: "#2196f3",
-          //   fontSize: "12px"
-          // }
         },
       });
     });
@@ -471,123 +455,123 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  // // Get the fold panel element
-  // const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
+  // Get the fold panel element
+  const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
 
-  // // Get the top fold panel element
-  // const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
+  // Get the top fold panel element
+  const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
 
-  // const topFlapContent = topFoldPanel.querySelector(
-  //   "[data-gsap-content='flap']"
-  // );
+  const topFlapContent = topFoldPanel.querySelector(
+    "[data-gsap-content='flap']"
+  );
 
-  // const bottomFlapContent = bottomFoldPanel.querySelector(
-  //   "[data-gsap-content='flap']"
-  // );
+  const bottomFlapContent = bottomFoldPanel.querySelector(
+    "[data-gsap-content='flap']"
+  );
 
-  // // Set initial styles for top panel
-  // gsap.set(topFoldPanel, {
-  //   transformOrigin: "center top",
-  //   transformPerspective: "100vw",
-  //   overflow: "hidden",
-  //   transformStyle: "preserve-3d",
-  // });
-  // // Set initial styles
-  // gsap.set(bottomFoldPanel, {
-  //   transformPerspective: "100vw",
-  //   overflow: "hidden",
-  //   transformStyle: "preserve-3d",
-  //   transformOrigin: "center bottom",
-  // });
-  // // Set initial styles for content to counter perspective effects
-  // gsap.set(topFlapContent, {
-  //   transformStyle: "preserve-3d",
-  //   transformOrigin: "center top",
-  //   transformPerspective: "100vw", // Remove perspective inheritance
-  //   backfaceVisibility: "hidden", // Ensure content stays visible
-  // });
+  // Set initial styles for top panel
+  gsap.set(topFoldPanel, {
+    transformOrigin: "center top",
+    transformPerspective: "100vw",
+    overflow: "hidden",
+    transformStyle: "preserve-3d",
+  });
+  // Set initial styles
+  gsap.set(bottomFoldPanel, {
+    transformPerspective: "100vw",
+    overflow: "hidden",
+    transformStyle: "preserve-3d",
+    transformOrigin: "center bottom",
+  });
+  // Set initial styles for content to counter perspective effects
+  gsap.set(topFlapContent, {
+    transformStyle: "preserve-3d",
+    transformOrigin: "center top",
+    transformPerspective: "100vw", // Remove perspective inheritance
+    backfaceVisibility: "hidden", // Ensure content stays visible
+  });
 
-  // gsap.set(bottomFlapContent, {
-  //   transformStyle: "preserve-3d",
-  //   transformOrigin: "center bottom",
-  //   transformPerspective: "100vw", // Remove perspective inheritance
-  //   backfaceVisibility: "hidden", // Ensure content stays visible
-  // });
+  gsap.set(bottomFlapContent, {
+    transformStyle: "preserve-3d",
+    transformOrigin: "center bottom",
+    transformPerspective: "100vw", // Remove perspective inheritance
+    backfaceVisibility: "hidden", // Ensure content stays visible
+  });
 
-  // // Create timeline for fold panels
-  // const tl = gsap.timeline({
-  //   scrollTrigger: {
-  //     trigger: topFoldPanel,
-  //     markers: true,
-  //     start: "top top",
-  //     end: "bottom 1%",
-  //     scrub: 0.1,
-  //   },
-  // });
+  // Create timeline for fold panels
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: topFoldPanel,
+      markers: true,
+      start: "top top",
+      end: "bottom 1%",
+      scrub: 0.1,
+    },
+  });
 
-  // // Phase 1: 0% to 50% - Initial rotation
-  // tl.to(topFoldPanel, {
-  //   duration: 6,
-  //   rotationX: -15,
-  // })
-  //   .to(
-  //     topFlapContent,
-  //     {
-  //       rotationX: 15, // Counter the parent's -15
-  //       duration: 6,
-  //     },
-  //     0 // Start at beginning
-  //   )
-  //   .to(
-  //     bottomFoldPanel,
-  //     {
-  //       rotationX: 15,
-  //       duration: 6,
-  //     },
-  //     0 // Start at beginning
-  //   )
-  //   .to(
-  //     bottomFlapContent,
-  //     {
-  //       rotationX: -15, // Counter the parent's +15
-  //       duration: 6,
-  //     },
-  //     0 // Start at beginning
-  //   )
+  // Phase 1: 0% to 50% - Initial rotation
+  tl.to(topFoldPanel, {
+    duration: 6,
+    rotationX: -15,
+  })
+    .to(
+      topFlapContent,
+      {
+        rotationX: 15, // Counter the parent's -15
+        duration: 6,
+      },
+      0 // Start at beginning
+    )
+    .to(
+      bottomFoldPanel,
+      {
+        rotationX: 15,
+        duration: 6,
+      },
+      0 // Start at beginning
+    )
+    .to(
+      bottomFlapContent,
+      {
+        rotationX: -15, // Counter the parent's +15
+        duration: 6,
+      },
+      0 // Start at beginning
+    )
 
-  //   // Phase 2: 50% to 100% - Final rotation
-  //   .to(
-  //     topFoldPanel,
-  //     {
-  //       rotationX: -40, // Goes from -15 to -40
-  //       duration: 4,
-  //     },
-  //     "50%" // Start at 50% of timeline
-  //   )
-  //   .to(
-  //     topFlapContent,
-  //     {
-  //       rotationX: 40, // Counter the parent's -40
-  //       duration: 4,
-  //     },
-  //     "50%" // Start at 50% of timeline
-  //   )
-  //   .to(
-  //     bottomFoldPanel,
-  //     {
-  //       rotationX: 0, // Goes from +15 to 0
-  //       duration: 4,
-  //     },
-  //     "50%" // Start at 50% of timeline
-  //   )
-  //   .to(
-  //     bottomFlapContent,
-  //     {
-  //       rotationX: 0, // Counter the parent's 0 (no rotation needed)
-  //       duration: 4,
-  //     },
-  //     "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
-  //   );
+    // Phase 2: 50% to 100% - Final rotation
+    .to(
+      topFoldPanel,
+      {
+        rotationX: -40, // Goes from -15 to -40
+        duration: 4,
+      },
+      "50%" // Start at 50% of timeline
+    )
+    .to(
+      topFlapContent,
+      {
+        rotationX: 40, // Counter the parent's -40
+        duration: 4,
+      },
+      "50%" // Start at 50% of timeline
+    )
+    .to(
+      bottomFoldPanel,
+      {
+        rotationX: 0, // Goes from +15 to 0
+        duration: 4,
+      },
+      "50%" // Start at 50% of timeline
+    )
+    .to(
+      bottomFlapContent,
+      {
+        rotationX: 0, // Counter the parent's 0 (no rotation needed)
+        duration: 4,
+      },
+      "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
+    );
 
   /////////////////////////////////
   /////////////////////////////////
@@ -596,223 +580,164 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
 
   // Function to initialize long scroll animation for a single instance
-  // function initializeLongScrollAnimation(longScrollSection, index) {
-  //   if (!longScrollSection) return;
 
-  //   // Get elements within this specific section
-  //   const stickyContent = longScrollSection.querySelector(
-  //     "[data-gsap-state='pinned']"
-  //   );
-  //   const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
-  //   const textMiddle = longScrollSection.querySelector(
-  //     "[data-gsap-text='middle']"
-  //   );
-  //   const textBottom = longScrollSection.querySelector(
-  //     "[data-gsap-text='bottom']"
-  //   );
-  //   const textWrapper = longScrollSection.querySelector(
-  //     "[data-gsap-wrapper='text-wrapper']"
-  //   );
-  //   const pivotElement = textMiddle?.querySelector("[data-gsap-pivot='pivot']");
-  //   const beforePivot = textMiddle?.querySelector("[data-gsap-pivot='before']");
-  //   const afterPivot = textMiddle?.querySelector("[data-gsap-pivot='after']");
+function initializeLongScrollAnimation(longScrollSection, index) {
+  if (!longScrollSection) return;
 
-  //   // Guard clause: Skip if essential elements are missing
-  //   if (!stickyContent) {
-  //     console.warn(
-  //       `Long scroll section ${index + 1}: Missing sticky content element`
-  //     );
-  //     return;
-  //   }
+  // Get elements within this specific section
+  const stickyContent = longScrollSection.querySelector("[data-gsap-state='pinned']");
+  const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
+  const textMiddle = longScrollSection.querySelector("[data-gsap-text='middle']");
+  const textBottom = longScrollSection.querySelector("[data-gsap-text='bottom']");
+  const textWrapper = longScrollSection.querySelector("[data-gsap-wrapper='text-wrapper']");
+  const pivotElement = textMiddle?.querySelector("[data-gsap-pivot='pivot']");
+  const beforePivot = textMiddle?.querySelector("[data-gsap-pivot='before']");
+  const afterPivot = textMiddle?.querySelector("[data-gsap-pivot='after']");
 
-  //   const pivotOffsetX = parseInt(pivotElement.getAttribute("data-gsap-offset"));
-  //   console.log(typeof pivotOffsetX)
-  //   const pivotOffsetY = 0;
-
-  //   // Initial and target transform origins
-  //   let initialOriginX = 50;
-  //   let initialOriginY = 50;
-  //   let pivotOriginX = 51;
-  //   let pivotOriginY = 40;
-
-  //   // Calculate pivot-based transform origin
-  //   if (textMiddle && pivotElement) {
-  //     const textMiddleRect = textMiddle.getBoundingClientRect();
-  //     const pivotRect = pivotElement.getBoundingClientRect();
-
-  //     const pivotCenterX =
-  //       pivotRect.left + pivotRect.width / 2 - textMiddleRect.left;
-  //     const pivotCenterY =
-  //       pivotRect.top + pivotRect.height / 2 - textMiddleRect.top;
-
-  //     const adjustedPivotX = pivotCenterX + pivotOffsetX;
-  //     const adjustedPivotY = pivotCenterY + pivotOffsetY;
-
-  //     pivotOriginX = (adjustedPivotX / textMiddleRect.width) * 100;
-  //     pivotOriginY = (adjustedPivotY / textMiddleRect.height) * 100;
-  //   }
-
-  //   // Set initial CSS variables
-  //   gsap.set(longScrollSection, {
-  //     "--progress1": 0,
-  //     "--progress2": 0,
-  //   });
-
-  //   // Set initial styles for text middle
-  //   if (textMiddle) {
-  //     gsap.set(textMiddle, {
-  //       scale: 0,
-  //       transformOrigin: `${initialOriginX}% ${initialOriginY}%`,
-  //     });
-  //   }
-
-  //   // Pin the sticky content
-  //   ScrollTrigger.create({
-  //     trigger: longScrollSection,
-  //     start: "top top",
-  //     end: "bottom bottom",
-  //     pin: stickyContent,
-  //     pinSpacing: false,
-  //     invalidateOnRefresh: true
-  //     // markers: true, // Remove in production
-  //   });
-
-  //   // Create the long scroll animation with progress tracking
-  //   ScrollTrigger.create({
-  //     trigger: longScrollSection,
-  //     start: "top top",
-  //     end: "bottom bottom",
-  //     markers: true,
-  //     scrub: true,
-  //     onUpdate: (self) => {
-  //       const progress = self.progress;
-  //       console.log(`Section ${index + 1} progress:`, progress);
-
-  //       // Calculate progress values
-  //       const progress1 = Math.min(progress / 0.55, 1);
-  //       const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
-  //       const progress3 =
-  //         progress >= 0.4 && progress <= 0.55
-  //           ? (progress - 0.4) / 0.15
-  //           : progress > 0.55
-  //           ? 1
-  //           : 0;
-
-  //       // Update CSS variables
-  //       gsap.set(longScrollSection, {
-  //         "--progress1": progress1,
-  //         "--progress2": progress2,
-  //       });
-
-  //       // Apply transforms with guard clauses
-  //       if (textTop) {
-  //         gsap.set(textTop, {
-  //           y: `${progress1 * -100}%`,
-  //         });
-  //       }
-
-  //       if (textBottom) {
-  //         gsap.set(textBottom, {
-  //           y: `${progress1 * 100}%`,
-  //         });
-  //       }
-
-  //       // Handle middle text animation with smooth origin interpolation
-  //       if (textMiddle) {
-  //         // Interpolate transform origin based on progress1
-  //         const currentOriginX =
-  //           initialOriginX + (pivotOriginX - initialOriginX) * progress1;
-  //         const currentOriginY =
-  //           initialOriginY + (pivotOriginY - initialOriginY) * progress1;
-
-  //         // Set the interpolated transform origin
-  //         textMiddle.style.transformOrigin = `${currentOriginX}% ${currentOriginY}%`;
-
-  //         gsap.set(textMiddle, {
-  //           scale: progress1 * 2.1,
-  //         });
-
-  //         // Apply pivot animations if elements exist
-  //         if (beforePivot) {
-  //           gsap.set(beforePivot, {
-  //             xPercent: progress3 * -5,
-  //           });
-  //         }
-
-  //         if (afterPivot) {
-  //           gsap.set(afterPivot, {
-  //             xPercent: progress3 * 20,
-  //           });
-  //         }
-  //       }
-
-  //       // Text wrapper animation
-  //       if (textWrapper) {
-  //         gsap.set(textWrapper, {
-  //           scale: 1 + progress1 * 8,
-  //         });
-  //       }
-
-  //       // Progress2 effects
-  //       if (progress2 > 0 && stickyContent) {
-  //         gsap.set(stickyContent, {
-  //           color: "var(--swatch--pink)",
-  //         });
-  //       }
-  //     },
-  //   });
-  // }
-
-  function initializeLongScrollAnimation(section, index) {
-    const stickyContent = section.querySelector("[data-gsap-state='pinned']");
-    const middleText = section.querySelector("[data-gsap-text='middle']");
-    const pivotElement = middleText
-      ? middleText.querySelector("[data-gsap-pivot='pivot']")
-      : null;
-
-    if (!middleText || !pivotElement) {
-      console.warn("Middle text or pivot element not found");
-      return;
-    }
-
-    // Step 1: Initial measurements
-    gsap.set(middleText, { scale: 1, x: 0 });
-
-    const pivotRect = pivotElement.getBoundingClientRect();
-    const pivotAbsoluteCenterX = pivotRect.left + pivotRect.width / 2;
-    const viewportCenterX = window.innerWidth / 2;
-    const offsetToCenter = pivotAbsoluteCenterX - viewportCenterX;
-
-    gsap.set(middleText, {
-      scale: 0,
-      x: 0,
-      transformOrigin: "50% 50%",
-    });
-
-    // Step 2: GSAP timeline
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "bottom bottom",
-        markers: true,
-        scrub: true,
-        pin: stickyContent,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          const currentScale = progress * 20;
-          const currentX = -offsetToCenter * currentScale;
-
-          gsap.set(middleText, {
-            scale: currentScale,
-            x: currentX,
-          });
-        },
-      },
-    });
-
-    return tl;
+  // Guard clause: Skip if essential elements are missing
+  if (!stickyContent) {
+    console.warn(`Long scroll section ${index + 1}: Missing sticky content element`);
+    return;
   }
+
+  // Set initial CSS variables
+  gsap.set(longScrollSection, {
+    "--progress1": 0,
+    "--progress2": 0,
+  });
+
+  // Simple setup - just measure where the pivot is relative to textMiddle at the start
+  let pivotOffsetX = 0;
+  
+  if (textMiddle && pivotElement) {
+    // Measure initial positions
+    const textMiddleRect = textMiddle.getBoundingClientRect();
+    const pivotRect = pivotElement.getBoundingClientRect();
+    
+    // How far is the pivot from textMiddle's center? (including the 13px offset)
+    const textMiddleCenterX = textMiddleRect.left + textMiddleRect.width / 2;
+    const pivotCenterX = (pivotRect.left + pivotRect.width / 2) + (pivotRect.width * 0.10);
+    
+    pivotOffsetX = pivotCenterX - textMiddleCenterX;
+    
+    console.log('Simple setup:', {
+      pivotOffsetX: pivotOffsetX,
+      textMiddleCenterX: textMiddleCenterX,
+      pivotCenterX: pivotCenterX
+    });
+    
+    // Set initial state for animation
+    gsap.set(textMiddle, {
+      scale: 0,
+      transformOrigin: "50% 50%", // Scale from center
+    });
+  }
+
+  // Pin the sticky content
+  ScrollTrigger.create({
+    trigger: longScrollSection,
+    start: "top top",
+    end: "bottom bottom",
+    pin: stickyContent,
+    pinSpacing: false,
+    invalidateOnRefresh: true
+  });
+
+  // Create the long scroll animation
+  ScrollTrigger.create({
+    trigger: longScrollSection,
+    start: "top top",
+    end: "bottom bottom",
+    markers: true,
+    scrub: true,
+    onUpdate: (self) => {
+      const progress = self.progress;
+
+      // Calculate progress values
+      const progress1 = Math.min(progress / 0.55, 1);
+      const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
+      const progress3 = progress >= 0.4 && progress <= 0.55 ? (progress - 0.4) / 0.15 : progress > 0.55 ? 1 : 0;
+
+      // Update CSS variables
+      gsap.set(longScrollSection, {
+        "--progress1": progress1,
+        "--progress2": progress2,
+      });
+
+      // Apply transforms
+      if (textTop) {
+        gsap.set(textTop, {
+          y: `${progress1 * -100}%`,
+        });
+      }
+
+      if (textBottom) {
+        gsap.set(textBottom, {
+          y: `${progress1 * 100}%`,
+        });
+      }
+
+      // Simple middle text animation
+      if (textMiddle && pivotElement) {
+        const currentScale = Math.max(0, progress1 * 2.1); // Clamp to minimum 0
+        
+        // Always apply transforms (don't use conditional)
+        const viewportCenterX = window.innerWidth / 2;
+        
+        // Calculate how much we need to shift to get pivot to center
+        const scaledPivotOffset = pivotOffsetX * currentScale;
+        const targetTranslateX = -scaledPivotOffset * progress1;
+        
+        // Calculate opacity: 0 at progress1=0, 1 at progress1>=0.33
+        const middleOpacity = Math.min(Math.max((progress1 - 0) / 0.33, 0), 1);
+
+        gsap.set(textMiddle, {
+          scale: currentScale,
+          x: targetTranslateX,
+          transformOrigin: "50% 50%",
+          opacity: middleOpacity
+        });
+
+        // Apply pivot animations if elements exist
+        if (beforePivot) {
+          gsap.set(beforePivot, {
+            xPercent: progress3 * -5,
+          });
+        }
+
+        if (afterPivot) {
+          gsap.set(afterPivot, {
+            xPercent: progress3 * 20,
+          });
+        }
+      }
+
+      // Text wrapper animation
+      if (textWrapper) {
+        gsap.set(textWrapper, {
+          scale: 1 + progress1 * 8,
+        });
+      }
+      
+      // Progress2 effects
+      if (progress2 > 0 && stickyContent) {
+        // Get the color mode from the attribute
+        const colorMode = longScrollSection.getAttribute("data-long-scroll");
+        let colorValue = "#fff"; // default
+
+        if (colorMode === "pink") {
+          colorValue = "var(--swatch--pink)"
+        } else if (colorMode === "white") {
+          colorValue = "#fff";
+        }
+
+        gsap.set(stickyContent, {
+          color: colorValue,
+        });
+      }
+    },
+  });
+}
 
   // Initialize all long scroll sections
   const longScrollSections = document.querySelectorAll(
