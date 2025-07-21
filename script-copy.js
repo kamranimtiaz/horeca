@@ -410,6 +410,63 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /////////////////////////////////
   /////////////////////////////////
+  /* H2 PINNED WITHOUT GRAVITY */
+  /////////////////////////////////
+  /////////////////////////////////
+
+  // Find all containers with the data attribute
+    const containers = document.querySelectorAll('[data-animate-container]');
+    
+    containers.forEach(container => {
+        // Find the h2 inside the container with data-animate-heading
+        const headingWrapper = container.querySelector('[data-animate-heading="h2"]');
+        const title = headingWrapper ? headingWrapper.querySelector('h2') : null;
+        
+        if (!title) return; // Skip if no h2 found
+        
+        // Use SplitText to split the h2 into individual characters
+        const splitText = new SplitText(title, {
+            type: "chars",
+            charsClass: "letter"
+        });
+        
+        // Calculate the distance for scattering
+        const dist = container.clientHeight - title.clientHeight;
+        
+        // Pin the title during scroll
+        ScrollTrigger.create({
+            trigger: container,
+            pin: title,
+            start: 'top 20%',
+            end: '+=' + dist,
+            onComplete: () => {
+                // Optional: Revert SplitText when animation completes
+                // splitText.revert();
+            }
+        });
+        
+        // Animate each character with random scattering
+        const letters = splitText.chars;
+        letters.forEach(letter => {
+            const randomDistance = Math.random() * dist;
+            
+            gsap.from(letter, {
+                y: randomDistance,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: title,
+                    start: 'top 20%',
+                    end: '+=' + randomDistance,
+                    scrub: true
+                }
+            });
+        });
+    });
+
+
+
+  /////////////////////////////////
+  /////////////////////////////////
   /* Squeesed H2 ANIMATION */
   /////////////////////////////////
   /////////////////////////////////
@@ -455,123 +512,123 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
   /////////////////////////////////
 
-  // Get the fold panel element
-  const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
+  // // Get the fold panel element
+  // const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
 
-  // Get the top fold panel element
-  const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
+  // // Get the top fold panel element
+  // const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
 
-  const topFlapContent = topFoldPanel.querySelector(
-    "[data-gsap-content='flap']"
-  );
+  // const topFlapContent = topFoldPanel.querySelector(
+  //   "[data-gsap-content='flap']"
+  // );
 
-  const bottomFlapContent = bottomFoldPanel.querySelector(
-    "[data-gsap-content='flap']"
-  );
+  // const bottomFlapContent = bottomFoldPanel.querySelector(
+  //   "[data-gsap-content='flap']"
+  // );
 
-  // Set initial styles for top panel
-  gsap.set(topFoldPanel, {
-    transformOrigin: "center top",
-    transformPerspective: "100vw",
-    overflow: "hidden",
-    transformStyle: "preserve-3d",
-  });
-  // Set initial styles
-  gsap.set(bottomFoldPanel, {
-    transformPerspective: "100vw",
-    overflow: "hidden",
-    transformStyle: "preserve-3d",
-    transformOrigin: "center bottom",
-  });
-  // Set initial styles for content to counter perspective effects
-  gsap.set(topFlapContent, {
-    transformStyle: "preserve-3d",
-    transformOrigin: "center top",
-    transformPerspective: "100vw", // Remove perspective inheritance
-    backfaceVisibility: "hidden", // Ensure content stays visible
-  });
+  // // Set initial styles for top panel
+  // gsap.set(topFoldPanel, {
+  //   transformOrigin: "center top",
+  //   transformPerspective: "100vw",
+  //   overflow: "hidden",
+  //   transformStyle: "preserve-3d",
+  // });
+  // // Set initial styles
+  // gsap.set(bottomFoldPanel, {
+  //   transformPerspective: "100vw",
+  //   overflow: "hidden",
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center bottom",
+  // });
+  // // Set initial styles for content to counter perspective effects
+  // gsap.set(topFlapContent, {
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center top",
+  //   transformPerspective: "100vw", // Remove perspective inheritance
+  //   backfaceVisibility: "hidden", // Ensure content stays visible
+  // });
 
-  gsap.set(bottomFlapContent, {
-    transformStyle: "preserve-3d",
-    transformOrigin: "center bottom",
-    transformPerspective: "100vw", // Remove perspective inheritance
-    backfaceVisibility: "hidden", // Ensure content stays visible
-  });
+  // gsap.set(bottomFlapContent, {
+  //   transformStyle: "preserve-3d",
+  //   transformOrigin: "center bottom",
+  //   transformPerspective: "100vw", // Remove perspective inheritance
+  //   backfaceVisibility: "hidden", // Ensure content stays visible
+  // });
 
-  // Create timeline for fold panels
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: topFoldPanel,
-      markers: true,
-      start: "top top",
-      end: "bottom 1%",
-      scrub: 0.1,
-    },
-  });
+  // // Create timeline for fold panels
+  // const tl = gsap.timeline({
+  //   scrollTrigger: {
+  //     trigger: topFoldPanel,
+  //     markers: true,
+  //     start: "top top",
+  //     end: "bottom 1%",
+  //     scrub: 0.1,
+  //   },
+  // });
 
-  // Phase 1: 0% to 50% - Initial rotation
-  tl.to(topFoldPanel, {
-    duration: 6,
-    rotationX: -15,
-  })
-    .to(
-      topFlapContent,
-      {
-        rotationX: 15, // Counter the parent's -15
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
-    .to(
-      bottomFoldPanel,
-      {
-        rotationX: 15,
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
-    .to(
-      bottomFlapContent,
-      {
-        rotationX: -15, // Counter the parent's +15
-        duration: 6,
-      },
-      0 // Start at beginning
-    )
+  // // Phase 1: 0% to 50% - Initial rotation
+  // tl.to(topFoldPanel, {
+  //   duration: 6,
+  //   rotationX: -15,
+  // })
+  //   .to(
+  //     topFlapContent,
+  //     {
+  //       rotationX: 15, // Counter the parent's -15
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
+  //   .to(
+  //     bottomFoldPanel,
+  //     {
+  //       rotationX: 15,
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
+  //   .to(
+  //     bottomFlapContent,
+  //     {
+  //       rotationX: -15, // Counter the parent's +15
+  //       duration: 6,
+  //     },
+  //     0 // Start at beginning
+  //   )
 
-    // Phase 2: 50% to 100% - Final rotation
-    .to(
-      topFoldPanel,
-      {
-        rotationX: -40, // Goes from -15 to -40
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      topFlapContent,
-      {
-        rotationX: 40, // Counter the parent's -40
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      bottomFoldPanel,
-      {
-        rotationX: 0, // Goes from +15 to 0
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline
-    )
-    .to(
-      bottomFlapContent,
-      {
-        rotationX: 0, // Counter the parent's 0 (no rotation needed)
-        duration: 4,
-      },
-      "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
-    );
+  //   // Phase 2: 50% to 100% - Final rotation
+  //   .to(
+  //     topFoldPanel,
+  //     {
+  //       rotationX: -40, // Goes from -15 to -40
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     topFlapContent,
+  //     {
+  //       rotationX: 40, // Counter the parent's -40
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     bottomFoldPanel,
+  //     {
+  //       rotationX: 0, // Goes from +15 to 0
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline
+  //   )
+  //   .to(
+  //     bottomFlapContent,
+  //     {
+  //       rotationX: 0, // Counter the parent's 0 (no rotation needed)
+  //       duration: 4,
+  //     },
+  //     "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
+  //   );
 
   /////////////////////////////////
   /////////////////////////////////
