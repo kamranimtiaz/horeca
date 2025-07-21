@@ -720,10 +720,10 @@ document.addEventListener("DOMContentLoaded", function () {
       scrub: true,
       onUpdate: (self) => {
         const progress = self.progress;
-
+        console.log(`Long scroll section ${index + 1} progress:`, progress);
         // Calculate progress values
         const progress1 = Math.min(progress / 0.55, 1);
-        const progress2 = progress >= 0.27 ? (progress - 0.27) / 0.73 : 0;
+        const progress2 = progress >= 0.25 ? (progress - 0.25) / 0.75  : 0;
         const progress3 =
           progress >= 0.4 && progress <= 0.55
             ? (progress - 0.4) / 0.15
