@@ -415,55 +415,55 @@ document.addEventListener("DOMContentLoaded", function () {
   /////////////////////////////////
 
   // Find all containers with the data attribute
-    const containers = document.querySelectorAll('[data-animate-container]');
-    
-    containers.forEach(container => {
-        // Find the h2 inside the container with data-animate-heading
-        const headingWrapper = container.querySelector('[data-animate-heading="h2"]');
-        const title = headingWrapper ? headingWrapper.querySelector('h2') : null;
-        
-        if (!title) return; // Skip if no h2 found
-        
-        // Use SplitText to split the h2 into individual characters
-        const splitText = new SplitText(title, {
-            type: "chars",
-            charsClass: "letter"
-        });
-        
-        // Calculate the distance for scattering
-        const dist = container.clientHeight - title.clientHeight;
-        
-        // Pin the title during scroll
-        ScrollTrigger.create({
-            trigger: container,
-            pin: title,
-            start: 'top 20%',
-            end: '+=' + dist,
-            onComplete: () => {
-                // Optional: Revert SplitText when animation completes
-                // splitText.revert();
-            }
-        });
-        
-        // Animate each character with random scattering
-        const letters = splitText.chars;
-        letters.forEach(letter => {
-            const randomDistance = Math.random() * dist;
-            
-            gsap.from(letter, {
-                y: randomDistance,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: title,
-                    start: 'top 20%',
-                    end: '+=' + randomDistance,
-                    scrub: true
-                }
-            });
-        });
+  const containers = document.querySelectorAll("[data-animate-container]");
+
+  containers.forEach((container) => {
+    // Find the h2 inside the container with data-animate-heading
+    const headingWrapper = container.querySelector(
+      '[data-animate-heading="h2"]'
+    );
+    const title = headingWrapper ? headingWrapper.querySelector("h2") : null;
+
+    if (!title) return; // Skip if no h2 found
+
+    // Use SplitText to split the h2 into individual characters
+    const splitText = new SplitText(title, {
+      type: "chars",
+      charsClass: "letter",
     });
 
+    // Calculate the distance for scattering
+    const dist = container.clientHeight - title.clientHeight;
 
+    // Pin the title during scroll
+    ScrollTrigger.create({
+      trigger: container,
+      pin: title,
+      start: "top 20%",
+      end: "+=" + dist,
+      onComplete: () => {
+        // Optional: Revert SplitText when animation completes
+        // splitText.revert();
+      },
+    });
+
+    // Animate each character with random scattering
+    const letters = splitText.chars;
+    letters.forEach((letter) => {
+      const randomDistance = Math.random() * dist;
+
+      gsap.from(letter, {
+        y: randomDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: title,
+          start: "top 20%",
+          end: "+=" + randomDistance,
+          scrub: true,
+        },
+      });
+    });
+  });
 
   /////////////////////////////////
   /////////////////////////////////
@@ -638,176 +638,196 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to initialize long scroll animation for a single instance
 
-function initializeLongScrollAnimation(longScrollSection, index) {
-  if (!longScrollSection) return;
+  function initializeLongScrollAnimation(longScrollSection, index) {
+    if (!longScrollSection) return;
 
-  // Get elements within this specific section
-  const stickyContent = longScrollSection.querySelector("[data-gsap-state='pinned']");
-  const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
-  const textMiddle = longScrollSection.querySelector("[data-gsap-text='middle']");
-  const textBottom = longScrollSection.querySelector("[data-gsap-text='bottom']");
-  const textWrapper = longScrollSection.querySelector("[data-gsap-wrapper='text-wrapper']");
-  const pivotElement = textMiddle?.querySelector("[data-gsap-pivot='pivot']");
-  const beforePivot = textMiddle?.querySelector("[data-gsap-pivot='before']");
-  const afterPivot = textMiddle?.querySelector("[data-gsap-pivot='after']");
+    // Get elements within this specific section
+    const stickyContent = longScrollSection.querySelector(
+      "[data-gsap-state='pinned']"
+    );
+    const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
+    const textMiddle = longScrollSection.querySelector(
+      "[data-gsap-text='middle']"
+    );
+    const textBottom = longScrollSection.querySelector(
+      "[data-gsap-text='bottom']"
+    );
+    const textWrapper = longScrollSection.querySelector(
+      "[data-gsap-wrapper='text-wrapper']"
+    );
+    const pivotElement = textMiddle?.querySelector("[data-gsap-pivot='pivot']");
+    const beforePivot = textMiddle?.querySelector("[data-gsap-pivot='before']");
+    const afterPivot = textMiddle?.querySelector("[data-gsap-pivot='after']");
 
-  // Guard clause: Skip if essential elements are missing
-  if (!stickyContent) {
-    console.warn(`Long scroll section ${index + 1}: Missing sticky content element`);
-    return;
-  }
+    // Guard clause: Skip if essential elements are missing
+    if (!stickyContent) {
+      console.warn(
+        `Long scroll section ${index + 1}: Missing sticky content element`
+      );
+      return;
+    }
 
-  // Set initial CSS variables
-  gsap.set(longScrollSection, {
-    "--progress1": 0,
-    "--progress2": 0,
-  });
-
-  // Simple setup - just measure where the pivot is relative to textMiddle at the start
-  let pivotOffsetX = 0;
-  
-  if (textMiddle && pivotElement) {
-    // Measure initial positions
-    const textMiddleRect = textMiddle.getBoundingClientRect();
-    const pivotRect = pivotElement.getBoundingClientRect();
-    
-    // How far is the pivot from textMiddle's center? (including the 13px offset)
-    const textMiddleCenterX = textMiddleRect.left + textMiddleRect.width / 2;
-    const pivotCenterX = (pivotRect.left + pivotRect.width / 2) + (pivotRect.width * 0.10);
-    
-    pivotOffsetX = pivotCenterX - textMiddleCenterX;
-    
-    console.log('Simple setup:', {
-      pivotOffsetX: pivotOffsetX,
-      textMiddleCenterX: textMiddleCenterX,
-      pivotCenterX: pivotCenterX
+    // Set initial CSS variables
+    gsap.set(longScrollSection, {
+      "--progress1": 0,
+      "--progress2": 0,
     });
-    
-    // Set initial state for animation
-    gsap.set(textMiddle, {
-      scale: 0,
-      transformOrigin: "50% 50%", // Scale from center
-    });
-  }
 
-  // Pin the sticky content
-  ScrollTrigger.create({
-    trigger: longScrollSection,
-    start: "top top",
-    end: "bottom bottom",
-    pin: stickyContent,
-    pinSpacing: false,
-    invalidateOnRefresh: true
-  });
+    // Simple setup - just measure where the pivot is relative to textMiddle at the start
+    let pivotOffsetX = 0;
 
-  // Create the long scroll animation
-  ScrollTrigger.create({
-    trigger: longScrollSection,
-    start: "top top",
-    end: "bottom bottom",
-    markers: true,
-    scrub: true,
-    onUpdate: (self) => {
-      const progress = self.progress;
+    if (textMiddle && pivotElement) {
+      // Measure initial positions
+      const textMiddleRect = textMiddle.getBoundingClientRect();
+      const pivotRect = pivotElement.getBoundingClientRect();
 
-      // Calculate progress values
-      const progress1 = Math.min(progress / 0.55, 1);
-      const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
-      const progress3 = progress >= 0.4 && progress <= 0.55 ? (progress - 0.4) / 0.15 : progress > 0.55 ? 1 : 0;
+      // How far is the pivot from textMiddle's center? (including the 13px offset)
+      const textMiddleCenterX = textMiddleRect.left + textMiddleRect.width / 2;
+      const pivotCenterX =
+        pivotRect.left + pivotRect.width / 2 + pivotRect.width * 0.1;
 
-      // Update CSS variables
-      gsap.set(longScrollSection, {
-        "--progress1": progress1,
-        "--progress2": progress2,
+      pivotOffsetX = pivotCenterX - textMiddleCenterX;
+
+      console.log("Simple setup:", {
+        pivotOffsetX: pivotOffsetX,
+        textMiddleCenterX: textMiddleCenterX,
+        pivotCenterX: pivotCenterX,
       });
 
-      // Apply transforms
-      if (textTop) {
-        gsap.set(textTop, {
-          y: `${progress1 * -100}%`,
+      // Set initial state for animation
+      gsap.set(textMiddle, {
+        scale: 0,
+        transformOrigin: "50% 50%", // Scale from center
+      });
+    }
+
+    // Pin the sticky content
+    ScrollTrigger.create({
+      trigger: longScrollSection,
+      start: "top top",
+      end: "bottom bottom",
+      pin: stickyContent,
+      pinSpacing: false,
+      invalidateOnRefresh: true,
+    });
+
+    // Create the long scroll animation
+    ScrollTrigger.create({
+      trigger: longScrollSection,
+      start: "top top",
+      end: "bottom bottom",
+      markers: true,
+      scrub: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+
+        // Calculate progress values
+        const progress1 = Math.min(progress / 0.55, 1);
+        const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
+        const progress3 =
+          progress >= 0.4 && progress <= 0.55
+            ? (progress - 0.4) / 0.15
+            : progress > 0.55
+            ? 1
+            : 0;
+
+        // Update CSS variables
+        gsap.set(longScrollSection, {
+          "--progress1": progress1,
+          "--progress2": progress2,
         });
-      }
 
-      if (textBottom) {
-        gsap.set(textBottom, {
-          y: `${progress1 * 100}%`,
-        });
-      }
-
-      // Simple middle text animation
-      if (textMiddle && pivotElement) {
-        const currentScale = Math.max(0, progress1 * 2.1); // Clamp to minimum 0
-        
-        // Always apply transforms (don't use conditional)
-        const viewportCenterX = window.innerWidth / 2;
-        
-        // Calculate how much we need to shift to get pivot to center
-        const scaledPivotOffset = pivotOffsetX * currentScale;
-        const targetTranslateX = -scaledPivotOffset * progress1;
-        
-        // Calculate opacity: 0 at progress1=0, 1 at progress1>=0.33
-        const middleOpacity = Math.min(Math.max((progress1 - 0) / 0.33, 0), 1);
-
-        gsap.set(textMiddle, {
-          scale: currentScale,
-          x: targetTranslateX,
-          transformOrigin: "50% 50%",
-          opacity: middleOpacity
-        });
-
-        // Apply pivot animations if elements exist
-        if (beforePivot) {
-          gsap.set(beforePivot, {
-            xPercent: progress3 * -5,
+        // Apply transforms
+        if (textTop) {
+          gsap.set(textTop, {
+            y: `${progress1 * -100}%`,
           });
         }
 
-        if (afterPivot) {
-          gsap.set(afterPivot, {
-            xPercent: progress3 * 20,
+        if (textBottom) {
+          gsap.set(textBottom, {
+            y: `${progress1 * 100}%`,
           });
         }
-      }
 
-      // Text wrapper animation
-      if (textWrapper) {
-        gsap.set(textWrapper, {
-          scale: 1 + progress1 * 8,
-        });
-      }
-      
-      // Progress2 effects
-      if (progress2 > 0 && stickyContent) {
-        // Get the color mode from the attribute
-        const colorMode = longScrollSection.getAttribute("data-long-scroll");
-        let colorValue = "#fff"; // default
+        // Simple middle text animation
+        if (textMiddle && pivotElement) {
+          const currentScale = Math.max(0, progress1 * 2.1); // Clamp to minimum 0
 
-        if (colorMode === "pink") {
-          colorValue = "var(--swatch--pink)"
-        } else if (colorMode === "white") {
-          colorValue = "#fff";
+          // Always apply transforms (don't use conditional)
+          const viewportCenterX = window.innerWidth / 2;
+
+          // Calculate how much we need to shift to get pivot to center
+          const scaledPivotOffset = pivotOffsetX * currentScale;
+          const targetTranslateX = -scaledPivotOffset;
+
+          // Calculate opacity: 0 at progress1=0, 1 at progress1>=0.33
+          const middleOpacity = Math.min(
+            Math.max((progress1 - 0) / 0.33, 0),
+            1
+          );
+
+          gsap.set(textMiddle, {
+            scale: currentScale,
+            x: targetTranslateX,
+            transformOrigin: "50% 50%",
+            opacity: middleOpacity,
+          });
+
+          // Apply pivot animations if elements exist
+          if (beforePivot) {
+            gsap.set(beforePivot, {
+              xPercent: progress3 * -5,
+            });
+          }
+
+          if (afterPivot) {
+            gsap.set(afterPivot, {
+              xPercent: progress3 * 20,
+            });
+          }
         }
 
-        gsap.set(stickyContent, {
-          color: colorValue,
-        });
-      }
-    },
-  });
-}
+        // Text wrapper animation
+        if (textWrapper) {
+          gsap.set(textWrapper, {
+            scale: 1 + progress1 * 8,
+          });
+        }
+
+        // Progress2 effects
+        if (progress2 > 0 && stickyContent) {
+          // Get the color mode from the attribute
+          const colorMode = longScrollSection.getAttribute("data-long-scroll");
+          let colorValue = "#fff"; // default
+
+          if (colorMode === "pink") {
+            colorValue = "var(--swatch--pink)";
+          } else if (colorMode === "white") {
+            colorValue = "#fff";
+          }
+
+          gsap.set(stickyContent, {
+            color: colorValue,
+          });
+        }
+      },
+    });
+  }
 
   // Initialize all long scroll sections
   const longScrollSections = document.querySelectorAll(
     "[data-gsap-section='long-scroll']"
   );
-
-  if (longScrollSections.length > 0) {
-    longScrollSections.forEach((section, index) => {
-      initializeLongScrollAnimation(section, index);
-    });
-  } else {
-    console.warn("No long scroll sections found");
-  }
+  setTimeout(() => {
+    if (longScrollSections.length > 0) {
+      longScrollSections.forEach((section, index) => {
+        initializeLongScrollAnimation(section, index);
+      });
+    } else {
+      console.warn("No long scroll sections found");
+    }
+  }, 500);
 
   /////////////////////////////////
   /////////////////////////////////
@@ -827,7 +847,10 @@ function initializeLongScrollAnimation(longScrollSection, index) {
     const totalItemsCount = accordionHeaders.length;
     const sectionHeight = accordionContainer.getBoundingClientRect().height;
     const wrapperHeight = accordionWrapper.offsetHeight;
-    const headerHeightPx = window.innerWidth > 768 ? `${wrapperHeight / totalItemsCount}px`: headerHeight;
+    const headerHeightPx =
+      window.innerWidth > 768
+        ? `${wrapperHeight / totalItemsCount}px`
+        : headerHeight;
     const sectionHeightPx = `${sectionHeight}px`;
 
     // Set global CSS variables on :root
