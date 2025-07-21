@@ -393,15 +393,15 @@ document.addEventListener("DOMContentLoaded", function () {
         onEnter: () => {
           gsap.to("body", {
             ...colorThemes.getTheme(theme),
-            duration: 0.5, // ← Add duration here
-            ease: "sine.inOut",
+            duration: 0.250, // ← Add duration here
+            ease: "power2.inOut",
           });
         },
         onEnterBack: () => {
           gsap.to("body", {
             ...colorThemes.getTheme(theme),
-            duration: 0.5, // ← Add duration here
-            ease: "sine.inOut",
+            duration: 0.250, // ← Add duration here
+            ease: "power2.inOut",
           });
         },
       });
@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Calculate progress values
         const progress1 = Math.min(progress / 0.55, 1);
-        const progress2 = progress >= 0.53 ? (progress - 0.53) / 0.47 : 0;
+        const progress2 = progress >= 0.27 ? (progress - 0.27) / 0.73 : 0;
         const progress3 =
           progress >= 0.4 && progress <= 0.55
             ? (progress - 0.4) / 0.15
