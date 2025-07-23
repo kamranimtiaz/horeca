@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  
   document.fonts.ready.then(() => {
     // Initialize Lenis
     const lenis = new Lenis();
@@ -331,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
 
-    const cardsWrappers = gsap.utils.toArray(".slide-wrapper").slice(0, -1);
+    const cardsWrappers = gsap.utils.toArray(".slide-wrapper");
     const cards = gsap.utils.toArray(".card_stack_component");
 
     cardsWrappers.forEach((wrapper, i) => {
@@ -344,7 +343,7 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollTrigger: {
           trigger: wrapper,
           start: "top top",
-          end: "bottom bottom",
+          end: "bottom center",
           endTrigger: ".g_component_layout",
           scrub: true,
           pin: wrapper,
@@ -692,14 +691,14 @@ document.addEventListener("DOMContentLoaded", function () {
         trigger: longScrollSection,
         start: "top top",
         end: "bottom bottom",
-        markers: true,
+        // markers: true,
         scrub: true,
         onUpdate: (self) => {
           const progress = self.progress;
           console.log(`Long scroll section ${index + 1} progress:`, progress);
           // Calculate progress values
-          const progress1 = Math.min(progress / 0.60, 1);
-          const progress2 = progress >= 0.30 ? (progress - 0.30) / 0.55 : 0;
+          const progress1 = Math.min(progress / 0.6, 1);
+          const progress2 = progress >= 0.3 ? (progress - 0.3) / 0.55 : 0;
           const progress3 =
             progress >= 0.4 && progress <= 0.55
               ? (progress - 0.4) / 0.15
@@ -878,17 +877,139 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
     }
+    /////////////////////////////////
+    /////////////////////////////////
+    /* Footer social Cards*/
+    /////////////////////////////////
+    /////////////////////////////////
+
+    // Feed Items 3D Animation Class
+// Feed Items 3D Animation Class
+class FeedItemsAnimation {
+    constructor(container) {
+        // Element selections based on your HTML structure
+        this.container = container;
+        this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
+        this.feedSection = container.querySelector(".section_feed");
+        this.feedWrapper = container.querySelector(".feed_cms_wrap");
+        this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
+        
+        // Animation properties
+        this.targetZValue = 1;
+        this.closestItem = null;
+        this.closestZDifference = Infinity;
+        this.currIndex = 0;
+        this.newIndex = 0;
+        this.numItems = this.feedItems.length;
+        this.progress = 0;
+        
+        this.init();
+    }
+
+    init() {
+        // Initial setup for feed items
+        gsap.set(this.feedItems, {
+            z: index => (index + 1) * -1800,
+            zIndex: index => index * -1,
+            opacity: 0
+        });
+        
+        this.createScrollTriggers();
+        this.getProgress();
+    }
+
+    // Main progress calculation and item positioning
+    getProgress = () => {
+        this.resetClosestItem();
+        
+        this.feedItems.forEach(item => {
+            let normalizedZ = gsap.utils.normalize(-3000, 0, gsap.getProperty(item, "z"));
+            item.setAttribute("data-z", normalizedZ);
+            
+            // Animate opacity based on z position
+            gsap.to(item, { opacity: normalizedZ + 0.2 });
+            
+            // Scale images based on z position
+            const itemImage = item.querySelector(".feed_img");
+            if (itemImage) {
+                gsap.to(itemImage, {
+                    scale: normalizedZ * 0.5 + 0.75,
+                    ease: "expo.out",
+                    duration: 0.5
+                });
+            }
+            
+            // Find closest item to target z value
+            let zDifference = Math.abs(normalizedZ - this.targetZValue);
+            if (zDifference < this.closestZDifference) {
+                this.closestZDifference = zDifference;
+                this.closestItem = item;
+            }
+        });
+        
+        // Update current index
+        this.currIndex = this.feedItems.indexOf(this.closestItem);
+    }
+
+    resetClosestItem = () => {
+        this.closestItem = null;
+        this.closestZDifference = Infinity;
+    }
+
+
+    createScrollTriggers() {
+        // Main scroll animation for feed items z-positioning
+        ScrollTrigger.create({
+            trigger: this.feedSection,
+            start: "top top",
+            end: () => `+=${this.numItems * window.innerHeight}`,
+            pin: this.feedSection,
+            pinSpacing: true,
+            scrub: 0.1,
+            // markers: true, // Remove this in production
+            immediateRender: false,
+            onUpdate: (self) => {
+                this.progress = self.progress;
+                this.progress = gsap.utils.clamp(0, 1, this.progress);
+                
+                // Calculate z-offset to bring items forward as you scroll
+                let zOffset = this.progress * 1800 * this.numItems;
+                gsap.set(this.feedItems, {
+                    z: index => (index + 1) * -1800 + zOffset
+                });
+                
+                this.getProgress();
+            },
+            onStart: () => {
+                // Ensure the pinned element starts at the top
+                gsap.set(this.feedList, { 
+                    position: 'fixed',
+                    top: 0,
+                    left: '50%',
+                    xPercent: -50
+                });
+            }
+        });
+    }
+}
+
+
+
+// Call this function to add the CSS:
+// addRequiredCSS();
+
+    const feedAnimation = new FeedItemsAnimation(document);
+
   });
 
-
   /////////////////////////////////
-    /////////////////////////////////
-    /* Animtate background */
-    /////////////////////////////////
-    /////////////////////////////////
+  /////////////////////////////////
+  /* Animtate background */
+  /////////////////////////////////
+  /////////////////////////////////
 
-    function animateBackground() {
-      const backgroundElement = document.querySelector("[data-animate-bg]");
+  function animateBackground() {
+    const backgroundElement = document.querySelector("[data-animate-bg]");
     document.addEventListener("colorThemesReady", () => {
       $("[data-animate-theme-to]").each(function () {
         let theme = $(this).attr("data-animate-theme-to");
@@ -896,6 +1017,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: $(this),
           start: "top center",
+          // markers: true,
           end: "bottom center",
           onToggle: ({ self, isActive }) => {
             if (isActive) gsap.to("body", { ...colorThemes.getTheme(theme) });
