@@ -524,7 +524,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let gridScrollTrigger = gsap.timeline({
       scrollTrigger: {
         trigger: horizontalWrapper,
-        start: "top 40%", // When section top hits 30% from top
+        start: "bottom bottom", // When section top hits 30% from top
         end: `+=${totalScrollDistance}`,
         scrub: 1,
         pin: pinnedContent,
@@ -600,10 +600,10 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: container,
           pin: title,
-          start: "top 20%",
+          start: "top 10%",
           endTrigger: horizontalWrapper,
           markers: true,
-          end: "bottom 40%",
+          end: "bottom 90%",
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
@@ -621,7 +621,7 @@ document.addEventListener("DOMContentLoaded", function () {
           ease: "none",
           scrollTrigger: {
             trigger: shouldPin ? title : container, // Use title if pinned, container if not
-            start: "top 20%",
+            start: "top 10%",
             end: "+=" + randomDistance,
             scrub: true,
           },
