@@ -43,6 +43,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const heroSlides = document.querySelectorAll(".hero_slide");
     if (!heroSlides.length) return;
 
+    // ====== ANIMATION TIMING VARIABLES ======
+    const ANIMATION_CONFIG = {
+      // Heading animations
+      heading: {
+        stagger: 0.15,
+        duration: 0.75,
+      },
+      // Text animations
+      text: {
+        stagger: 0.05,
+        duration: 0.6,
+        slideInDelay: 0.2, // Simple delay in seconds for text slide-in
+      },
+      // Container animations
+      container: {
+        headingDuration: 1,
+        textDuration: 0.8,
+        slideOutDelay: 0.1,
+      },
+    };
+
     let currentIndex = 0;
     let splitInstances = [];
     let isFirstAnimation = true;
@@ -77,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Move text and its words out of screen initially
         gsap.set(textElement, { yPercent: 100, y: "50vh" });
-        gsap.set(textSplit.words, { yPercent: 100, y: "50vh" });
+        gsap.set(textSplit.words, { yPercent: 100, y: "50vh", opacity: 0 });
       }
     });
 
@@ -105,7 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const textInstance = getSplitInstance(textElement);
         gsap.set(textElement, { yPercent: 100, y: "50vh" });
         if (textInstance && textInstance.split.words) {
-          gsap.set(textInstance.split.words, { yPercent: 100, y: "50vh" });
+          gsap.set(textInstance.split.words, {
+            yPercent: 100,
+            y: "50vh",
+            opacity: 0,
+          });
         }
       }
     }
@@ -154,6 +179,24 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       // SLIDE IN ANIMATIONS (always happen)
+      // Calculate slide-in delay for heading based on slide-out progress
+      let headingSlideInDelay = 0;
+
+      if (!isFirstAnimation && currentHeading) {
+        const currentHeadingInstance = getSplitInstance(currentHeading);
+        if (currentHeadingInstance && currentHeadingInstance.split.chars) {
+          const charCount = currentHeadingInstance.split.chars.length;
+          // 2/3 of chars out = (charCount * 2/3 - 1) * stagger + slideOutDelay
+          headingSlideInDelay =
+            ANIMATION_CONFIG.container.slideOutDelay +
+            ((charCount * 2) / 3 - 1) * ANIMATION_CONFIG.heading.stagger;
+        }
+      }
+
+      // Simple text delay: heading starts + text delay
+      const textSlideInDelay =
+        headingSlideInDelay + ANIMATION_CONFIG.text.slideInDelay;
+
       // Animate next heading from bottom to center
       if (nextHeading) {
         const nextHeadingInstance = getSplitInstance(nextHeading);
@@ -168,12 +211,12 @@ document.addEventListener("DOMContentLoaded", function () {
             yPercent: 0,
             y: "0vh",
             ease: "power2.out",
-            duration: 1,
+            duration: ANIMATION_CONFIG.container.headingDuration,
           },
-          0
+          headingSlideInDelay
         );
 
-        // Animate next heading chars with stagger
+        // Animate next heading chars with stagger (positive for slide in)
         if (nextHeadingInstance && nextHeadingInstance.split.chars) {
           tl.fromTo(
             nextHeadingInstance.split.chars,
@@ -185,15 +228,15 @@ document.addEventListener("DOMContentLoaded", function () {
               yPercent: 0,
               y: "0vh",
               ease: "power2.out",
-              stagger: 0.1,
-              duration: 1,
+              stagger: ANIMATION_CONFIG.heading.stagger,
+              duration: ANIMATION_CONFIG.heading.duration,
             },
-            0
+            headingSlideInDelay
           );
         }
       }
 
-      // Animate next text from bottom to center (slight delay)
+      // Animate next text from bottom to center (simple delay after heading starts)
       if (nextTextElement) {
         const nextTextInstance = getSplitInstance(nextTextElement);
 
@@ -207,34 +250,36 @@ document.addEventListener("DOMContentLoaded", function () {
             yPercent: 0,
             y: "0vh",
             ease: "power2.out",
-            duration: 0.8,
+            duration: ANIMATION_CONFIG.container.textDuration,
           },
-          0.2
+          textSlideInDelay
         );
 
-        // Animate next text words with stagger
+        // Animate next text words with stagger (positive for slide in)
         if (nextTextInstance && nextTextInstance.split.words) {
           tl.fromTo(
             nextTextInstance.split.words,
             {
               yPercent: 100,
+              opacity: 0,
               y: "50vh",
             },
             {
               yPercent: 0,
               y: "0vh",
+              opacity: 1,
               ease: "power2.out",
-              stagger: 0.05,
-              duration: 0.6,
+              stagger: ANIMATION_CONFIG.text.stagger,
+              duration: ANIMATION_CONFIG.text.duration,
             },
-            0.2
+            textSlideInDelay
           );
         }
       }
 
       // SLIDE OUT ANIMATIONS (only if NOT first animation)
       if (!isFirstAnimation) {
-        // Move current heading to top (starts at 0.5s)
+        // Move current heading to top (starts at slideOutDelay)
         if (currentHeading) {
           const currentHeadingInstance = getSplitInstance(currentHeading);
 
@@ -244,12 +289,12 @@ document.addEventListener("DOMContentLoaded", function () {
               yPercent: -100,
               y: "-50vh",
               ease: "power2.in",
-              duration: 0.8,
+              duration: ANIMATION_CONFIG.container.headingDuration,
             },
-            0.1
+            ANIMATION_CONFIG.container.slideOutDelay
           );
 
-          // Move current heading chars to top with stagger
+          // Move current heading chars to top with stagger (negative for slide out)
           if (currentHeadingInstance && currentHeadingInstance.split.chars) {
             tl.to(
               currentHeadingInstance.split.chars,
@@ -257,10 +302,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 yPercent: -100,
                 y: "-50vh",
                 ease: "power2.in",
-                stagger: -0.02,
-                duration: 0.6,
+                stagger: -ANIMATION_CONFIG.heading.stagger,
+                duration: ANIMATION_CONFIG.heading.duration,
               },
-              0.1
+              ANIMATION_CONFIG.container.slideOutDelay
             );
           }
         }
@@ -275,23 +320,24 @@ document.addEventListener("DOMContentLoaded", function () {
               yPercent: -100,
               y: "-50vh",
               ease: "power2.in",
-              duration: 0.8,
+              duration: ANIMATION_CONFIG.container.textDuration,
             },
-            0.1
+            ANIMATION_CONFIG.container.slideOutDelay
           );
 
-          // Move current text words to top with stagger
+          // Move current text words to top with stagger (negative for slide out)
           if (currentTextInstance && currentTextInstance.split.words) {
             tl.to(
               currentTextInstance.split.words,
               {
                 yPercent: -100,
                 y: "-50vh",
+                opacity: 0,
                 ease: "power2.in",
-                stagger: -0.03,
-                duration: 0.6,
+                stagger: -ANIMATION_CONFIG.text.stagger,
+                duration: ANIMATION_CONFIG.text.duration,
               },
-              0.1
+              ANIMATION_CONFIG.container.slideOutDelay
             );
           }
         }
@@ -330,7 +376,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
 
-    const cardsWrappers = gsap.utils.toArray(".slide-wrapper");
+    const cardsWrappers = gsap.utils.toArray(".slide-wrapper").slice(0, -1);
     const cards = gsap.utils.toArray(".card_stack_component");
 
     cardsWrappers.forEach((wrapper, i) => {
@@ -348,6 +394,17 @@ document.addEventListener("DOMContentLoaded", function () {
           scrub: true,
           pin: wrapper,
           pinSpacing: false,
+        },
+      });
+
+      gsap.to(card, {
+        autoAlpha: 0, // Ends at opacity: 0 and visibility: hidden
+        ease: "power1.in", // Starts gradually
+        scrollTrigger: {
+          trigger: card, // Listens to the position of content
+          start: "top -80%", // Starts when the top exceeds 80% of the viewport
+          end: "+=" + 0.2 * window.innerHeight, // Ends 20% later
+          scrub: true, // Progresses with the scroll
         },
       });
     });
@@ -380,11 +437,128 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /////////////////////////////////
     /////////////////////////////////
-    /* H2 PINNED WITHOUT GRAVITY */
+    /* GRID LINES ANIMATION */
     /////////////////////////////////
     /////////////////////////////////
 
+    const gridSection = document.querySelector(
+      '[data-gsap-section="grid-lines"]'
+    );
+    if (!gridSection) return;
+
+    const pinnedContent = gridSection.querySelector(
+      '[data-gsap-state="pinned"]'
+    );
+    const horizontalWrapper = gridSection.querySelector(
+      '[data-gsap-wrapper="horizontal-scroll"]'
+    );
+    const scrollItems = gridSection.querySelectorAll(
+      '[data-gsap-item="scroll-item"]'
+    );
+    const horizontalLines = gridSection.querySelectorAll(
+      '[data-gsap-lines="horizontal"]'
+    );
+    const verticalLines = gridSection.querySelectorAll(
+      '[data-gsap-lines="vertical"]'
+    );
+
+    const itemCount =
+      parseInt(gridSection.getAttribute("data-gsap-items")) ||
+      scrollItems.length;
+
+    if (!pinnedContent || !horizontalWrapper || scrollItems.length === 0) {
+      console.warn(
+        `Grid lines section ${gridSection}: Missing essential elements`
+      );
+      return;
+    }
+
+    // Set initial line state
+    gsap.set(horizontalLines, {
+      width: "0%",
+      transformOrigin: "left center",
+    });
+
+    gsap.set(verticalLines, {
+      height: "0%",
+      transformOrigin: "top center",
+    });
+
+    // Line animation when section comes into view
+    gsap.to(horizontalLines, {
+      width: "100%",
+      duration: 1,
+      ease: "power4.out",
+      scrollTrigger: {
+        trigger: horizontalWrapper,
+        start: "top 40%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    gsap.to(verticalLines, {
+      height: "100%",
+      duration: 1,
+      ease: "power4.out",
+      stagger: 0.2,
+      scrollTrigger: {
+        trigger: horizontalWrapper,
+        start: "top 40%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    // 🧠 Dynamically calculate the total scroll distance in px
+    const wrapperWidth = horizontalWrapper.scrollWidth;
+    const visibleWidth = horizontalWrapper.offsetWidth;
+    const totalScrollDistance = wrapperWidth - visibleWidth;
+
+    // Set height of the pinned section based on scroll distance
+    const requiredHeight = totalScrollDistance + window.innerHeight;
+
+    gsap.set(gridSection, {
+      minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
+    });
+
+    // 🌀 Animate horizontal scroll in pixels
+    let gridScrollTrigger = gsap.timeline({
+      scrollTrigger: {
+        trigger: horizontalWrapper,
+        start: "top 40%", // When section top hits 30% from top
+        end: `+=${totalScrollDistance}`,
+        scrub: 1,
+        pin: pinnedContent,
+        pinSpacing: true,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          console.log(
+            `Grid lines ${gridSection} scroll progress:`,
+            self.progress
+          );
+        },
+        markers: true,
+      },
+    });
+
+    if (scrollItems.length > 1) {
+      gridScrollTrigger.to(
+        horizontalWrapper,
+        {
+          x: -totalScrollDistance,
+          ease: "none",
+          duration: 1,
+        },
+        0
+      );
+    }
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* H2 PINNED WITHOUT GRAVITY */
+    /////////////////////////////////
+    /////////////////////////////////
     // Find all containers with the data attribute
+
     const containers = document.querySelectorAll("[data-animate-container]");
 
     containers.forEach((container) => {
@@ -405,19 +579,39 @@ document.addEventListener("DOMContentLoaded", function () {
       // Calculate the distance for scattering
       const dist = container.clientHeight - title.clientHeight;
 
-      // Pin the title during scroll
-      ScrollTrigger.create({
-        trigger: container,
-        pin: title,
-        start: "top 20%",
-        end: "+=" + dist,
-        onComplete: () => {
-          // Optional: Revert SplitText when animation completes
-          // splitText.revert();
-        },
-      });
+      // Check if container should be pinned
+      const shouldPin =
+        container.getAttribute("data-animate-container") === "pinned";
 
-      // Animate each character with random scattering
+      if (shouldPin) {
+        // Pin the title during scroll (only for containers with "pinned" value)
+        ScrollTrigger.create({
+          trigger: container,
+          pin: title,
+          start: "top 20%",
+          end: "+=" + dist,
+          onComplete: () => {
+            // Optional: Revert SplitText when animation completes
+            // splitText.revert();
+          },
+        });
+      } else {
+        //Specific case for horizontal scroll with pinning
+        ScrollTrigger.create({
+          trigger: container,
+          pin: title,
+          start: "top 20%",
+          endTrigger: horizontalWrapper,
+          markers: true,
+          end: "bottom 40%",
+          onComplete: () => {
+            // Optional: Revert SplitText when animation completes
+            // splitText.revert();
+          },
+        });
+      }
+
+      // Animate each character with random scattering (applies to all containers)
       const letters = splitText.chars;
       letters.forEach((letter) => {
         const randomDistance = Math.random() * dist;
@@ -426,7 +620,7 @@ document.addEventListener("DOMContentLoaded", function () {
           y: randomDistance,
           ease: "none",
           scrollTrigger: {
-            trigger: title,
+            trigger: shouldPin ? title : container, // Use title if pinned, container if not
             start: "top 20%",
             end: "+=" + randomDistance,
             scrub: true,
@@ -475,130 +669,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       });
     });
-
-    /////////////////////////////////
-    /////////////////////////////////
-    /* FLAPS ANIMATION */
-    /////////////////////////////////
-    /////////////////////////////////
-
-    // // Get the fold panel element
-    // const bottomFoldPanel = document.querySelector("[data-gsap-flap='bottom']");
-
-    // // Get the top fold panel element
-    // const topFoldPanel = document.querySelector("[data-gsap-flap='top']");
-
-    // const topFlapContent = topFoldPanel.querySelector(
-    //   "[data-gsap-content='flap']"
-    // );
-
-    // const bottomFlapContent = bottomFoldPanel.querySelector(
-    //   "[data-gsap-content='flap']"
-    // );
-
-    // // Set initial styles for top panel
-    // gsap.set(topFoldPanel, {
-    //   transformOrigin: "center top",
-    //   transformPerspective: "100vw",
-    //   overflow: "hidden",
-    //   transformStyle: "preserve-3d",
-    // });
-    // // Set initial styles
-    // gsap.set(bottomFoldPanel, {
-    //   transformPerspective: "100vw",
-    //   overflow: "hidden",
-    //   transformStyle: "preserve-3d",
-    //   transformOrigin: "center bottom",
-    // });
-    // // Set initial styles for content to counter perspective effects
-    // gsap.set(topFlapContent, {
-    //   transformStyle: "preserve-3d",
-    //   transformOrigin: "center top",
-    //   transformPerspective: "100vw", // Remove perspective inheritance
-    //   backfaceVisibility: "hidden", // Ensure content stays visible
-    // });
-
-    // gsap.set(bottomFlapContent, {
-    //   transformStyle: "preserve-3d",
-    //   transformOrigin: "center bottom",
-    //   transformPerspective: "100vw", // Remove perspective inheritance
-    //   backfaceVisibility: "hidden", // Ensure content stays visible
-    // });
-
-    // // Create timeline for fold panels
-    // const tl = gsap.timeline({
-    //   scrollTrigger: {
-    //     trigger: topFoldPanel,
-    //     markers: true,
-    //     start: "top top",
-    //     end: "bottom 1%",
-    //     scrub: 0.1,
-    //   },
-    // });
-
-    // // Phase 1: 0% to 50% - Initial rotation
-    // tl.to(topFoldPanel, {
-    //   duration: 6,
-    //   rotationX: -15,
-    // })
-    //   .to(
-    //     topFlapContent,
-    //     {
-    //       rotationX: 15, // Counter the parent's -15
-    //       duration: 6,
-    //     },
-    //     0 // Start at beginning
-    //   )
-    //   .to(
-    //     bottomFoldPanel,
-    //     {
-    //       rotationX: 15,
-    //       duration: 6,
-    //     },
-    //     0 // Start at beginning
-    //   )
-    //   .to(
-    //     bottomFlapContent,
-    //     {
-    //       rotationX: -15, // Counter the parent's +15
-    //       duration: 6,
-    //     },
-    //     0 // Start at beginning
-    //   )
-
-    //   // Phase 2: 50% to 100% - Final rotation
-    //   .to(
-    //     topFoldPanel,
-    //     {
-    //       rotationX: -40, // Goes from -15 to -40
-    //       duration: 4,
-    //     },
-    //     "50%" // Start at 50% of timeline
-    //   )
-    //   .to(
-    //     topFlapContent,
-    //     {
-    //       rotationX: 40, // Counter the parent's -40
-    //       duration: 4,
-    //     },
-    //     "50%" // Start at 50% of timeline
-    //   )
-    //   .to(
-    //     bottomFoldPanel,
-    //     {
-    //       rotationX: 0, // Goes from +15 to 0
-    //       duration: 4,
-    //     },
-    //     "50%" // Start at 50% of timeline
-    //   )
-    //   .to(
-    //     bottomFlapContent,
-    //     {
-    //       rotationX: 0, // Counter the parent's 0 (no rotation needed)
-    //       duration: 4,
-    //     },
-    //     "50%" // Start at 50% of timeline - THIS WAS THE MAIN FIX
-    //   );
 
     /////////////////////////////////
     /////////////////////////////////
@@ -884,16 +954,16 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
 
     // Feed Items 3D Animation Class
-// Feed Items 3D Animation Class
-class FeedItemsAnimation {
-    constructor(container) {
+    // Feed Items 3D Animation Class
+    class FeedItemsAnimation {
+      constructor(container) {
         // Element selections based on your HTML structure
         this.container = container;
         this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
         this.feedSection = container.querySelector(".section_feed");
         this.feedWrapper = container.querySelector(".feed_cms_wrap");
         this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
-        
+
         // Animation properties
         this.targetZValue = 1;
         this.closestItem = null;
@@ -902,104 +972,104 @@ class FeedItemsAnimation {
         this.newIndex = 0;
         this.numItems = this.feedItems.length;
         this.progress = 0;
-        
-        this.init();
-    }
 
-    init() {
+        this.init();
+      }
+
+      init() {
         // Initial setup for feed items
         gsap.set(this.feedItems, {
-            z: index => (index + 1) * -1800,
-            zIndex: index => index * -1,
-            opacity: 0
+          z: (index) => (index + 1) * -1800,
+          zIndex: (index) => index * -1,
+          opacity: 0,
         });
-        
+
         this.createScrollTriggers();
         this.getProgress();
-    }
+      }
 
-    // Main progress calculation and item positioning
-    getProgress = () => {
+      // Main progress calculation and item positioning
+      getProgress = () => {
         this.resetClosestItem();
-        
-        this.feedItems.forEach(item => {
-            let normalizedZ = gsap.utils.normalize(-3000, 0, gsap.getProperty(item, "z"));
-            item.setAttribute("data-z", normalizedZ);
-            
-            // Animate opacity based on z position
-            gsap.to(item, { opacity: normalizedZ + 0.2 });
-            
-            // Scale images based on z position
-            const itemImage = item.querySelector(".feed_img");
-            if (itemImage) {
-                gsap.to(itemImage, {
-                    scale: normalizedZ * 0.5 + 0.75,
-                    ease: "expo.out",
-                    duration: 0.5
-                });
-            }
-            
-            // Find closest item to target z value
-            let zDifference = Math.abs(normalizedZ - this.targetZValue);
-            if (zDifference < this.closestZDifference) {
-                this.closestZDifference = zDifference;
-                this.closestItem = item;
-            }
+
+        this.feedItems.forEach((item) => {
+          let normalizedZ = gsap.utils.normalize(
+            -3000,
+            0,
+            gsap.getProperty(item, "z")
+          );
+          item.setAttribute("data-z", normalizedZ);
+
+          // Animate opacity based on z position
+          gsap.to(item, { opacity: normalizedZ + 0.2 });
+
+          // Scale images based on z position
+          const itemImage = item.querySelector(".feed_img");
+          if (itemImage) {
+            gsap.to(itemImage, {
+              scale: normalizedZ * 0.5 + 0.75,
+              ease: "expo.out",
+              duration: 0.5,
+            });
+          }
+
+          // Find closest item to target z value
+          let zDifference = Math.abs(normalizedZ - this.targetZValue);
+          if (zDifference < this.closestZDifference) {
+            this.closestZDifference = zDifference;
+            this.closestItem = item;
+          }
         });
-        
+
         // Update current index
         this.currIndex = this.feedItems.indexOf(this.closestItem);
-    }
+      };
 
-    resetClosestItem = () => {
+      resetClosestItem = () => {
         this.closestItem = null;
         this.closestZDifference = Infinity;
-    }
+      };
 
-
-    createScrollTriggers() {
+      createScrollTriggers() {
         // Main scroll animation for feed items z-positioning
         ScrollTrigger.create({
-            trigger: this.feedSection,
-            start: "top top",
-            end: () => `+=${this.numItems * window.innerHeight}`,
-            pin: this.feedSection,
-            pinSpacing: true,
-            scrub: 0.1,
-            // markers: true, // Remove this in production
-            immediateRender: false,
-            onUpdate: (self) => {
-                this.progress = self.progress;
-                this.progress = gsap.utils.clamp(0, 1, this.progress);
-                
-                // Calculate z-offset to bring items forward as you scroll
-                let zOffset = this.progress * 1800 * this.numItems;
-                gsap.set(this.feedItems, {
-                    z: index => (index + 1) * -1800 + zOffset
-                });
-                
-                this.getProgress();
-            },
-            onStart: () => {
-                // Ensure the pinned element starts at the top
-                gsap.set(this.feedList, { 
-                    position: 'fixed',
-                    top: 0,
-                    left: '50%',
-                    xPercent: -50
-                });
-            }
+          trigger: this.feedSection,
+          start: "top top",
+          end: () => `+=${this.numItems * window.innerHeight}`,
+          pin: this.feedSection,
+          pinSpacing: true,
+          scrub: 0.1,
+          // markers: true, // Remove this in production
+          immediateRender: false,
+          onUpdate: (self) => {
+            this.progress = self.progress;
+            this.progress = gsap.utils.clamp(0, 1, this.progress);
+
+            // Calculate z-offset to bring items forward as you scroll
+            let zOffset = this.progress * 1800 * this.numItems;
+            gsap.set(this.feedItems, {
+              z: (index) => (index + 1) * -1800 + zOffset,
+            });
+
+            this.getProgress();
+          },
+          onStart: () => {
+            // Ensure the pinned element starts at the top
+            gsap.set(this.feedList, {
+              position: "fixed",
+              top: 0,
+              left: "50%",
+              xPercent: -50,
+            });
+          },
         });
+      }
     }
-}
 
-
-
-// Call this function to add the CSS:
-// addRequiredCSS();
+    // Call this function to add the CSS:
+    // addRequiredCSS();
 
     const feedAnimation = new FeedItemsAnimation(document);
-
   });
 
   /////////////////////////////////
@@ -1017,7 +1087,7 @@ class FeedItemsAnimation {
         ScrollTrigger.create({
           trigger: $(this),
           start: "top center",
-          // markers: true,
+          markers: true,
           end: "bottom center",
           onToggle: ({ self, isActive }) => {
             if (isActive) gsap.to("body", { ...colorThemes.getTheme(theme) });
