@@ -491,7 +491,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ease: "power4.out",
       scrollTrigger: {
         trigger: horizontalWrapper,
-        start: "top 40%",
+        start: "top 50%",
         toggleActions: "play none none none",
       },
     });
@@ -503,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
       stagger: 0.2,
       scrollTrigger: {
         trigger: horizontalWrapper,
-        start: "top 40%",
+        start: "top 50%",
         toggleActions: "play none none none",
       },
     });
@@ -525,7 +525,8 @@ document.addEventListener("DOMContentLoaded", function () {
       scrollTrigger: {
         trigger: horizontalWrapper,
         start: "bottom bottom", // When section top hits 30% from top
-        end: `+=${totalScrollDistance}`,
+        endTrigger: gridSection,
+        end: "bottom bottom",
         scrub: 1,
         pin: pinnedContent,
         pinSpacing: true,
@@ -546,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
         {
           x: -totalScrollDistance,
           ease: "none",
-          duration: 1,
+          // duration: 1,
         },
         0
       );
@@ -600,10 +601,10 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: container,
           pin: title,
-          start: "top 10%",
-          endTrigger: horizontalWrapper,
+          start: "top 20%",
+          endTrigger: gridSection,
           markers: true,
-          end: "bottom 90%",
+          end: "bottom bottom",
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
@@ -621,7 +622,7 @@ document.addEventListener("DOMContentLoaded", function () {
           ease: "none",
           scrollTrigger: {
             trigger: shouldPin ? title : container, // Use title if pinned, container if not
-            start: "top 10%",
+            start: "top 20%",
             end: "+=" + randomDistance,
             scrub: true,
           },
@@ -752,6 +753,7 @@ document.addEventListener("DOMContentLoaded", function () {
         start: "top top",
         end: "bottom bottom",
         pin: stickyContent,
+        markers: true,
         pinSpacing: false,
         invalidateOnRefresh: true,
       });
@@ -929,6 +931,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ScrollTrigger.create({
         trigger: accordionWrapper,
         start: `top bottom-=${wrapperHeight}`,
+        // start: `top bottom-=${headerHeight}`,
         onEnter: () => {
           accordionContainers.forEach((container) => {
             container.classList.add("inview");
@@ -953,7 +956,6 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
 
-    // Feed Items 3D Animation Class
     // Feed Items 3D Animation Class
     class FeedItemsAnimation {
       constructor(container) {
