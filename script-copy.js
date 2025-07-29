@@ -1,7 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
   document.fonts.ready.then(() => {
     // Initialize Lenis
-    const lenis = new Lenis();
+    const lenis = new Lenis({
+      touchMultiplier: 2,
+      wheelMultiplier: 1,
+    });
 
     lenis.on("scroll", (e) => {
       // console.log(e);
@@ -12,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
       requestAnimationFrame(raf);
     }
 
-    // requestAnimationFrame(raf);
+    requestAnimationFrame(raf);
 
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
@@ -20,11 +23,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // Connect Lenis with ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
+    ScrollTrigger.normalizeScroll(true);
 
-    gsap.ticker.lagSmoothing(0);
+    // gsap.ticker.add((time) => {
+    //   lenis.raf(time * 1000);
+    // });
+
+    // gsap.ticker.lagSmoothing(0);
 
     // Function to refresh ScrollTrigger instances
     function refreshScrollTriggers() {
@@ -34,6 +39,231 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.addEventListener("resize", refreshScrollTriggers);
 
+    /////////////////////////////////
+    /////////////////////////////////
+    /* Hero Navbar */
+    /////////////////////////////////
+    /////////////////////////////////
+    
+// Get elements
+    const menuContainer = document.querySelector('.nav_buttons_menu');
+    const menuTrigger = document.querySelector('.nav_menu_trigger');
+    const menuMask = document.querySelector('.nav_menu_mask');
+    const menuLinks = document.querySelectorAll('.nav_menu_link');
+    const triggerText = menuTrigger.querySelector('.nav_menu_text');
+    
+    // Animation variables
+    let openTimeline = null;
+    let closeTimeline = null;
+    let isOpen = false;
+    let splitInstances1 = [];
+    
+    // Split text in menu links for character animation
+    function splitMenuTexts() {
+        menuLinks.forEach(link => {
+            const textElement = link.querySelector('.nav_menu_text');
+            if (textElement && window.SplitText) {
+                const splitText = new SplitText(textElement, { type: "words" });
+                splitInstances1.push({
+                    element: textElement,
+                    split: splitText
+                });
+                // Initially hide all characters
+                gsap.set(splitText.chars, { opacity: 0, y: 20 });
+            }
+        });
+    }
+    
+    // Initialize split text if SplitText is available
+    if (window.SplitText) {
+        splitMenuTexts();
+    }
+    
+    // Get the full width needed for the menu
+    function getMenuWidth() {
+        // Temporarily make visible to measure
+        gsap.set(menuMask, { 
+            opacity: 1, 
+            width: 'auto',
+            display: 'flex',
+            position: 'static'
+        });
+        
+        const width = menuMask.offsetWidth;
+        
+        // Reset to hidden state
+        gsap.set(menuMask, { 
+            opacity: 0, 
+            width: 0,
+            display: 'flex',
+            position: 'absolute'
+        });
+        
+        return width;
+    }
+    
+    const menuWidth = getMenuWidth();
+    
+    // Set initial styles for menu mask
+    gsap.set(menuMask, {
+        width: 0,
+        opacity: 0,
+        display: 'flex',
+        position: 'absolute',
+        right: 0,
+        top: '50%',
+        y: '-50%',
+        pointerEvents: 'none'
+    });
+    
+    // Open animation
+    function openMenu() {
+        if (isOpen || openTimeline) return;
+        isOpen = true;
+        
+        // Kill any existing close animation
+        if (closeTimeline) {
+            closeTimeline.kill();
+            closeTimeline = null;
+        }
+        
+        openTimeline = gsap.timeline({
+            onComplete: () => {
+                openTimeline = null;
+            }
+        });
+        
+        // Animate trigger text down and fade out
+        openTimeline.to(triggerText, {
+            y: 20,
+            opacity: 0,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => {
+                // Set trigger to absolute position after text animation
+                gsap.set(menuTrigger, { position: 'absolute' });
+            }
+        });
+        
+        // Set mask to relative position and enable pointer events
+        openTimeline.set(menuMask, {
+            position: 'relative',
+            pointerEvents: 'auto'
+        }, 0.3);
+        
+        // Expand menu mask
+        openTimeline.to(menuMask, {
+            width: menuWidth,
+            opacity: 1,
+            duration: 0.5,
+            ease: "power2.out"
+        }, 0.3);
+        
+        // Animate split text characters if available, otherwise animate links
+        if (splitInstances1.length > 0) {
+            splitInstances1.forEach((instance, index) => {
+                openTimeline.to(instance.split.words, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.3,
+                    stagger: 0.02,
+                    ease: "power2.out"
+                }, 0.5 + (index * 0.05));
+            });
+        } else {
+            // Fallback if SplitText is not available
+            const menuTexts = document.querySelectorAll('.nav_menu_link .nav_menu_text');
+            openTimeline.from(menuTexts, {
+                y: 20,
+                opacity: 0,
+                duration: 0.3,
+                stagger: 0.05,
+                ease: "power2.out"
+            }, 0.5);
+        }
+    }
+    
+    // Close animation
+    function closeMenu() {
+        if (!isOpen || closeTimeline) return;
+        isOpen = false;
+        
+        // Kill any existing open animation
+        if (openTimeline) {
+            openTimeline.kill();
+            openTimeline = null;
+        }
+        
+        closeTimeline = gsap.timeline({
+            onComplete: () => {
+                closeTimeline = null;
+                // Reset to initial state
+                gsap.set(menuTrigger, { position: 'relative' });
+                gsap.set(menuMask, { position: 'absolute' });
+            }
+        });
+        
+        // Animate split text characters out if available
+        if (splitInstances1.length > 0) {
+            splitInstances1.forEach((instance, index) => {
+                closeTimeline.to(instance.split.words, {
+                    opacity: 0,
+                    y: -20,
+                    duration: 0.2,
+                    stagger: -0.01,
+                    ease: "power2.in"
+                }, index * 0.02);
+            });
+        } else {
+            // Fallback if SplitText is not available
+            const menuTexts = document.querySelectorAll('.nav_menu_link .nav_menu_text');
+            closeTimeline.to(menuTexts, {
+                y: -20,
+                opacity: 0,
+                duration: 0.2,
+                stagger: -0.03,
+                ease: "power2.in"
+            });
+        }
+        
+        // Hide and collapse menu mask
+        closeTimeline.to(menuMask, {
+            width: 0,
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.in"
+        }, 0.2);
+        
+        closeTimeline.set(menuMask, {
+            pointerEvents: 'none'
+        });
+        
+        // Animate trigger text back up and fade in
+        closeTimeline.to(triggerText, {
+            y: 0,
+            opacity: 1,
+            duration: 0.3,
+            ease: "power2.out"
+        }, 0.3);
+    }
+    
+    // Event listeners
+    menuContainer.addEventListener('mouseenter', openMenu);
+    menuContainer.addEventListener('mouseleave', closeMenu);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (openTimeline) openTimeline.kill();
+        if (closeTimeline) closeTimeline.kill();
+        // Cleanup split text instances
+        splitInstances1.forEach(instance => {
+            if (instance.split && instance.split.revert) {
+                instance.split.revert();
+            }
+        });
+    });
+   
+    
     /////////////////////////////////
     /////////////////////////////////
     /* 2ND Hero Slider */
@@ -429,10 +659,43 @@ document.addEventListener("DOMContentLoaded", function () {
             trigger: wrapper,
             start: "top 80%", // When card top hits 90% from top
             end: "top 30%", // When card reaches center (50% from top)
-            scrub: true,
+            scrub: 1,
           },
         });
       }
+    });
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* PARTNERS LIST ANIMATION */
+    /////////////////////////////////
+    /////////////////////////////////
+
+    // Get all partner items
+    const partnerItems = gsap.utils.toArray(".partners_cms_item");
+    gsap.set(".partners_cms_item", {
+      scale: 0.75,
+      opacity: 0,
+      transformOrigin: "top left"
+    });
+
+    ScrollTrigger.batch(".partners_cms_item", {
+      // When items enter the viewport - ANIMATE ONCE
+      onEnter: (elements) => {
+        gsap.to(elements, {
+          scale: 1,
+          opacity: 1,
+          duration: 0.6,
+          // ease: "power2.out",
+          stagger: 0.15, // Stagger effect between items in the same batch
+          // overwrite: true,
+        });
+      },
+
+      // Trigger settings
+      start: "top 85%", // When item hits 85% from top of viewport
+      once: true, // THIS IS KEY! Animation only happens once
+      // markers: true, // Uncomment to see trigger points during development
     });
 
     /////////////////////////////////
@@ -473,22 +736,71 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Store split text instances for cleanup
+    let cardSplitInstances = [];
+
+    // Initialize card animations - set initial states
+    scrollItems.forEach((item) => {
+      const heading = item.querySelector(
+        '[data-animate-heading="card-heading"]'
+      );
+      const textElement = item.querySelector('[data-animate-text="card-para"]');
+      const footer = item.querySelector('[data-gsap-animate="card-footer"]');
+
+      // Set initial state for heading
+      if (heading) {
+        gsap.set(heading, {
+          opacity: 0,
+          y: 10,
+        });
+      }
+
+      // Set initial state and split paragraph
+      if (textElement) {
+        const paragraph = textElement.querySelector("p");
+        if (paragraph) {
+          // Split paragraph into lines
+          const splitText = new SplitText(paragraph, {
+            type: "lines",
+            linesClass: "card-line",
+          });
+
+          // Store split instance for cleanup
+          cardSplitInstances.push({
+            element: paragraph,
+            split: splitText,
+          });
+
+          // Set initial state for lines
+          gsap.set(splitText.lines, {
+            opacity: 0,
+            y: 20,
+          });
+        }
+      }
+
+      // Set initial state for footer
+      if (footer) {
+        gsap.set(footer, {
+          opacity: 0,
+          y: 15,
+        });
+      }
+    });
+
     // Set initial line state
     gsap.set(horizontalLines, {
+      height: "1px",
       width: "0%",
-      transformOrigin: "left center",
     });
 
     gsap.set(verticalLines, {
       height: "0%",
-      transformOrigin: "top center",
+      width: "1px",
     });
 
-    // Line animation when section comes into view
-    gsap.to(horizontalLines, {
-      width: "100%",
-      duration: 1,
-      ease: "power4.out",
+    // Line animations timeline
+    const linesTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: horizontalWrapper,
         start: "top 50%",
@@ -496,17 +808,94 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    gsap.to(verticalLines, {
-      height: "100%",
-      duration: 1,
-      ease: "power4.out",
-      stagger: 0.2,
-      scrollTrigger: {
-        trigger: horizontalWrapper,
-        start: "top 50%",
-        toggleActions: "play none none none",
-      },
+    linesTimeline
+      .to(horizontalLines, {
+        width: "100%",
+        duration: 1,
+        ease: "power4.out",
+      })
+      .to(
+        verticalLines,
+        {
+          height: "100%",
+          duration: 1,
+          ease: "power4.out",
+          stagger: 0.2,
+        },
+        0.3 // Start vertical lines slightly after horizontal
+      );
+
+    // Card animations - start after lines animation completes
+    const cardAnimationsTimeline = gsap.timeline({
+      delay: 0.5, // Small delay after lines complete
     });
+
+    scrollItems.forEach((item, index) => {
+      const heading = item.querySelector(
+        '[data-animate-heading="card-heading"]'
+      );
+      const textElement = item.querySelector('[data-animate-text="card-para"]');
+      const footer = item.querySelector('[data-gsap-animate="card-footer"]');
+
+      // Calculate stagger delay for this card
+      const cardDelay = index * 0.3; // 0.3s stagger between cards
+
+      // Animate heading
+      if (heading) {
+        cardAnimationsTimeline.to(
+          heading,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          cardDelay
+        );
+      }
+
+      // Animate paragraph lines
+      if (textElement) {
+        const paragraph = textElement.querySelector("p");
+        if (paragraph) {
+          // Find the split instance for this paragraph
+          const splitInstance = cardSplitInstances.find(
+            (instance) => instance.element === paragraph
+          );
+
+          if (splitInstance && splitInstance.split.lines) {
+            cardAnimationsTimeline.to(
+              splitInstance.split.lines,
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: "power2.out",
+                stagger: 0.08, // Stagger between lines within the paragraph
+              },
+              cardDelay + 0.2 // Start 0.2s after heading
+            );
+          }
+        }
+      }
+
+      // Animate footer
+      if (footer) {
+        cardAnimationsTimeline.to(
+          footer,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          cardDelay + 0.5 // Start 0.5s after heading (after paragraph animation starts)
+        );
+      }
+    });
+
+    // Add card animations to the lines timeline
+    linesTimeline.add(cardAnimationsTimeline, -0.25); // Start 0.25s before lines timeline ends
 
     // 🧠 Dynamically calculate the total scroll distance in px
     const wrapperWidth = horizontalWrapper.scrollWidth;
@@ -524,20 +913,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let gridScrollTrigger = gsap.timeline({
       scrollTrigger: {
         trigger: horizontalWrapper,
-        start: "bottom bottom", // When section top hits 30% from top
+        start: "bottom 99.5%", // When section top hits 30% from top
         endTrigger: gridSection,
         end: "bottom bottom",
         scrub: 1,
         pin: pinnedContent,
         pinSpacing: true,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          console.log(
-            `Grid lines ${gridSection} scroll progress:`,
-            self.progress
-          );
-        },
-        markers: true,
+        markers: false,
       },
     });
 
@@ -552,6 +935,15 @@ document.addEventListener("DOMContentLoaded", function () {
         0
       );
     }
+
+    // Cleanup function for split text instances
+    window.addEventListener("beforeunload", () => {
+      cardSplitInstances.forEach((instance) => {
+        if (instance.split && instance.split.revert) {
+          instance.split.revert();
+        }
+      });
+    });
 
     /////////////////////////////////
     /////////////////////////////////
@@ -603,7 +995,7 @@ document.addEventListener("DOMContentLoaded", function () {
           pin: title,
           start: "top 20%",
           endTrigger: gridSection,
-          markers: true,
+          markers: false,
           end: "bottom bottom",
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
@@ -624,47 +1016,6 @@ document.addEventListener("DOMContentLoaded", function () {
             trigger: shouldPin ? title : container, // Use title if pinned, container if not
             start: "top 20%",
             end: "+=" + randomDistance,
-            scrub: true,
-          },
-        });
-      });
-    });
-
-    /////////////////////////////////
-    /////////////////////////////////
-    /* Squeesed H2 ANIMATION */
-    /////////////////////////////////
-    /////////////////////////////////
-
-    // Basic Line-by-Line Squeeze using GSAP SplitText plugin
-    const squeezeElements = gsap.utils.toArray("[data-gsap-squeeze]");
-
-    squeezeElements.forEach((element, i) => {
-      // Split the text into lines using SplitText plugin
-      const splitText = new SplitText(element, {
-        type: "lines",
-        linesClass: "squeeze-line",
-      });
-
-      // Get the line elements
-      const lines = splitText.lines;
-
-      // Set initial transform origin and scale for each line
-      gsap.set(lines, {
-        transformOrigin: "0 0", // Origin at top-left (0,0)
-        scaleX: 1,
-        scaleY: 0, // Start from scale 1,0
-      });
-
-      // Create the squeeze animation for each line
-      lines.forEach((line, lineIndex) => {
-        gsap.to(line, {
-          scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
-          ease: "none",
-          scrollTrigger: {
-            trigger: line, // Use the parent element as trigger
-            start: "top bottom", // When element top hits viewport bottom
-            end: "top 75%", // When element top hits 75% from top
             scrub: true,
           },
         });
@@ -753,7 +1104,7 @@ document.addEventListener("DOMContentLoaded", function () {
         start: "top top",
         end: "bottom bottom",
         pin: stickyContent,
-        markers: true,
+        markers: false,
         pinSpacing: false,
         invalidateOnRefresh: true,
       });
@@ -763,7 +1114,7 @@ document.addEventListener("DOMContentLoaded", function () {
         trigger: longScrollSection,
         start: "top top",
         end: "bottom bottom",
-        // markers: true,
+        // markers: false,
         scrub: true,
         onUpdate: (self) => {
           const progress = self.progress;
@@ -963,6 +1314,8 @@ document.addEventListener("DOMContentLoaded", function () {
         this.container = container;
         this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
         this.feedSection = container.querySelector(".section_feed");
+        this.feedWrapper = container.querySelector(".feed_cms_wrapper");
+        this.feedContainer = container.querySelector(".feed_container");
         this.feedWrapper = container.querySelector(".feed_cms_wrap");
         this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
 
@@ -985,6 +1338,9 @@ document.addEventListener("DOMContentLoaded", function () {
           zIndex: (index) => index * -1,
           opacity: 0,
         });
+        this.feedSection.style.height = `${
+          (this.numItems + 1) * window.innerHeight
+        }px`;
 
         this.createScrollTriggers();
         this.getProgress();
@@ -1035,13 +1391,14 @@ document.addEventListener("DOMContentLoaded", function () {
       createScrollTriggers() {
         // Main scroll animation for feed items z-positioning
         ScrollTrigger.create({
-          trigger: this.feedSection,
+          trigger: this.feedContainer,
           start: "top top",
           end: () => `+=${this.numItems * window.innerHeight}`,
-          pin: this.feedSection,
+          pin: this.feedContainer,
           pinSpacing: true,
           scrub: 0.1,
-          // markers: true, // Remove this in production
+          invalidateOnRefresh: true,
+          markers: true, // Remove this in production
           immediateRender: false,
           onUpdate: (self) => {
             this.progress = self.progress;
@@ -1072,6 +1429,110 @@ document.addEventListener("DOMContentLoaded", function () {
     // addRequiredCSS();
 
     const feedAnimation = new FeedItemsAnimation(document);
+    // setTimeout(() => {
+    //   ScrollTrigger.refresh();
+    // }, 200);
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* Squeesed H2 ANIMATION */
+    /////////////////////////////////
+    /////////////////////////////////
+
+    // Basic Line-by-Line Squeeze using GSAP SplitText plugin
+    const squeezeElements = gsap.utils.toArray("[data-gsap-squeeze]");
+
+    squeezeElements.forEach((element, i) => {
+      // Split the text into lines using SplitText plugin
+      console.log(`Animating line of element ${element}}`);
+      const splitText = new SplitText(element, {
+        type: "lines",
+        linesClass: "squeeze-line",
+      });
+
+      // Get the line elements
+      const lines = splitText.lines;
+
+      // Set initial transform origin and scale for each line
+      gsap.set(lines, {
+        transformOrigin: "0 0", // Origin at top-left (0,0)
+        scaleX: 1,
+        scaleY: 0, // Start from scale 1,0
+      });
+
+      // Create the squeeze animation for each line
+      lines.forEach((line, lineIndex) => {
+        gsap.to(line, {
+          scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
+          ease: "none",
+          scrollTrigger: {
+            trigger: line, // Use the parent element as trigger
+            start: "top bottom", // When element top hits viewport bottom
+            end: "top 75%", // When element top hits 75% from top
+            scrub: true,
+          },
+        });
+      });
+    });
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* Body Text Animations*/
+    /////////////////////////////////
+    /////////////////////////////////
+
+    // Body Text Animation
+    const bodyTextElements = document.querySelectorAll(
+      '[data-animate-text="body"]'
+    );
+
+    // Store split text instances for cleanup
+    let bodyTextSplitInstances = [];
+
+    bodyTextElements.forEach((textElement, index) => {
+      const paragraph = textElement.querySelector("p");
+
+      if (!paragraph) {
+        console.warn(`Body text element ${index + 1}: No paragraph found`);
+        return;
+      }
+
+      // Split paragraph into lines
+      const splitText = new SplitText(paragraph, {
+        type: "lines",
+        linesClass: "body-text-line",
+      });
+
+      // Store split instance for cleanup
+      bodyTextSplitInstances.push({
+        element: paragraph,
+        split: splitText,
+      });
+
+      // Set initial state for lines - hidden and offset from bottom
+      gsap.set(splitText.lines, {
+        opacity: 0,
+        y: 20,
+      });
+
+      // Create ScrollTrigger for this specific element
+      ScrollTrigger.create({
+        trigger: textElement,
+        start: "top 90%", // When element top hits 80% from viewport top
+        // markers: true, // Remove in production
+        toggleActions: "play none none none", // Only play once when entering
+        onEnter: () => {
+          // Animate lines with stagger
+          gsap.to(splitText.lines, {
+            opacity: 1,
+            y: 0,
+            duration: 0.75,
+            ease: "power2.out",
+            stagger: 0.2, // 0.2s delay between each line
+          });
+        },
+      });
+    });
   });
 
   /////////////////////////////////
@@ -1089,7 +1550,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: $(this),
           start: "top center",
-          markers: true,
+          markers: false,
           end: "bottom center",
           onToggle: ({ self, isActive }) => {
             if (isActive) gsap.to("body", { ...colorThemes.getTheme(theme) });
