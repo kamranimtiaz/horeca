@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("resize", refreshScrollTriggers);
 
     function isMobileViewport() {
-      return window.innerWidth <= 768; // or any breakpoint you consider "mobile"
+      return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
     }
 
     /////////////////////////////////
@@ -798,252 +798,253 @@ document.addEventListener("DOMContentLoaded", function () {
     /* GRID LINES ANIMATION */
     /////////////////////////////////
     /////////////////////////////////
-
-    if(isMobileViewport) {
-
-    
-    const gridSection = document.querySelector(
-      '[data-gsap-section="grid-lines"]'
-    );
-    if (!gridSection) return;
-
-    const pinnedContent = gridSection.querySelector(
-      '[data-gsap-state="pinned"]'
-    );
-    const horizontalWrapper = gridSection.querySelector(
-      '[data-gsap-wrapper="horizontal-scroll"]'
-    );
-    const scrollItems = gridSection.querySelectorAll(
-      '[data-gsap-item="scroll-item"]'
-    );
-    const horizontalLines = gridSection.querySelectorAll(
-      '[data-gsap-lines="horizontal"]'
-    );
-    const verticalLines = gridSection.querySelectorAll(
-      '[data-gsap-lines="vertical"]'
-    );
-
-    const itemCount =
-      parseInt(gridSection.getAttribute("data-gsap-items")) ||
-      scrollItems.length;
-
-    if (!pinnedContent || !horizontalWrapper || scrollItems.length === 0) {
-      console.warn(
-        `Grid lines section ${gridSection}: Missing essential elements`
+const gridSection = document.querySelector(
+        '[data-gsap-section="grid-lines"]'
       );
-      return;
-    }
+    if (!isMobileViewport()) {
+      
+      if (!gridSection) return;
 
-    // Store split text instances for cleanup
-    let cardSplitInstances = [];
-
-    // Initialize card animations - set initial states
-    scrollItems.forEach((item) => {
-      const heading = item.querySelector(
-        '[data-animate-heading="card-heading"]'
+      const pinnedContent = gridSection.querySelector(
+        '[data-gsap-state="pinned"]'
       );
-      const textElement = item.querySelector('[data-animate-text="card-para"]');
-      const footer = item.querySelector('[data-gsap-animate="card-footer"]');
+      const horizontalWrapper = gridSection.querySelector(
+        '[data-gsap-wrapper="horizontal-scroll"]'
+      );
+      const scrollItems = gridSection.querySelectorAll(
+        '[data-gsap-item="scroll-item"]'
+      );
+      const horizontalLines = gridSection.querySelectorAll(
+        '[data-gsap-lines="horizontal"]'
+      );
+      const verticalLines = gridSection.querySelectorAll(
+        '[data-gsap-lines="vertical"]'
+      );
 
-      // Set initial state for heading
-      if (heading) {
-        gsap.set(heading, {
-          opacity: 0,
-          y: 10,
-        });
+      const itemCount =
+        parseInt(gridSection.getAttribute("data-gsap-items")) ||
+        scrollItems.length;
+
+      if (!pinnedContent || !horizontalWrapper || scrollItems.length === 0) {
+        console.warn(
+          `Grid lines section ${gridSection}: Missing essential elements`
+        );
+        return;
       }
 
-      // Set initial state and split paragraph
-      if (textElement) {
-        const paragraph = textElement.querySelector("p");
-        if (paragraph) {
-          // Split paragraph into lines
-          const splitText = new SplitText(paragraph, {
-            type: "lines",
-            linesClass: "card-line",
-          });
+      // Store split text instances for cleanup
+      let cardSplitInstances = [];
 
-          // Store split instance for cleanup
-          cardSplitInstances.push({
-            element: paragraph,
-            split: splitText,
-          });
+      // Initialize card animations - set initial states
+      scrollItems.forEach((item) => {
+        const heading = item.querySelector(
+          '[data-animate-heading="card-heading"]'
+        );
+        const textElement = item.querySelector(
+          '[data-animate-text="card-para"]'
+        );
+        const footer = item.querySelector('[data-gsap-animate="card-footer"]');
 
-          // Set initial state for lines
-          gsap.set(splitText.lines, {
+        // Set initial state for heading
+        if (heading) {
+          gsap.set(heading, {
             opacity: 0,
-            y: 20,
+            y: 10,
           });
         }
-      }
 
-      // Set initial state for footer
-      if (footer) {
-        gsap.set(footer, {
-          opacity: 0,
-          y: 15,
-        });
-      }
-    });
+        // Set initial state and split paragraph
+        if (textElement) {
+          const paragraph = textElement.querySelector("p");
+          if (paragraph) {
+            // Split paragraph into lines
+            const splitText = new SplitText(paragraph, {
+              type: "lines",
+              linesClass: "card-line",
+            });
 
-    // Set initial line state
-    gsap.set(horizontalLines, {
-      height: "1px",
-      width: "0%",
-    });
+            // Store split instance for cleanup
+            cardSplitInstances.push({
+              element: paragraph,
+              split: splitText,
+            });
 
-    gsap.set(verticalLines, {
-      height: "0%",
-      width: "1px",
-    });
-
-    // Line animations timeline
-    const linesTimeline = gsap.timeline({
-      scrollTrigger: {
-        trigger: horizontalWrapper,
-        start: "top 50%",
-        toggleActions: "play none none none",
-      },
-    });
-
-    linesTimeline
-      .to(horizontalLines, {
-        width: "100%",
-        duration: 1,
-        ease: "power4.out",
-      })
-      .to(
-        verticalLines,
-        {
-          height: "100%",
-          duration: 1,
-          ease: "power4.out",
-          stagger: 0.2,
-        },
-        0.3 // Start vertical lines slightly after horizontal
-      );
-
-    // Card animations - start after lines animation completes
-    const cardAnimationsTimeline = gsap.timeline({
-      delay: 0.5, // Small delay after lines complete
-    });
-
-    scrollItems.forEach((item, index) => {
-      const heading = item.querySelector(
-        '[data-animate-heading="card-heading"]'
-      );
-      const textElement = item.querySelector('[data-animate-text="card-para"]');
-      const footer = item.querySelector('[data-gsap-animate="card-footer"]');
-
-      // Calculate stagger delay for this card
-      const cardDelay = index * 0.3; // 0.3s stagger between cards
-
-      // Animate heading
-      if (heading) {
-        cardAnimationsTimeline.to(
-          heading,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          cardDelay
-        );
-      }
-
-      // Animate paragraph lines
-      if (textElement) {
-        const paragraph = textElement.querySelector("p");
-        if (paragraph) {
-          // Find the split instance for this paragraph
-          const splitInstance = cardSplitInstances.find(
-            (instance) => instance.element === paragraph
-          );
-
-          if (splitInstance && splitInstance.split.lines) {
-            cardAnimationsTimeline.to(
-              splitInstance.split.lines,
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.5,
-                ease: "power2.out",
-                stagger: 0.08, // Stagger between lines within the paragraph
-              },
-              cardDelay + 0.2 // Start 0.2s after heading
-            );
+            // Set initial state for lines
+            gsap.set(splitText.lines, {
+              opacity: 0,
+              y: 20,
+            });
           }
         }
-      }
 
-      // Animate footer
-      if (footer) {
-        cardAnimationsTimeline.to(
-          footer,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          cardDelay + 0.5 // Start 0.5s after heading (after paragraph animation starts)
-        );
-      }
-    });
-
-    // Add card animations to the lines timeline
-    linesTimeline.add(cardAnimationsTimeline, -0.25); // Start 0.25s before lines timeline ends
-
-    // 🧠 Dynamically calculate the total scroll distance in px
-    const wrapperWidth = horizontalWrapper.scrollWidth;
-    const visibleWidth = horizontalWrapper.offsetWidth;
-    const totalScrollDistance = wrapperWidth - visibleWidth;
-
-    // Set height of the pinned section based on scroll distance
-    const requiredHeight = totalScrollDistance + window.innerHeight;
-
-    gsap.set(gridSection, {
-      minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
-    });
-
-    // 🌀 Animate horizontal scroll in pixels
-    let gridScrollTrigger = gsap.timeline({
-      scrollTrigger: {
-        trigger: horizontalWrapper,
-        start: "bottom 99.5%", // When section top hits 30% from top
-        endTrigger: gridSection,
-        end: "bottom bottom",
-        scrub: 1,
-        pin: pinnedContent,
-        pinSpacing: true,
-        invalidateOnRefresh: true,
-        markers: false,
-      },
-    });
-
-    if (scrollItems.length > 1) {
-      gridScrollTrigger.to(
-        horizontalWrapper,
-        {
-          x: -totalScrollDistance,
-          ease: "none",
-          // duration: 1,
-        },
-        0
-      );
-    }
-
-    // Cleanup function for split text instances
-    window.addEventListener("beforeunload", () => {
-      cardSplitInstances.forEach((instance) => {
-        if (instance.split && instance.split.revert) {
-          instance.split.revert();
+        // Set initial state for footer
+        if (footer) {
+          gsap.set(footer, {
+            opacity: 0,
+            y: 15,
+          });
         }
       });
-    });
 
-  }
+      // Set initial line state
+      gsap.set(horizontalLines, {
+        height: "1px",
+        width: "0%",
+      });
+
+      gsap.set(verticalLines, {
+        height: "0%",
+        width: "1px",
+      });
+
+      // Line animations timeline
+      const linesTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: horizontalWrapper,
+          start: "top 50%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      linesTimeline
+        .to(horizontalLines, {
+          width: "100%",
+          duration: 1,
+          ease: "power4.out",
+        })
+        .to(
+          verticalLines,
+          {
+            height: "100%",
+            duration: 1,
+            ease: "power4.out",
+            stagger: 0.2,
+          },
+          0.3 // Start vertical lines slightly after horizontal
+        );
+
+      // Card animations - start after lines animation completes
+      const cardAnimationsTimeline = gsap.timeline({
+        delay: 0.5, // Small delay after lines complete
+      });
+
+      scrollItems.forEach((item, index) => {
+        const heading = item.querySelector(
+          '[data-animate-heading="card-heading"]'
+        );
+        const textElement = item.querySelector(
+          '[data-animate-text="card-para"]'
+        );
+        const footer = item.querySelector('[data-gsap-animate="card-footer"]');
+
+        // Calculate stagger delay for this card
+        const cardDelay = index * 0.3; // 0.3s stagger between cards
+
+        // Animate heading
+        if (heading) {
+          cardAnimationsTimeline.to(
+            heading,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            cardDelay
+          );
+        }
+
+        // Animate paragraph lines
+        if (textElement) {
+          const paragraph = textElement.querySelector("p");
+          if (paragraph) {
+            // Find the split instance for this paragraph
+            const splitInstance = cardSplitInstances.find(
+              (instance) => instance.element === paragraph
+            );
+
+            if (splitInstance && splitInstance.split.lines) {
+              cardAnimationsTimeline.to(
+                splitInstance.split.lines,
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.5,
+                  ease: "power2.out",
+                  stagger: 0.08, // Stagger between lines within the paragraph
+                },
+                cardDelay + 0.2 // Start 0.2s after heading
+              );
+            }
+          }
+        }
+
+        // Animate footer
+        if (footer) {
+          cardAnimationsTimeline.to(
+            footer,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            cardDelay + 0.5 // Start 0.5s after heading (after paragraph animation starts)
+          );
+        }
+      });
+
+      // Add card animations to the lines timeline
+      linesTimeline.add(cardAnimationsTimeline, -0.25); // Start 0.25s before lines timeline ends
+
+      // 🧠 Dynamically calculate the total scroll distance in px
+      const wrapperWidth = horizontalWrapper.scrollWidth;
+      const visibleWidth = horizontalWrapper.offsetWidth;
+      const totalScrollDistance = wrapperWidth - visibleWidth;
+
+      // Set height of the pinned section based on scroll distance
+      const requiredHeight = totalScrollDistance + window.innerHeight;
+
+      gsap.set(gridSection, {
+        minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
+      });
+
+      // 🌀 Animate horizontal scroll in pixels
+      let gridScrollTrigger = gsap.timeline({
+        scrollTrigger: {
+          trigger: horizontalWrapper,
+          start: "bottom 99.5%", // When section top hits 30% from top
+          endTrigger: gridSection,
+          end: "bottom bottom",
+          scrub: 1,
+          pin: pinnedContent,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+          markers: false,
+        },
+      });
+
+      if (scrollItems.length > 1) {
+        gridScrollTrigger.to(
+          horizontalWrapper,
+          {
+            x: -totalScrollDistance,
+            ease: "none",
+            // duration: 1,
+          },
+          0
+        );
+      }
+
+      // Cleanup function for split text instances
+      window.addEventListener("beforeunload", () => {
+        cardSplitInstances.forEach((instance) => {
+          if (instance.split && instance.split.revert) {
+            instance.split.revert();
+          }
+        });
+      });
+    }
 
     /////////////////////////////////
     /////////////////////////////////
@@ -1076,27 +1077,40 @@ document.addEventListener("DOMContentLoaded", function () {
       const shouldPin =
         container.getAttribute("data-animate-container") === "pinned";
 
-      if (shouldPin) {
-        // Pin the title during scroll (only for containers with "pinned" value)
+      if (!isMobileViewport()) {
+        if (shouldPin) {
+          // Pin the title during scroll (only for containers with "pinned" value)
+          ScrollTrigger.create({
+            trigger: container,
+            pin: title,
+            start: "top 20%",
+            end: "+=" + dist,
+            onComplete: () => {
+              // Optional: Revert SplitText when animation completes
+              // splitText.revert();
+            },
+          });
+        } else {
+          //Specific case for horizontal scroll with pinning
+          ScrollTrigger.create({
+            trigger: container,
+            pin: title,
+            start: "top 20%",
+            endTrigger: gridSection,
+            markers: false,
+            end: "bottom bottom",
+            onComplete: () => {
+              // Optional: Revert SplitText when animation completes
+              // splitText.revert();
+            },
+          });
+        }
+      } else {
         ScrollTrigger.create({
           trigger: container,
           pin: title,
           start: "top 20%",
           end: "+=" + dist,
-          onComplete: () => {
-            // Optional: Revert SplitText when animation completes
-            // splitText.revert();
-          },
-        });
-      } else {
-        //Specific case for horizontal scroll with pinning
-        ScrollTrigger.create({
-          trigger: container,
-          pin: title,
-          start: "top 20%",
-          endTrigger: gridSection,
-          markers: false,
-          end: "bottom bottom",
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
