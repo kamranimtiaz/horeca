@@ -44,226 +44,322 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Hero Navbar */
     /////////////////////////////////
     /////////////////////////////////
-    
-// Get elements
-    const menuContainer = document.querySelector('.nav_buttons_menu');
-    const menuTrigger = document.querySelector('.nav_menu_trigger');
-    const menuMask = document.querySelector('.nav_menu_mask');
-    const menuLinks = document.querySelectorAll('.nav_menu_link');
-    const triggerText = menuTrigger.querySelector('.nav_menu_text');
-    
-    // Animation variables
-    let openTimeline = null;
-    let closeTimeline = null;
-    let isOpen = false;
-    let splitInstances1 = [];
-    
-    // Split text in menu links for character animation
-    function splitMenuTexts() {
-        menuLinks.forEach(link => {
-            const textElement = link.querySelector('.nav_menu_text');
-            if (textElement && window.SplitText) {
-                const splitText = new SplitText(textElement, { type: "words" });
-                splitInstances1.push({
-                    element: textElement,
-                    split: splitText
-                });
-                // Initially hide all characters
-                gsap.set(splitText.chars, { opacity: 0, y: 20 });
-            }
+
+    function initializeNavbarAnimation() {
+      // Get navbar elements
+      const navButtonsMenu = document.querySelector(".nav_buttons_menu");
+      const navMenuWrap = document.querySelector(".nav_desktop_wrap");
+      const navMenuMask = document.querySelector(".nav_desktop_mask");
+      const navMenuTrigger = document.querySelector(".nav_desktop_trigger");
+      const navMenuLinks = document.querySelectorAll(".nav_desktop_link");
+
+      // Get text elements for splitting and icon
+      const triggerText = navMenuTrigger.querySelector(".nav_desktop_text");
+      const triggerIcon = navMenuTrigger.querySelector(".nav_desktop_icon");
+      const linkTexts = [];
+
+      // Collect all link text elements
+      navMenuLinks.forEach((link) => {
+        const textElement = link.querySelector(".nav_desktop_text");
+        if (textElement) {
+          linkTexts.push(textElement);
+        }
+      });
+
+      // Split text into words
+      let triggerSplit = null;
+      let linkSplits = [];
+
+      // Split trigger text
+      if (triggerText) {
+        triggerSplit = new SplitText(triggerText, {
+          type: "words",
+          wordsClass: "word",
         });
-    }
-    
-    // Initialize split text if SplitText is available
-    if (window.SplitText) {
-        splitMenuTexts();
-    }
-    
-    // Get the full width needed for the menu
-    function getMenuWidth() {
-        // Temporarily make visible to measure
-        gsap.set(menuMask, { 
-            opacity: 1, 
-            width: 'auto',
-            display: 'flex',
-            position: 'static'
+      }
+
+      // Split link texts
+      linkTexts.forEach((textElement) => {
+        const split = new SplitText(textElement, {
+          type: "words",
+          wordsClass: "word",
         });
-        
-        const width = menuMask.offsetWidth;
-        
-        // Reset to hidden state
-        gsap.set(menuMask, { 
-            opacity: 0, 
-            width: 0,
-            display: 'flex',
-            position: 'absolute'
+        linkSplits.push({
+          element: textElement,
+          split: split,
         });
-        
-        return width;
-    }
-    
-    const menuWidth = getMenuWidth();
-    
-    // Set initial styles for menu mask
-    gsap.set(menuMask, {
-        width: 0,
+      });
+
+      const triggerWidth = navMenuTrigger.offsetWidth;
+
+      // Reset to initial hidden state
+      gsap.set(navMenuMask, {
+        display: "none",
+        position: "absolute",
+        width: triggerWidth,
         opacity: 0,
-        display: 'flex',
-        position: 'absolute',
-        right: 0,
-        top: '50%',
-        y: '-50%',
-        pointerEvents: 'none'
-    });
-    
-    // Open animation
-    function openMenu() {
-        if (isOpen || openTimeline) return;
-        isOpen = true;
-        
-        // Kill any existing close animation
-        if (closeTimeline) {
-            closeTimeline.kill();
-            closeTimeline = null;
-        }
-        
-        openTimeline = gsap.timeline({
-            onComplete: () => {
-                openTimeline = null;
-            }
+        pointerEvents: "none",
+      });
+
+      gsap.set(navMenuWrap, {
+        position: "relative",
+      });
+
+      gsap.set(navMenuTrigger, {
+        position: "relative",
+        display: "flex",
+      });
+
+      // Set initial positions for split text and icon
+      if (triggerSplit) {
+        gsap.set(triggerSplit.words, {
+          yPercent: 0,
+          opacity: 1,
         });
-        
-        // Animate trigger text down and fade out
-        openTimeline.to(triggerText, {
-            y: 20,
-            opacity: 0,
-            duration: 0.3,
-            ease: "power2.in",
-            onComplete: () => {
-                // Set trigger to absolute position after text animation
-                gsap.set(menuTrigger, { position: 'absolute' });
-            }
+      }
+
+      if (triggerIcon) {
+        gsap.set(triggerIcon, {
+          x: 0,
+          opacity: 1,
         });
-        
-        // Set mask to relative position and enable pointer events
-        openTimeline.set(menuMask, {
-            position: 'relative',
-            pointerEvents: 'auto'
-        }, 0.3);
-        
-        // Expand menu mask
-        openTimeline.to(menuMask, {
-            width: menuWidth,
+      }
+
+      // Initially hide all link words
+      linkSplits.forEach((splitData) => {
+        gsap.set(splitData.split.words, {
+          yPercent: 100,
+          opacity: 0,
+        });
+      });
+
+      // Animation timelines
+      let hoverInTl = null;
+      let hoverOutTl = null;
+      let isAnimating = false;
+
+      // Hover in animation with OVERLAPPING timing (like reference code)
+      function createHoverInAnimation() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        if (hoverInTl) hoverInTl.kill();
+        if (hoverOutTl) hoverOutTl.kill();
+
+        hoverInTl = gsap.timeline({
+          onComplete: () => {
+            isAnimating = false;
+          },
+        });
+
+        // PHASE 1: Trigger exit animations (0s start)
+        hoverInTl
+          .to(
+            triggerSplit ? triggerSplit.words : [],
+            {
+              yPercent: 100,
+              opacity: 0,
+              duration: 0.35,
+              ease: "Quart.easeIn",
+              stagger: 0.05,
+            },
+            0
+          )
+          .to(
+            triggerIcon || [],
+            {
+              x: 100,
+              opacity: 0,
+              duration: 0.35,
+              ease: "Quart.easeIn",
+            },
+            0
+          );
+
+        // PHASE 2: Layout shift preparation (AT EXACTLY 0s)
+        hoverInTl
+          .set(
+            navMenuTrigger,
+            {
+              position: "absolute",
+            },
+            0
+          )
+          .set(
+            navMenuMask,
+            {
+              position: "relative",
+              display: "flex",
+            },
+            0
+          );
+
+        // PHASE 3: Mask expansion (start AFTER trigger hides)
+        hoverInTl.to(
+          navMenuMask,
+          {
+            width: "auto", // Use predefined target width
             opacity: 1,
+            pointerEvents: "auto",
             duration: 0.5,
-            ease: "power2.out"
-        }, 0.3);
-        
-        // Animate split text characters if available, otherwise animate links
-        if (splitInstances1.length > 0) {
-            splitInstances1.forEach((instance, index) => {
-                openTimeline.to(instance.split.words, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.3,
-                    stagger: 0.02,
-                    ease: "power2.out"
-                }, 0.5 + (index * 0.05));
-            });
-        } else {
-            // Fallback if SplitText is not available
-            const menuTexts = document.querySelectorAll('.nav_menu_link .nav_menu_text');
-            openTimeline.from(menuTexts, {
-                y: 20,
-                opacity: 0,
-                duration: 0.3,
-                stagger: 0.05,
-                ease: "power2.out"
-            }, 0.5);
-        }
-    }
-    
-    // Close animation
-    function closeMenu() {
-        if (!isOpen || closeTimeline) return;
-        isOpen = false;
-        
-        // Kill any existing open animation
-        if (openTimeline) {
-            openTimeline.kill();
-            openTimeline = null;
-        }
-        
-        closeTimeline = gsap.timeline({
-            onComplete: () => {
-                closeTimeline = null;
-                // Reset to initial state
-                gsap.set(menuTrigger, { position: 'relative' });
-                gsap.set(menuMask, { position: 'absolute' });
-            }
+            ease: "Quart.easeInOut",
+          },
+          0.15 // Start 0.15s into timeline
+        );
+
+        // PHASE 4: Link animations (staggered AFTER mask starts)
+        linkSplits.forEach((splitData, index) => {
+          hoverInTl.to(
+            splitData.split.words,
+            {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.35,
+              ease: "Back.easeOut",
+              stagger: -0.03,
+            },
+            0.25 + index * 0.05 // Start after mask expansion begins
+          );
         });
-        
-        // Animate split text characters out if available
-        if (splitInstances1.length > 0) {
-            splitInstances1.forEach((instance, index) => {
-                closeTimeline.to(instance.split.words, {
-                    opacity: 0,
-                    y: -20,
-                    duration: 0.2,
-                    stagger: -0.01,
-                    ease: "power2.in"
-                }, index * 0.02);
+
+        return hoverInTl;
+      }
+
+      // Hover out animation - REVERSE of hover in with proper timing
+      function createHoverOutAnimation() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        if (hoverInTl) hoverInTl.kill();
+        if (hoverOutTl) hoverOutTl.kill();
+
+        hoverOutTl = gsap.timeline({
+          onComplete: () => {
+            isAnimating = false;
+            // Reset to initial state after animation completes
+            gsap.set(navMenuTrigger, { position: "relative" });
+            gsap.set(navMenuMask, {
+              position: "absolute",
+              display: "none",
+              width: triggerWidth + "px"
             });
-        } else {
-            // Fallback if SplitText is not available
-            const menuTexts = document.querySelectorAll('.nav_menu_link .nav_menu_text');
-            closeTimeline.to(menuTexts, {
-                y: -20,
-                opacity: 0,
-                duration: 0.2,
-                stagger: -0.03,
-                ease: "power2.in"
-            });
-        }
-        
-        // Hide and collapse menu mask
-        closeTimeline.to(menuMask, {
-            width: 0,
+          },
+        });
+
+        // PHASE 1: Link words exit (REVERSE ORDER - last in, first out)
+        // Reverse the stagger order and direction
+        linkSplits.slice().reverse().forEach((splitData, index) => {
+          hoverOutTl.to(
+            splitData.split.words,
+            {
+              yPercent: -100, // Exit upward (opposite of hover in)
+              opacity: 0,
+              duration: 0.3,
+              ease: "Quart.easeIn", // Sharp exit
+              stagger: 0.02, // Positive stagger (opposite of -0.03)
+            },
+            index * 0.04 // Start immediately, stagger each set
+          );
+        });
+
+        // PHASE 2: Mask collapse (starts while links are exiting - OVERLAP)
+        hoverOutTl.to(
+          navMenuMask,
+          {
+            width: triggerWidth + "px", // Contract back to trigger width
             opacity: 0,
-            duration: 0.4,
-            ease: "power2.in"
-        }, 0.2);
-        
-        closeTimeline.set(menuMask, {
-            pointerEvents: 'none'
+            duration: 0.5,
+            ease: "Quart.easeInOut",
+          },
+          0.15 // Start after links begin exiting (OVERLAP)
+        );
+
+        // PHASE 3: Hide mask and prepare trigger (happens during mask collapse)
+        hoverOutTl.set(
+          navMenuMask,
+          {
+            pointerEvents: "none",
+          },
+          0.5 // Disable interactions when mask is mostly collapsed
+        );
+
+        // PHASE 4: Trigger elements return (OVERLAP with mask collapse)
+        hoverOutTl
+          .to(
+            triggerSplit ? triggerSplit.words : [],
+            {
+              yPercent: 0, // Return to original position
+              opacity: 1,
+              duration: 0.35,
+              ease: "Quart.easeOut", // Smooth return
+              stagger: -0.05, // Reverse stagger (opposite of 0.05)
+            },
+            0.3 // Start during mask collapse
+          )
+          .to(
+            triggerIcon || [],
+            {
+              x: 0, // Return to original position
+              opacity: 1,
+              duration: 0.35,
+              ease: "Quart.easeOut", // Smooth return
+            },
+            0.3 // Start at same time as trigger text
+          );
+
+        return hoverOutTl;
+      }
+
+      // Event listeners
+      if (navButtonsMenu) {
+        navButtonsMenu.addEventListener("mouseenter", () => {
+          console.log("Mouse enter - starting hover in animation");
+          createHoverInAnimation();
         });
-        
-        // Animate trigger text back up and fade in
-        closeTimeline.to(triggerText, {
-            y: 0,
-            opacity: 1,
-            duration: 0.3,
-            ease: "power2.out"
-        }, 0.3);
-    }
-    
-    // Event listeners
-    menuContainer.addEventListener('mouseenter', openMenu);
-    menuContainer.addEventListener('mouseleave', closeMenu);
-    
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-        if (openTimeline) openTimeline.kill();
-        if (closeTimeline) closeTimeline.kill();
-        // Cleanup split text instances
-        splitInstances1.forEach(instance => {
-            if (instance.split && instance.split.revert) {
-                instance.split.revert();
+
+        navButtonsMenu.addEventListener("mouseleave", () => {
+          console.log("Mouse leave - starting hover out animation");
+          createHoverOutAnimation();
+        });
+      }
+
+      // Cleanup function
+      window.addEventListener("beforeunload", () => {
+        if (hoverInTl) hoverInTl.kill();
+        if (hoverOutTl) hoverOutTl.kill();
+
+        if (triggerSplit && triggerSplit.revert) {
+          triggerSplit.revert();
+        }
+        linkSplits.forEach((splitData) => {
+          if (splitData.split && splitData.split.revert) {
+            splitData.split.revert();
+          }
+        });
+      });
+
+      // Handle window resize
+      let resizeTimeout;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          // Refresh split text
+          if (triggerSplit && triggerSplit.split) {
+            triggerSplit.split();
+          }
+          linkSplits.forEach((splitData) => {
+            if (splitData.split && splitData.split.split) {
+              splitData.split.split();
             }
-        });
-    });
-   
-    
+          });
+        }, 250);
+      });
+    }
+
+
+
+    initializeNavbarAnimation();
+
     /////////////////////////////////
     /////////////////////////////////
     /* 2ND Hero Slider */
@@ -676,7 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gsap.set(".partners_cms_item", {
       scale: 0.75,
       opacity: 0,
-      transformOrigin: "top left"
+      transformOrigin: "top left",
     });
 
     ScrollTrigger.batch(".partners_cms_item", {
