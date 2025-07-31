@@ -1293,7 +1293,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (textMiddle && pivotElement) {
             const currentScale = !isMobileViewport()
               ? Math.max(0, progress1 * 2.25)
-              : Math.max(0, progress1 * 2.8);
+              : Math.max(0, progress1 * 2.95); // Scale based on progress1, larger on desktop
             // Clamp to minimum 0
 
             // Always apply transforms (don't use conditional)
