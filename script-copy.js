@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
       scale: 1,
       duration: 2,
       ease: "power4.out",
-    }, "-=1.25");
+    }, "-=2.25");
 
     /////////////////////////////////
     /////////////////////////////////
