@@ -798,11 +798,10 @@ document.addEventListener("DOMContentLoaded", function () {
     /* GRID LINES ANIMATION */
     /////////////////////////////////
     /////////////////////////////////
-const gridSection = document.querySelector(
-        '[data-gsap-section="grid-lines"]'
-      );
+    const gridSection = document.querySelector(
+      '[data-gsap-section="grid-lines"]'
+    );
     if (!isMobileViewport()) {
-      
       if (!gridSection) return;
 
       const pinnedContent = gridSection.querySelector(
@@ -1009,11 +1008,37 @@ const gridSection = document.querySelector(
         minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
       });
 
-      // 🌀 Animate horizontal scroll in pixels
+      // // 🌀 Animate horizontal scroll in pixels
+      // let gridScrollTrigger = gsap.timeline({
+      //   scrollTrigger: {
+      //     trigger: horizontalWrapper,
+      //     start: "bottom 99.8%", // When section top hits 30% from top
+      //     endTrigger: gridSection,
+      //     end: "bottom bottom",
+      //     scrub: 1,
+      //     pin: pinnedContent,
+      //     pinSpacing: true,
+      //     invalidateOnRefresh: true,
+      //     markers: false,
+      //   },
+      // });
+
+      // if (scrollItems.length > 1) {
+      //   gridScrollTrigger.to(
+      //     horizontalWrapper,
+      //     {
+      //       x: -totalScrollDistance,
+      //       ease: "none",
+      //       // duration: 1,
+      //     },
+      //     0
+      //   );
+      // }
+
       let gridScrollTrigger = gsap.timeline({
         scrollTrigger: {
           trigger: horizontalWrapper,
-          start: "bottom 99.5%", // When section top hits 30% from top
+          start: "bottom 99.8%", // When section top hits 30% from top
           endTrigger: gridSection,
           end: "bottom bottom",
           scrub: 1,
@@ -1025,15 +1050,17 @@ const gridSection = document.querySelector(
       });
 
       if (scrollItems.length > 1) {
-        gridScrollTrigger.to(
-          horizontalWrapper,
-          {
-            x: -totalScrollDistance,
-            ease: "none",
-            // duration: 1,
-          },
-          0
-        );
+        gridScrollTrigger
+          .to({}, { duration: 0.1 }) // 10% delay (no movement)
+          .to(
+            horizontalWrapper,
+            {
+              x: -totalScrollDistance,
+              ease: "none",
+              duration: 0.9, // Remaining 90% of the timeline
+            },
+            0.1 // Start at 10% progress
+          );
       }
 
       // Cleanup function for split text instances
@@ -1266,7 +1293,7 @@ const gridSection = document.querySelector(
           if (textMiddle && pivotElement) {
             const currentScale = !isMobileViewport()
               ? Math.max(0, progress1 * 2.25)
-              : Math.max(0, progress1 * 4.25);
+              : Math.max(0, progress1 * 3.5);
             // Clamp to minimum 0
 
             // Always apply transforms (don't use conditional)
@@ -1789,14 +1816,19 @@ const gridSection = document.querySelector(
 
       // Create the squeeze animation for each line
       lines.forEach((line, lineIndex) => {
+        // Get the line height
+        const lineHeight = line.offsetHeight;
+
         gsap.to(line, {
           scaleY: 1, // Animate to scale 1,1 (scaleX stays 1)
+          scaleX: 1,
           ease: "none",
           scrollTrigger: {
-            trigger: line, // Use the parent element as trigger
-            start: "top bottom", // When element top hits viewport bottom
-            end: "top 75%", // When element top hits 75% from top
+            trigger: line, // Use the line itself as trigger
+            start: "top bottom", // When line top hits viewport bottom
+            end: `top bottom-=${lineHeight}px`, // End when line travels exactly its height
             scrub: true,
+            // markers: true, // Remove in production
           },
         });
       });
