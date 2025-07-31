@@ -48,6 +48,106 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Hero Navbar */
     /////////////////////////////////
     /////////////////////////////////
+    
+    // Create main timeline
+  // Create main timeline
+  const preloaderTimeline = gsap.timeline();
+
+  // Set initial states
+  gsap.set(".preloader_img_wrap", {
+    yPercent: (index) => (index % 2 === 0 ? -100 : 100),
+    rotation: (index) => (index % 2 === 0 ? -10 : 10),
+    opacity: 0,
+  });
+
+  gsap.set(".preloader_title", {
+    yPercent: 100,
+    opacity: 0,
+  });
+
+  // Set initial states for on-load elements
+  gsap.set(".loader_video", {
+    scale: 1.25,
+  });
+
+  // Split text elements and set initial states
+  const onLoadHeading = document.querySelector('[data-animate-heading="on-load"]');
+  const onLoadText = document.querySelector('[data-animate-text="on-load"] p');
+
+  
+  let headingSplit, textSplit;
+  
+  if (onLoadHeading) {
+    headingSplit = new SplitText(onLoadHeading, { type: "words" });
+    gsap.set(headingSplit.words, { opacity: 0, yPercent: 100 });
+  }
+  
+  if (onLoadText) {
+    textSplit = new SplitText(onLoadText, { type: "lines" });
+    gsap.set(textSplit.lines, { opacity: 0, y: 40 });
+  }
+
+  // Timeline animations
+  preloaderTimeline
+    // 1. Animate images in
+    .to(".preloader_img_wrap", {
+      yPercent: 0,
+      rotation: 0,
+      opacity: 1,
+      duration: 0.9,
+      ease: "power1.out",
+      stagger: 0.2,
+    })
+
+    // 2. Animate heading in (starts before images finish)
+    .to(".preloader_title", {
+      yPercent: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "power2.out",
+    }, "-=0.3")
+
+    // 3. Hold for a moment
+    .to({}, { duration: 0.5 })
+
+    // 4. Animate preloader out
+    .to(".preloader_wrap", {
+      height: "0svh",
+      duration: 1.5,
+      ease: "power4.out",
+      onComplete: function () {
+        gsap.set(".preloader_wrap", { display: "none" });
+      },
+    })
+
+    // 5. Animate on-load elements (starts 0.5s before preloader finishes)
+    .to(headingSplit ? headingSplit.words : [], {
+      opacity: 1,
+      yPercent: 0,
+      duration: 1,
+      ease: "power4.out",
+      stagger: 0.05,
+    }, "-=0.65")
+
+    .to(textSplit ? textSplit.lines : [], {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      ease: "power4.out",
+      stagger: 0.1,
+    }, "-=0.85")
+
+    .to(".loader_video", {
+      scale: 1,
+      duration: 2,
+      ease: "power4.out",
+    }, "-=1.25");
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* Hero Navbar */
+    /////////////////////////////////
+    /////////////////////////////////
 
     function initializeNavbarAnimation() {
       // Get navbar elements
@@ -358,6 +458,54 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     initializeNavbarAnimation();
+
+    /////////////////////////////////
+    /////////////////////////////////
+    /* H2 LINE FADE-IN ANIMATION */
+    /////////////////////////////////
+    /////////////////////////////////
+
+    // Find all wrappers with the data attribute
+    const lineFadeWrappers = document.querySelectorAll(
+      "[data-animate-heading='line-fade-in']"
+    );
+
+    lineFadeWrappers.forEach((wrapper) => {
+      // Find h2 inside the wrapper
+      const h2Element = wrapper.querySelector("h2");
+
+      if (!h2Element) return; // Skip if no h2 found
+
+      // Split the h2 text into lines
+      const splitText = new SplitText(h2Element, {
+        type: "lines",
+        linesClass: "fade-line",
+      });
+
+      const lines = splitText.lines;
+
+      // Create the fade-in animation
+      gsap.fromTo(
+        lines,
+        {
+          opacity: 0,
+          yPercent: 100,
+        },
+        {
+          opacity: 1,
+          yPercent: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: wrapper,
+            start: "top 70%",
+            // markers: true, // Uncomment for debugging
+            once: true,
+          },
+        }
+      );
+    });
 
     /////////////////////////////////
     /////////////////////////////////
@@ -1877,7 +2025,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Create ScrollTrigger for this specific element
       ScrollTrigger.create({
         trigger: textElement,
-        start: "top 90%", // When element top hits 80% from viewport top
+        start: "top 70%", // When element top hits 70% from viewport top
         // markers: false, // Remove in production
         toggleActions: "play none none none", // Only play once when entering
         onEnter: () => {
