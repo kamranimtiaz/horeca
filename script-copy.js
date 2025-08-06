@@ -177,8 +177,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // Split trigger text
       if (triggerText) {
         triggerSplit = new SplitText(triggerText, {
-          type: "words",
-          wordsClass: "word",
+          type: "chars",
+          wordsClass: "chars",
         });
       }
 
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Set initial positions for split text and icon
       if (triggerSplit) {
-        gsap.set(triggerSplit.words, {
+        gsap.set(triggerSplit.chars, {
           yPercent: 0,
           opacity: 1,
         });
@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // PHASE 1: Trigger exit animations
         hoverInTl
           .to(
-            triggerSplit ? triggerSplit.words : [],
+            triggerSplit ? triggerSplit.chars : [],
             {
               yPercent: 100,
               opacity: 0,
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // PHASE 4: Trigger elements return
         hoverOutTl
           .to(
-            triggerSplit ? triggerSplit.words : [],
+            triggerSplit ? triggerSplit.chars : [],
             {
               yPercent: 0,
               opacity: 1,
