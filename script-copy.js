@@ -118,9 +118,8 @@ document.addEventListener("DOMContentLoaded", function () {
 const preloaderTimeline = gsap.timeline();
 
 // Set initial states
-gsap.set(".preloader_img_wrap", {
-  yPercent: (index) => (index % 2 === 0 ? -100 : 100),
-  rotation: (index) => (index % 2 === 0 ? -10 : 10),
+gsap.set(".preloader_image_wrap img", {
+  scale: 0,
   opacity: 0,
 });
 
@@ -162,7 +161,14 @@ if (preloaderTitle) {
 
 // Timeline animations
 preloaderTimeline
-    
+// 1. Animate the image
+.to(".preloader_image_wrap img", {
+  opacity: 1,
+  scale: 1,
+  duration: 1.5,
+  ease: "power4.out",
+
+})
 // 2. Animate title characters in (char by char with stagger) - starts before images finish
   .to(titleSplit ? titleSplit.chars : [], {
     yPercent: 0,
@@ -170,7 +176,7 @@ preloaderTimeline
     duration: 1, // 1 second total duration for the stagger effect
     ease: "power2.out",
     stagger: 0.05, // Character by character stagger
-  })
+  }, "-=0.35")
 
   // 3. Hold for a moment
   .to({}, { duration: 0.5 })
@@ -543,8 +549,7 @@ preloaderTimeline
         }, 250);
       });
     }
-
-    initializeNavbarAnimation();
+    !isMobileViewport() ? initializeNavbarAnimation() : "";
 
     /////////////////////////////////
     /////////////////////////////////
