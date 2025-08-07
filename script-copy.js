@@ -48,101 +48,116 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Hero Navbar */
     /////////////////////////////////
     /////////////////////////////////
-
     // Create main timeline
-    // Create main timeline
-    const preloaderTimeline = gsap.timeline();
+const preloaderTimeline = gsap.timeline();
 
-    // Set initial states
-    gsap.set(".preloader_img_wrap", {
-      yPercent: (index) => (index % 2 === 0 ? -100 : 100),
-      rotation: (index) => (index % 2 === 0 ? -10 : 10),
-      opacity: 0,
-    });
+// Set initial states
+gsap.set(".preloader_img_wrap", {
+  yPercent: (index) => (index % 2 === 0 ? -100 : 100),
+  rotation: (index) => (index % 2 === 0 ? -10 : 10),
+  opacity: 0,
+});
 
-    gsap.set(".preloader_title", {
-      yPercent: 100,
-      opacity: 0,
-    });
+// Set initial states for on-load elements
+gsap.set(".loader_video", {
+  scale: 1.25,
+});
 
-    // Set initial states for on-load elements
-    gsap.set(".loader_video", {
-      scale: 1.25,
-    });
+// Set initial state for navigation component
+gsap.set(".nav_component", {
+  y: -100,
+  opacity: 0,
+});
 
-    // Split text elements and set initial states
-    const onLoadHeading = document.querySelector('[data-animate-heading="on-load"]');
-    const onLoadText = document.querySelector('[data-animate-text="on-load"] p');
+// Split text elements and set initial states
+const onLoadHeading = document.querySelector('[data-animate-heading="on-load"]');
+const onLoadText = document.querySelector('[data-animate-text="on-load"] p');
+const preloaderTitle = document.querySelector('.preloader_title');
 
+let headingSplit, textSplit, titleSplit;
 
-    let headingSplit, textSplit;
+if (onLoadHeading) {
+  headingSplit = new SplitText(onLoadHeading, { type: "words" });
+  gsap.set(headingSplit.words, { opacity: 0, yPercent: 100 });
+}
 
-    if (onLoadHeading) {
-      headingSplit = new SplitText(onLoadHeading, { type: "words" });
-      gsap.set(headingSplit.words, { opacity: 0, yPercent: 100 });
-    }
+if (onLoadText) {
+  textSplit = new SplitText(onLoadText, { type: "lines" });
+  gsap.set(textSplit.lines, { opacity: 0, y: 40 });
+}
 
-    if (onLoadText) {
-      textSplit = new SplitText(onLoadText, { type: "lines" });
-      gsap.set(textSplit.lines, { opacity: 0, y: 40 });
-    }
+// Split preloader title into characters
+if (preloaderTitle) {
+  titleSplit = new SplitText(preloaderTitle, { type: "chars" });
+  gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
+  // Hide the original title container
+  gsap.set(preloaderTitle, { opacity: 1 });
+}
 
-    // Timeline animations
-    preloaderTimeline
-      // 1. Animate images in
-      .to(".preloader_img_wrap", {
-        yPercent: 0,
-        rotation: 0,
-        opacity: 1,
-        duration: 0.9,
-        ease: "power1.out",
-        stagger: 0.2,
-      })
+// Timeline animations
+preloaderTimeline
+    
+// 2. Animate title characters in (char by char with stagger) - starts before images finish
+  .to(titleSplit ? titleSplit.chars : [], {
+    yPercent: 0,
+    opacity: 1,
+    duration: 1, // 1 second total duration for the stagger effect
+    ease: "power2.out",
+    stagger: 0.05, // Character by character stagger
+  })
 
-      // 2. Animate heading in (starts before images finish)
-      .to(".preloader_title", {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.out",
-      }, "-=0.3")
+  // 3. Hold for a moment
+  .to({}, { duration: 0.5 })
 
-      // 3. Hold for a moment
-      .to({}, { duration: 0.5 })
+  // 4. Animate title characters out (to -100%) before preloader closes
+  .to(titleSplit ? titleSplit.chars : [], {
+    yPercent: -100,
+    opacity: 0,
+    duration: 0.8,
+    ease: "power2.in",
+    stagger: 0.03, // Faster stagger for exit
+  })
 
-      // 4. Animate preloader out
-      .to(".preloader_wrap", {
-        height: "0svh",
-        duration: 1.5,
-        ease: "power4.out",
-        onComplete: function () {
-          gsap.set(".preloader_wrap", { display: "none" });
-        },
-      })
+  // 5. Animate preloader out (starts while title is exiting)
+  .to(".preloader_wrap", {
+    height: "0svh",
+    duration: 1.5,
+    ease: "power4.out",
+    onComplete: function () {
+      gsap.set(".preloader_wrap", { display: "none" });
+    },
+  }, "-=0.1") // Start before title chars finish exiting
 
-      // 5. Animate on-load elements (starts 0.5s before preloader finishes)
-      .to(headingSplit ? headingSplit.words : [], {
-        opacity: 1,
-        yPercent: 0,
-        duration: 1,
-        ease: "power4.out",
-        stagger: 0.05,
-      }, "-=0.65")
+  // 6. Animate on-load elements (starts 0.5s before preloader finishes)
+  .to(headingSplit ? headingSplit.words : [], {
+    opacity: 1,
+    yPercent: 0,
+    duration: 1,
+    ease: "power4.out",
+    stagger: 0.05,
+  }, "-=0.65")
 
-      .to(textSplit ? textSplit.lines : [], {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power4.out",
-        stagger: 0.1,
-      }, "-=0.85")
+  .to(textSplit ? textSplit.lines : [], {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    ease: "power4.out",
+    stagger: 0.1,
+  }, "-=0.85")
 
-      .to(".loader_video", {
-        scale: 1,
-        duration: 2,
-        ease: "power4.out",
-      }, "-=2.25");
+  .to(".loader_video", {
+    scale: 1,
+    duration: 2,
+    ease: "power4.out",
+  }, "-=2.25")
 
+  // 7. Animate navigation component at the very end
+  .to(".nav_component", {
+    y: 0,
+    opacity: 1,
+    duration: 0.8,
+    ease: "power2.out",
+  }, "-=1"); // Start slightly before video animation completes
     /////////////////////////////////
     /////////////////////////////////
     /* Hero Navbar */
@@ -286,7 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // PHASE 2: Position changes
         hoverInTl
-          .set(navMenuTrigger, { position: "absolute" }, 0)
+          .set(navMenuTrigger, { position: "absolute"}, 0)
           .set(navMenuMask, { position: "relative", display: "flex" }, 0);
 
         // PHASE 3: Mask expansion
@@ -316,10 +331,14 @@ document.addEventListener("DOMContentLoaded", function () {
             0.25 + index * 0.05
           );
         });
+
+         hoverInTl
+          .to(navMenuTrigger, { display: "none"}, 0)
       }
 
       function closeMenu() {
         if (!isOpen) return;
+
 
         console.log("Closing menu...");
         isOpen = false;
@@ -333,7 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
             hoverOutTl = null;
 
             // Reset to initial state
-            gsap.set(navMenuTrigger, { position: "relative" });
+            gsap.set(navMenuTrigger, { position: "relative"});
             gsap.set(navMenuMask, {
               position: "absolute",
               display: "none",
@@ -345,6 +364,8 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Close animation completed, menu reset");
           },
         });
+
+        gsap.set(navMenuTrigger, { display: "flex" });
 
         // PHASE 1: Link words exit
         linkSplits
@@ -2024,7 +2045,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Create ScrollTrigger for this specific element
       ScrollTrigger.create({
         trigger: textElement,
-        start: "top 70%", // When element top hits 70% from viewport top
+        start: "top 86%", // When element top hits 70% from viewport top
         // markers: false, // Remove in production
         toggleActions: "play none none none", // Only play once when entering
         onEnter: () => {
