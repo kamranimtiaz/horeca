@@ -1,49 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
   document.fonts.ready.then(() => {
-    // // Initialize Lenis
-    // const lenis = new Lenis({
-    //   touchMultiplier: 2,
-    //   wheelMultiplier: 1,
-    // });
-
-    // lenis.on("scroll", (e) => {
-    //   // console.log(e);
-    // });
-
-    // function raf(time) {
-    //   lenis.raf(time);
-    //   requestAnimationFrame(raf);
-    // }
-
-    // requestAnimationFrame(raf);
-
-    // // Register ScrollTrigger plugin
-    // gsap.registerPlugin(ScrollTrigger);
-
-    // // Connect Lenis with ScrollTrigger
-    // lenis.on("scroll", ScrollTrigger.update);
-
-    // ScrollTrigger.normalizeScroll(true);
-
-    // // gsap.ticker.add((time) => {
-    // //   lenis.raf(time * 1000);
-    // // });
-
-    // // gsap.ticker.lagSmoothing(0);
-
-    // // Function to refresh ScrollTrigger instances
-    // function refreshScrollTriggers() {
-    //   ScrollTrigger.refresh();
-    //   lenis.resize();
-    // }
-
-    // window.addEventListener("resize", refreshScrollTriggers);
-
-    // function isMobileViewport() {
-    //   return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
-    // }
-
-
     function isMobileViewport() {
       return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
     }
@@ -53,26 +9,25 @@ document.addEventListener("DOMContentLoaded", function () {
     // Only initialize Lenis if NOT on mobile
     if (!isMobileViewport()) {
       // Initialize Lenis for desktop/tablet only
-      lenis = new Lenis({
+      // Initialize Lenis with custom config
+      const lenis = new Lenis({
         touchMultiplier: 2,
         wheelMultiplier: 1,
+        smooth: true,
+        smoothTouch: false,
       });
 
-      lenis.on("scroll", (e) => {
-        // console.log(e);
-      });
-
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-
-      requestAnimationFrame(raf);
-
-      // Connect Lenis with ScrollTrigger
+      // Keep ScrollTrigger in sync with Lenis
       lenis.on("scroll", ScrollTrigger.update);
 
-      ScrollTrigger.normalizeScroll(true);
+      // Use GSAP's ticker instead of requestAnimationFrame for smoother sync
+      gsap.ticker.add((time) => {
+        lenis.raf(time * 1000); // GSAP provides time in seconds; Lenis needs ms
+      });
+
+      // Disable lag smoothing for better accuracy in scroll-linked animations
+      gsap.ticker.lagSmoothing(0);
+      // ScrollTrigger.normalizeScroll(true);
     } else {
       // On mobile, just use ScrollTrigger without Lenis
       console.log("Mobile detected - Lenis disabled, using native scroll");
@@ -99,10 +54,12 @@ document.addEventListener("DOMContentLoaded", function () {
       resizeTimeout = setTimeout(() => {
         const wasMobile = lenis === null;
         const isMobileNow = isMobileViewport();
-        
+
         // If viewport changed from desktop to mobile or vice versa
         if (wasMobile !== isMobileNow) {
-          console.log("Viewport changed - consider page reload for optimal experience");
+          console.log(
+            "Viewport changed - consider page reload for optimal experience"
+          );
           // Optionally, you could reload the page here:
           // location.reload();
         }
@@ -115,140 +72,165 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
     // Create main timeline
-const preloaderTimeline = gsap.timeline(
-  {
-  onStart: () => {
-    // Disable Lenis scrolling at the start of preloader
-    if (lenis) {
-      lenis.stop();
+    const preloaderTimeline = gsap.timeline({
+      onStart: () => {
+        // Disable Lenis scrolling at the start of preloader
+        if (lenis) {
+          lenis.stop();
+        }
+        // Fallback: also set body overflow hidden
+        // document.body.classList.add('u-live-noscroll');
+      },
+      onComplete: () => {
+        // Re-enable Lenis scrolling when preloader completes
+        if (lenis) {
+          lenis.start();
+        }
+        // Remove body overflow restriction
+        document.body.classList.remove("u-live-noscroll");
+      },
+    });
+
+    // Set initial states
+    gsap.set(".preloader_image_wrap img", {
+      scale: 0,
+      opacity: 0,
+    });
+
+    // Set initial states for on-load elements
+    gsap.set(".loader_video", {
+      scale: 1.25,
+    });
+
+    // Set initial state for navigation component
+    gsap.set(".nav_component", {
+      y: -100,
+      opacity: 0,
+    });
+
+    // Split text elements and set initial states
+    const onLoadHeading = document.querySelector(
+      '[data-animate-heading="on-load"]'
+    );
+    const onLoadText = document.querySelector(
+      '[data-animate-text="on-load"] p'
+    );
+    const preloaderTitle = document.querySelector(".preloader_title");
+
+    let headingSplit, textSplit, titleSplit;
+
+    if (onLoadHeading) {
+      headingSplit = new SplitText(onLoadHeading, { type: "words" });
+      gsap.set(headingSplit.words, { opacity: 0, yPercent: 100 });
     }
-    // Fallback: also set body overflow hidden
-    // document.body.classList.add('u-live-noscroll');
-  },
-  onComplete: () => {
-    // Re-enable Lenis scrolling when preloader completes
-    if (lenis) {
-      lenis.start();
+
+    if (onLoadText) {
+      textSplit = new SplitText(onLoadText, { type: "lines" });
+      gsap.set(textSplit.lines, { opacity: 0, y: 40 });
     }
-    // Remove body overflow restriction
-    document.body.classList.remove('u-live-noscroll');
-  }
-}
-);
 
-// Set initial states
-gsap.set(".preloader_image_wrap img", {
-  scale: 0,
-  opacity: 0,
-});
+    // Split preloader title into characters
+    if (preloaderTitle) {
+      titleSplit = new SplitText(preloaderTitle, { type: "chars" });
+      gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
+      // Hide the original title container
+      gsap.set(preloaderTitle, { opacity: 1 });
+    }
 
-// Set initial states for on-load elements
-gsap.set(".loader_video", {
-  scale: 1.25,
-});
+    // Timeline animations
+    preloaderTimeline
+      // 1. Animate the image
+      .to(".preloader_image_wrap img", {
+        opacity: 1,
+        scale: 1,
+        duration: 1.5,
+        ease: "power4.out",
+      })
+      // 2. Animate title characters in (char by char with stagger) - starts before images finish
+      .to(
+        titleSplit ? titleSplit.chars : [],
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 1, // 1 second total duration for the stagger effect
+          ease: "power2.out",
+          stagger: 0.05, // Character by character stagger
+        },
+        "-=0.35"
+      )
 
-// Set initial state for navigation component
-gsap.set(".nav_component", {
-  y: -100,
-  opacity: 0,
-});
+      // 3. Hold for a moment
+      .to({}, { duration: 0.5 })
 
-// Split text elements and set initial states
-const onLoadHeading = document.querySelector('[data-animate-heading="on-load"]');
-const onLoadText = document.querySelector('[data-animate-text="on-load"] p');
-const preloaderTitle = document.querySelector('.preloader_title');
+      // 4. Animate title characters out (to -100%) before preloader closes
+      .to(titleSplit ? titleSplit.chars : [], {
+        yPercent: -100,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.in",
+        stagger: 0.03, // Faster stagger for exit
+      })
 
-let headingSplit, textSplit, titleSplit;
+      // 5. Animate preloader out (starts while title is exiting)
+      .to(
+        ".preloader_wrap",
+        {
+          height: "0svh",
+          duration: 1.5,
+          ease: "power4.out",
+          onComplete: function () {
+            gsap.set(".preloader_wrap", { display: "none" });
+          },
+        },
+        "-=0.1"
+      ) // Start before title chars finish exiting
 
-if (onLoadHeading) {
-  headingSplit = new SplitText(onLoadHeading, { type: "words" });
-  gsap.set(headingSplit.words, { opacity: 0, yPercent: 100 });
-}
+      // 6. Animate on-load elements (starts 0.5s before preloader finishes)
+      .to(
+        headingSplit ? headingSplit.words : [],
+        {
+          opacity: 1,
+          yPercent: 0,
+          duration: 1,
+          ease: "power4.out",
+          stagger: 0.05,
+        },
+        "-=0.65"
+      )
 
-if (onLoadText) {
-  textSplit = new SplitText(onLoadText, { type: "lines" });
-  gsap.set(textSplit.lines, { opacity: 0, y: 40 });
-}
+      .to(
+        textSplit ? textSplit.lines : [],
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power4.out",
+          stagger: 0.1,
+        },
+        "-=0.85"
+      )
 
-// Split preloader title into characters
-if (preloaderTitle) {
-  titleSplit = new SplitText(preloaderTitle, { type: "chars" });
-  gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
-  // Hide the original title container
-  gsap.set(preloaderTitle, { opacity: 1 });
-}
+      .to(
+        ".loader_video",
+        {
+          scale: 1,
+          duration: 2,
+          ease: "power4.out",
+        },
+        "-=2.25"
+      )
 
-// Timeline animations
-preloaderTimeline
-// 1. Animate the image
-.to(".preloader_image_wrap img", {
-  opacity: 1,
-  scale: 1,
-  duration: 1.5,
-  ease: "power4.out",
-
-})
-// 2. Animate title characters in (char by char with stagger) - starts before images finish
-  .to(titleSplit ? titleSplit.chars : [], {
-    yPercent: 0,
-    opacity: 1,
-    duration: 1, // 1 second total duration for the stagger effect
-    ease: "power2.out",
-    stagger: 0.05, // Character by character stagger
-  }, "-=0.35")
-
-  // 3. Hold for a moment
-  .to({}, { duration: 0.5 })
-
-  // 4. Animate title characters out (to -100%) before preloader closes
-  .to(titleSplit ? titleSplit.chars : [], {
-    yPercent: -100,
-    opacity: 0,
-    duration: 0.8,
-    ease: "power2.in",
-    stagger: 0.03, // Faster stagger for exit
-  })
-
-  // 5. Animate preloader out (starts while title is exiting)
-  .to(".preloader_wrap", {
-    height: "0svh",
-    duration: 1.5,
-    ease: "power4.out",
-    onComplete: function () {
-      gsap.set(".preloader_wrap", { display: "none" });
-    },
-  }, "-=0.1") // Start before title chars finish exiting
-
-  // 6. Animate on-load elements (starts 0.5s before preloader finishes)
-  .to(headingSplit ? headingSplit.words : [], {
-    opacity: 1,
-    yPercent: 0,
-    duration: 1,
-    ease: "power4.out",
-    stagger: 0.05,
-  }, "-=0.65")
-
-  .to(textSplit ? textSplit.lines : [], {
-    opacity: 1,
-    y: 0,
-    duration: 1,
-    ease: "power4.out",
-    stagger: 0.1,
-  }, "-=0.85")
-
-  .to(".loader_video", {
-    scale: 1,
-    duration: 2,
-    ease: "power4.out",
-  }, "-=2.25")
-
-  // 7. Animate navigation component at the very end
-  .to(".nav_component", {
-    y: 0,
-    opacity: 1,
-    duration: 0.8,
-    ease: "power2.out",
-  }, "-=1"); // Start slightly before video animation completes
+      // 7. Animate navigation component at the very end
+      .to(
+        ".nav_component",
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        "-=1"
+      ); // Start slightly before video animation completes
     /////////////////////////////////
     /////////////////////////////////
     /* Hero Navbar */
@@ -392,7 +374,7 @@ preloaderTimeline
 
         // PHASE 2: Position changes
         hoverInTl
-          .set(navMenuTrigger, { position: "absolute"}, 0)
+          .set(navMenuTrigger, { position: "absolute" }, 0)
           .set(navMenuMask, { position: "relative", display: "flex" }, 0);
 
         // PHASE 3: Mask expansion
@@ -423,13 +405,11 @@ preloaderTimeline
           );
         });
 
-         hoverInTl
-          .to(navMenuTrigger, { display: "none"}, 0)
+        hoverInTl.to(navMenuTrigger, { display: "none" }, 0);
       }
 
       function closeMenu() {
         if (!isOpen) return;
-
 
         console.log("Closing menu...");
         isOpen = false;
@@ -443,7 +423,7 @@ preloaderTimeline
             hoverOutTl = null;
 
             // Reset to initial state
-            gsap.set(navMenuTrigger, { position: "relative"});
+            gsap.set(navMenuTrigger, { position: "relative" });
             gsap.set(navMenuMask, {
               position: "absolute",
               display: "none",
@@ -1521,16 +1501,20 @@ preloaderTimeline
           console.log(`Long scroll section ${index + 1} progress:`, progress);
           // Calculate progress values
           const progress1 = Math.min(progress / 0.6, 1);
-          const progress2 = !isMobileViewport() 
-          ? (progress >= 0.3 ? (progress - 0.3) / 0.55 : 0)  // Desktop: start at 30%, finish at 85%
-          : (progress >= 0.45 ? (progress - 0.40) / 0.30 : 0); // Mobile: start at 45%, finish at 75%
+          const progress2 = !isMobileViewport()
+            ? progress >= 0.3
+              ? (progress - 0.3) / 0.55
+              : 0 // Desktop: start at 30%, finish at 85%
+            : progress >= 0.45
+            ? (progress - 0.4) / 0.2
+            : 0; // Mobile: start at 45%, finish at 75%
 
           const progress3 =
             progress >= 0.4 && progress <= 0.55
               ? (progress - 0.4) / 0.15
               : progress > 0.55
-                ? 1
-                : 0;
+              ? 1
+              : 0;
 
           // Update CSS variables
           gsap.set(longScrollSection, {
@@ -1761,8 +1745,9 @@ preloaderTimeline
           });
         }
 
-        this.feedSection.style.height = `${(this.numItems + 1) * window.innerHeight
-          }px`;
+        this.feedSection.style.height = `${
+          (this.numItems + 1) * window.innerHeight
+        }px`;
 
         this.createScrollTriggers();
         this.getProgress();
@@ -2020,7 +2005,7 @@ preloaderTimeline
       // Create ScrollTrigger for this specific element
       ScrollTrigger.create({
         trigger: textElement,
-        start: "top 86%", // When element top hits 70% from viewport top
+        start: "top 90%", // When element top hits 70% from viewport top
         // markers: false, // Remove in production
         toggleActions: "play none none none", // Only play once when entering
         onEnter: () => {
