@@ -115,7 +115,26 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
     // Create main timeline
-const preloaderTimeline = gsap.timeline();
+const preloaderTimeline = gsap.timeline(
+  {
+  onStart: () => {
+    // Disable Lenis scrolling at the start of preloader
+    if (lenis) {
+      lenis.stop();
+    }
+    // Fallback: also set body overflow hidden
+    document.body.style.overflow = 'hidden';
+  },
+  onComplete: () => {
+    // Re-enable Lenis scrolling when preloader completes
+    if (lenis) {
+      lenis.start();
+    }
+    // Remove body overflow restriction
+    document.body.style.overflow = '';
+  }
+}
+);
 
 // Set initial states
 gsap.set(".preloader_image_wrap img", {
