@@ -1,47 +1,113 @@
 document.addEventListener("DOMContentLoaded", function () {
   document.fonts.ready.then(() => {
-    // Initialize Lenis
-    const lenis = new Lenis({
-      touchMultiplier: 2,
-      wheelMultiplier: 1,
-    });
-
-    lenis.on("scroll", (e) => {
-      // console.log(e);
-    });
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    // Register ScrollTrigger plugin
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Connect Lenis with ScrollTrigger
-    lenis.on("scroll", ScrollTrigger.update);
-
-    ScrollTrigger.normalizeScroll(true);
-
-    // gsap.ticker.add((time) => {
-    //   lenis.raf(time * 1000);
+    // // Initialize Lenis
+    // const lenis = new Lenis({
+    //   touchMultiplier: 2,
+    //   wheelMultiplier: 1,
     // });
 
-    // gsap.ticker.lagSmoothing(0);
+    // lenis.on("scroll", (e) => {
+    //   // console.log(e);
+    // });
 
-    // Function to refresh ScrollTrigger instances
-    function refreshScrollTriggers() {
-      ScrollTrigger.refresh();
-      lenis.resize();
-    }
+    // function raf(time) {
+    //   lenis.raf(time);
+    //   requestAnimationFrame(raf);
+    // }
 
-    window.addEventListener("resize", refreshScrollTriggers);
+    // requestAnimationFrame(raf);
+
+    // // Register ScrollTrigger plugin
+    // gsap.registerPlugin(ScrollTrigger);
+
+    // // Connect Lenis with ScrollTrigger
+    // lenis.on("scroll", ScrollTrigger.update);
+
+    // ScrollTrigger.normalizeScroll(true);
+
+    // // gsap.ticker.add((time) => {
+    // //   lenis.raf(time * 1000);
+    // // });
+
+    // // gsap.ticker.lagSmoothing(0);
+
+    // // Function to refresh ScrollTrigger instances
+    // function refreshScrollTriggers() {
+    //   ScrollTrigger.refresh();
+    //   lenis.resize();
+    // }
+
+    // window.addEventListener("resize", refreshScrollTriggers);
+
+    // function isMobileViewport() {
+    //   return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
+    // }
+
 
     function isMobileViewport() {
       return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
     }
+
+    let lenis = null; // Initialize as null
+
+    // Only initialize Lenis if NOT on mobile
+    if (!isMobileViewport()) {
+      // Initialize Lenis for desktop/tablet only
+      lenis = new Lenis({
+        touchMultiplier: 2,
+        wheelMultiplier: 1,
+      });
+
+      lenis.on("scroll", (e) => {
+        // console.log(e);
+      });
+
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      requestAnimationFrame(raf);
+
+      // Connect Lenis with ScrollTrigger
+      lenis.on("scroll", ScrollTrigger.update);
+
+      ScrollTrigger.normalizeScroll(true);
+    } else {
+      // On mobile, just use ScrollTrigger without Lenis
+      console.log("Mobile detected - Lenis disabled, using native scroll");
+      ScrollTrigger.normalizeScroll(true);
+    }
+
+    // Register ScrollTrigger plugin (works with or without Lenis)
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Function to refresh ScrollTrigger instances
+    function refreshScrollTriggers() {
+      ScrollTrigger.refresh();
+      if (lenis) {
+        lenis.resize(); // Only call if Lenis exists
+      }
+    }
+
+    window.addEventListener("resize", refreshScrollTriggers);
+
+    // Handle resize events that might change mobile/desktop state
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const wasMobile = lenis === null;
+        const isMobileNow = isMobileViewport();
+        
+        // If viewport changed from desktop to mobile or vice versa
+        if (wasMobile !== isMobileNow) {
+          console.log("Viewport changed - consider page reload for optimal experience");
+          // Optionally, you could reload the page here:
+          // location.reload();
+        }
+      }, 250);
+    });
 
     /////////////////////////////////
     /////////////////////////////////
@@ -1619,124 +1685,6 @@ preloaderTimeline
     /* Footer social Cards*/
     /////////////////////////////////
     /////////////////////////////////
-
-    // Feed Items 3D Animation Class
-    // class FeedItemsAnimation {
-    //   constructor(container) {
-    //     // Element selections based on your HTML structure
-    //     this.container = container;
-    //     this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
-    //     this.feedSection = container.querySelector(".section_feed");
-    //     this.feedWrapper = container.querySelector(".feed_cms_wrapper");
-    //     this.feedContainer = container.querySelector(".feed_container");
-    //     this.feedWrapper = container.querySelector(".feed_cms_wrap");
-    //     this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
-
-    //     // Animation properties
-    //     this.targetZValue = 1;
-    //     this.closestItem = null;
-    //     this.closestZDifference = Infinity;
-    //     this.currIndex = 0;
-    //     this.newIndex = 0;
-    //     this.numItems = this.feedItems.length;
-    //     this.progress = 0;
-
-    //     this.init();
-    //   }
-
-    //   init() {
-    //     // Initial setup for feed items
-    //     gsap.set(this.feedItems, {
-    //       z: (index) => (index + 1) * -1800,
-    //       zIndex: (index) => index * -1,
-    //       opacity: 0,
-    //     });
-    //     this.feedSection.style.height = `${
-    //       (this.numItems + 1) * window.innerHeight
-    //     }px`;
-
-    //     this.createScrollTriggers();
-    //     this.getProgress();
-    //   }
-
-    //   // Main progress calculation and item positioning
-    //   getProgress = () => {
-    //     this.resetClosestItem();
-
-    //     this.feedItems.forEach((item) => {
-    //       let normalizedZ = gsap.utils.normalize(
-    //         -3000,
-    //         0,
-    //         gsap.getProperty(item, "z")
-    //       );
-    //       item.setAttribute("data-z", normalizedZ);
-
-    //       // Animate opacity based on z position
-    //       gsap.to(item, { opacity: normalizedZ + 0.2 });
-
-    //       // Scale images based on z position
-    //       const itemImage = item.querySelector(".feed_img");
-    //       if (itemImage) {
-    //         gsap.to(itemImage, {
-    //           scale: normalizedZ * 0.5 + 0.75,
-    //           ease: "expo.out",
-    //           duration: 0.5,
-    //         });
-    //       }
-
-    //       // Find closest item to target z value
-    //       let zDifference = Math.abs(normalizedZ - this.targetZValue);
-    //       if (zDifference < this.closestZDifference) {
-    //         this.closestZDifference = zDifference;
-    //         this.closestItem = item;
-    //       }
-    //     });
-
-    //     // Update current index
-    //     this.currIndex = this.feedItems.indexOf(this.closestItem);
-    //   };
-
-    //   resetClosestItem = () => {
-    //     this.closestItem = null;
-    //     this.closestZDifference = Infinity;
-    //   };
-
-    //   createScrollTriggers() {
-    //     // Main scroll animation for feed items z-positioning
-    //     ScrollTrigger.create({
-    //       trigger: this.feedContainer,
-    //       start: "top top",
-    //       end: () => `+=${this.numItems * window.innerHeight}`,
-    //       pin: this.feedContainer,
-    //       pinSpacing: true,
-    //       scrub: 0.1,
-    //       invalidateOnRefresh: true,
-    //       markers: false, // Remove this in production
-    //       immediateRender: false,
-    //       onUpdate: (self) => {
-    //         this.progress = self.progress;
-    //         this.progress = gsap.utils.clamp(0, 1, this.progress);
-
-    //         // Calculate z-offset to bring items forward as you scroll
-    //         let zOffset = this.progress * 1800 * this.numItems;
-    //         gsap.set(this.feedItems, {
-    //           z: (index) => (index + 1) * -1800 + zOffset,
-    //         });
-
-    //         this.getProgress();
-    //       },
-    //       onStart: () => {
-    //         // Ensure the pinned element starts at the top
-    //         gsap.set(this.feedList, {
-    //           position: "fixed",
-    //           top: 0,
-    //           left: "50%",
-    //           xPercent: -50,
-    //         });
-    //       },
-    //     });
-    //   }
-    // }
 
     class FeedItemsAnimation {
       constructor(container) {
