@@ -123,7 +123,7 @@ const preloaderTimeline = gsap.timeline(
       lenis.stop();
     }
     // Fallback: also set body overflow hidden
-    document.body.style.overflow = 'hidden';
+    // document.body.classList.add('u-live-noscroll');
   },
   onComplete: () => {
     // Re-enable Lenis scrolling when preloader completes
@@ -131,7 +131,7 @@ const preloaderTimeline = gsap.timeline(
       lenis.start();
     }
     // Remove body overflow restriction
-    document.body.style.overflow = '';
+    document.body.classList.remove('u-live-noscroll');
   }
 }
 );
