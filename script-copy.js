@@ -1521,7 +1521,10 @@ preloaderTimeline
           console.log(`Long scroll section ${index + 1} progress:`, progress);
           // Calculate progress values
           const progress1 = Math.min(progress / 0.6, 1);
-          const progress2 = progress >= 0.3 ? (progress - 0.3) / 0.55 : 0;
+          const progress2 = !isMobileViewport() 
+          ? (progress >= 0.3 ? (progress - 0.3) / 0.55 : 0)  // Desktop: start at 30%, finish at 85%
+          : (progress >= 0.45 ? (progress - 0.40) / 0.30 : 0); // Mobile: start at 45%, finish at 75%
+
           const progress3 =
             progress >= 0.4 && progress <= 0.55
               ? (progress - 0.4) / 0.15
