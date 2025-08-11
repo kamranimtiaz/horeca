@@ -1332,7 +1332,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Use SplitText to split the h2 into individual characters
       const splitText = new SplitText(title, {
-        type: "lines,chars",
+        type: "lines, chars",
         linesClass: "line",
         charsClass: "letter",
         reduceWhiteSpace: false,
@@ -1359,19 +1359,39 @@ document.addEventListener("DOMContentLoaded", function () {
             },
           });
         } else {
-          //Specific case for horizontal scroll with pinning
-          ScrollTrigger.create({
+          // Specific case for horizontal scroll with pinning
+
+          // Check if gridSection height is less than 70% of viewport height
+          const gridSectionHeight = gridSection
+            ? gridSection.getBoundingClientRect().height
+            : 0;
+          const viewportHeight = window.innerHeight;
+          const seventyPercentVH = viewportHeight * 0.7;
+
+          const shouldUseGridSectionAsEndTrigger =
+            gridSectionHeight < seventyPercentVH;
+
+          const scrollTriggerConfig = {
             trigger: container,
             pin: title,
             start: "top 20%",
-            endTrigger: gridSection,
             markers: false,
-            end: "bottom bottom",
             onComplete: () => {
               // Optional: Revert SplitText when animation completes
               // splitText.revert();
             },
-          });
+          };
+
+          // Conditionally set endTrigger and end based on grid section height
+          if (shouldUseGridSectionAsEndTrigger && gridSection) {
+            scrollTriggerConfig.endTrigger = gridSection;
+            scrollTriggerConfig.end = "bottom bottom";
+          } else {
+            // Default behavior when grid section is tall enough
+            scrollTriggerConfig.end = "+=" + dist;
+          }
+
+          ScrollTrigger.create(scrollTriggerConfig);
         }
       } else {
         ScrollTrigger.create({
