@@ -569,7 +569,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Split the h2 text into lines
       const splitText = new SplitText(h2Element, {
-        type: "lines",
+        type: "lines, words",
         linesClass: "fade-line",
       });
 
@@ -913,7 +913,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Start when hero section hits 20% from top
     ScrollTrigger.create({
       trigger: ".section_hero",
-      start: "top 20%",
+      start: () => (isMobileViewport() ? "top 80%" : "top 20%"),
       once: true,
       onEnter: () => {
         console.log("Hero section triggered, starting slideshow");
@@ -1332,8 +1332,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Use SplitText to split the h2 into individual characters
       const splitText = new SplitText(title, {
-        type: "chars",
+        type: "lines,chars",
+        linesClass: "line",
         charsClass: "letter",
+        reduceWhiteSpace: false,
       });
 
       // Calculate the distance for scattering
@@ -1697,6 +1699,219 @@ document.addEventListener("DOMContentLoaded", function () {
     /////////////////////////////////
     /////////////////////////////////
 
+    // class FeedItemsAnimation {
+    //   constructor(container) {
+    //     // Element selections based on your HTML structure
+    //     this.container = container;
+    //     this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
+    //     this.feedSection = container.querySelector(".section_feed");
+    //     this.feedWrapper = container.querySelector(".feed_cms_wrapper");
+    //     this.feedContainer = container.querySelector(".feed_container");
+    //     this.feedWrapper = container.querySelector(".feed_cms_wrap");
+    //     this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
+
+    //     // Background elements
+    //     this.bgItems = [...container.querySelectorAll(".feed_bg-content-item")];
+    //     this.bgContainer = container.querySelector(".feed_bg-content");
+
+    //     // Animation properties
+    //     this.targetZValue = 1;
+    //     this.closestItem = null;
+    //     this.closestZDifference = Infinity;
+    //     this.currIndex = 0;
+    //     this.newIndex = 0;
+    //     this.numItems = this.feedItems.length;
+    //     this.progress = 0;
+
+    //     this.init();
+    //   }
+
+    //   init() {
+    //     // Initial setup for feed items
+    //     gsap.set(this.feedItems, {
+    //       z: (index) => (index + 1) * -1800,
+    //       zIndex: (index) => index * -1,
+    //       opacity: 0,
+    //     });
+
+    //     // Initial setup for background items
+    //     if (this.bgContainer && this.bgItems.length > 0) {
+    //       // Set background container to opacity 0 initially
+    //       gsap.set(this.bgContainer, {
+    //         opacity: 0,
+    //       });
+
+    //       // Set all background items to opacity 0 initially
+    //       gsap.set(this.bgItems, {
+    //         opacity: 0,
+    //       });
+    //     }
+
+    //     this.feedSection.style.height = `${
+    //       (this.numItems + 1) * window.innerHeight
+    //     }px`;
+
+    //     this.createScrollTriggers();
+    //     this.getProgress();
+    //   }
+
+    //   // Main progress calculation and item positioning
+    //   getProgress = () => {
+    //     this.resetClosestItem();
+
+    //     this.feedItems.forEach((item) => {
+    //       let normalizedZ = gsap.utils.normalize(
+    //         -3000,
+    //         0,
+    //         gsap.getProperty(item, "z")
+    //       );
+    //       item.setAttribute("data-z", normalizedZ);
+
+    //       // Animate opacity based on z position
+    //       gsap.to(item, { opacity: normalizedZ + 0.2 });
+
+    //       // Scale images based on z position
+    //       const itemImage = item.querySelector(".feed_img");
+    //       if (itemImage) {
+    //         gsap.to(itemImage, {
+    //           scale: normalizedZ * 0.5 + 0.75,
+    //           ease: "expo.out",
+    //           duration: 0.5,
+    //         });
+    //       }
+
+    //       // Find closest item to target z value
+    //       let zDifference = Math.abs(normalizedZ - this.targetZValue);
+    //       if (zDifference < this.closestZDifference) {
+    //         this.closestZDifference = zDifference;
+    //         this.closestItem = item;
+    //       }
+    //     });
+
+    //     // Update current index and handle background transitions
+    //     const newIndex = this.feedItems.indexOf(this.closestItem);
+
+    //     if (newIndex !== this.currIndex) {
+    //       this.handleBackgroundTransition(newIndex);
+    //       this.currIndex = newIndex;
+    //     }
+    //   };
+
+    //   handleBackgroundTransition = (newIndex) => {
+    //     if (!this.bgItems.length) return;
+
+    //     // Fade out current background item if it exists
+    //     if (this.currIndex >= 0 && this.bgItems[this.currIndex]) {
+    //       gsap.to(this.bgItems[this.currIndex], {
+    //         opacity: 0,
+    //         duration: 0.3,
+    //         ease: "power2.out",
+    //       });
+    //     }
+
+    //     // Fade in new background item
+    //     if (this.bgItems[newIndex]) {
+    //       gsap.to(this.bgItems[newIndex], {
+    //         opacity: 1,
+    //         duration: 0.3,
+    //         ease: "power2.out",
+    //       });
+    //     }
+
+    //     this.newIndex = newIndex;
+    //   };
+
+    //   resetClosestItem = () => {
+    //     this.closestItem = null;
+    //     this.closestZDifference = Infinity;
+    //   };
+
+    //   createScrollTriggers() {
+    //     // Main scroll animation for feed items z-positioning
+    //     ScrollTrigger.create({
+    //       trigger: this.feedContainer,
+    //       start: "top top",
+    //       end: () => `+=${this.numItems * window.innerHeight}`,
+    //       pin: this.feedContainer,
+    //       pinSpacing: true,
+    //       scrub: 0.1,
+    //       invalidateOnRefresh: true,
+    //       markers: false, // Remove this in production
+    //       immediateRender: false,
+    //       onUpdate: (self) => {
+    //         this.progress = self.progress;
+    //         this.progress = gsap.utils.clamp(0, 1, this.progress);
+
+    //         // Calculate z-offset to bring items forward as you scroll
+    //         let zOffset = this.progress * 1800 * this.numItems;
+    //         gsap.set(this.feedItems, {
+    //           z: (index) => (index + 1) * -1800 + zOffset,
+    //         });
+
+    //         this.getProgress();
+    //       },
+    //       onEnter: () => {
+    //         // Show background container when entering the trigger area
+    //         if (this.bgContainer) {
+    //           gsap.to(this.bgContainer, {
+    //             opacity: 1,
+    //             duration: 0.3,
+    //             ease: "power2.out",
+    //           });
+    //         }
+
+    //         // Show first background item
+    //         if (this.bgItems[0]) {
+    //           gsap.to(this.bgItems[0], {
+    //             opacity: 1,
+    //             duration: 0.3,
+    //             ease: "power2.out",
+    //           });
+    //         }
+    //       },
+    //       onStart: () => {
+    //         // Ensure the pinned element starts at the top
+    //         gsap.set(this.feedList, {
+    //           position: "fixed",
+    //           top: 0,
+    //           left: "50%",
+    //           xPercent: -50,
+    //         });
+    //       },
+    //       onLeave: () => {
+    //         // Optional: fade out background when leaving the section
+    //         if (this.bgContainer) {
+    //           gsap.to(this.bgContainer, {
+    //             opacity: 0,
+    //             duration: 0.3,
+    //             ease: "power2.out",
+    //           });
+    //         }
+    //       },
+    //       onLeaveBack: () => {
+    //         // Hide background when scrolling back up and leaving the trigger area
+    //         if (this.bgContainer) {
+    //           gsap.to(this.bgContainer, {
+    //             opacity: 0,
+    //             duration: 0.3,
+    //             ease: "power2.out",
+    //           });
+    //         }
+    //       },
+    //       onEnterBack: () => {
+    //         // Show background again when entering back
+    //         if (this.bgContainer) {
+    //           gsap.to(this.bgContainer, {
+    //             opacity: 1,
+    //             duration: 0.3,
+    //             ease: "power2.out",
+    //           });
+    //         }
+    //       },
+    //     });
+    //   }
+    // }
+
     class FeedItemsAnimation {
       constructor(container) {
         // Element selections based on your HTML structure
@@ -1712,7 +1927,10 @@ document.addEventListener("DOMContentLoaded", function () {
         this.bgItems = [...container.querySelectorAll(".feed_bg-content-item")];
         this.bgContainer = container.querySelector(".feed_bg-content");
 
-        // Animation properties
+        // Mobile detection (using the same function from your code)
+        this.isMobile = window.innerWidth <= 767;
+
+        // Animation properties - adjust for mobile
         this.targetZValue = 1;
         this.closestItem = null;
         this.closestZDifference = Infinity;
@@ -1721,13 +1939,31 @@ document.addEventListener("DOMContentLoaded", function () {
         this.numItems = this.feedItems.length;
         this.progress = 0;
 
+        // Z-depth configuration based on device
+        this.zDepthConfig = {
+          desktop: {
+            initialSpacing: -1800, // Original spacing for desktop
+            totalRange: 3000, // Total range for normalization
+            maxOffset: 1800 * this.numItems,
+          },
+          mobile: {
+            initialSpacing: -900, // Half the spacing = items start closer
+            totalRange: 1500, // Adjusted range for normalization
+            maxOffset: 900 * this.numItems,
+          },
+        };
+
+        this.currentConfig = this.isMobile
+          ? this.zDepthConfig.mobile
+          : this.zDepthConfig.desktop;
+
         this.init();
       }
 
       init() {
-        // Initial setup for feed items
+        // Initial setup for feed items with mobile-specific positioning
         gsap.set(this.feedItems, {
-          z: (index) => (index + 1) * -1800,
+          z: (index) => (index + 1) * this.currentConfig.initialSpacing,
           zIndex: (index) => index * -1,
           opacity: 0,
         });
@@ -1758,8 +1994,9 @@ document.addEventListener("DOMContentLoaded", function () {
         this.resetClosestItem();
 
         this.feedItems.forEach((item) => {
+          // Use mobile-specific range for normalization
           let normalizedZ = gsap.utils.normalize(
-            -3000,
+            -this.currentConfig.totalRange,
             0,
             gsap.getProperty(item, "z")
           );
@@ -1768,11 +2005,15 @@ document.addEventListener("DOMContentLoaded", function () {
           // Animate opacity based on z position
           gsap.to(item, { opacity: normalizedZ + 0.2 });
 
-          // Scale images based on z position
+          // Scale images based on z position with mobile-specific scaling
           const itemImage = item.querySelector(".feed_img");
           if (itemImage) {
+            // Slightly different scaling for mobile to account for closer starting position
+            const scaleMultiplier = this.isMobile ? 0.6 : 0.5;
+            const baseScale = this.isMobile ? 0.8 : 0.75;
+
             gsap.to(itemImage, {
-              scale: normalizedZ * 0.5 + 0.75,
+              scale: normalizedZ * scaleMultiplier + baseScale,
               ease: "expo.out",
               duration: 0.5,
             });
@@ -1840,10 +2081,11 @@ document.addEventListener("DOMContentLoaded", function () {
             this.progress = self.progress;
             this.progress = gsap.utils.clamp(0, 1, this.progress);
 
-            // Calculate z-offset to bring items forward as you scroll
-            let zOffset = this.progress * 1800 * this.numItems;
+            // Calculate z-offset using mobile-specific values
+            let zOffset = this.progress * this.currentConfig.maxOffset;
             gsap.set(this.feedItems, {
-              z: (index) => (index + 1) * -1800 + zOffset,
+              z: (index) =>
+                (index + 1) * this.currentConfig.initialSpacing + zOffset,
             });
 
             this.getProgress();
