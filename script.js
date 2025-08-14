@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Register ScrollTrigger plugin (works with or without Lenis)
+  gsap.registerPlugin(ScrollTrigger, SplitText);
   document.fonts.ready.then(() => {
     function isMobileViewport() {
       return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
@@ -33,9 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("Mobile detected - Lenis disabled, using native scroll");
       ScrollTrigger.normalizeScroll(true);
     }
-
-    // Register ScrollTrigger plugin (works with or without Lenis)
-    gsap.registerPlugin(ScrollTrigger, SplitText);
 
     // Function to refresh ScrollTrigger instances
     function refreshScrollTriggers() {
@@ -79,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
           lenis.stop();
         }
         // Fallback: also set body overflow hidden
-        // document.body.classList.add('u-live-noscroll');
+        //  document.body.classList.add('u-live-noscroll');
       },
       onComplete: () => {
         // Re-enable Lenis scrolling when preloader completes
@@ -87,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
           lenis.start();
         }
         // Remove body overflow restriction
-        document.body.classList.remove("u-live-noscroll");
+        // document.body.classList.remove("u-live-noscroll");
       },
     });
 
@@ -131,10 +130,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Split preloader title into characters
     if (preloaderTitle) {
-      titleSplit = new SplitText(preloaderTitle, { type: "chars" });
-      gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
       // Hide the original title container
       gsap.set(preloaderTitle, { opacity: 1 });
+
+      titleSplit = new SplitText(preloaderTitle, { type: "chars" });
+      gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
     }
 
     // Timeline animations
@@ -571,31 +571,31 @@ document.addEventListener("DOMContentLoaded", function () {
       const splitText = new SplitText(h2Element, {
         type: "lines, words",
         linesClass: "fade-line",
-      });
-
-      const lines = splitText.lines;
-
-      // Create the fade-in animation
-      gsap.fromTo(
-        lines,
-        {
-          opacity: 0,
-          yPercent: 100,
+        autoSplit: true,
+        onSplit: (self) => {
+          return gsap.fromTo(
+            self.lines,
+            {
+              opacity: 0,
+              yPercent: 100,
+            },
+            {
+              opacity: 1,
+              yPercent: 0,
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: wrapper,
+                start: "top 70%",
+                // markers: true, // Uncomment for debugging
+                once: true,
+              },
+              onComplete: () => splitText.revert(),
+            }
+          );
         },
-        {
-          opacity: 1,
-          yPercent: 0,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: wrapper,
-            start: "top 70%",
-            // markers: true, // Uncomment for debugging
-            once: true,
-          },
-        }
-      );
+      });
     });
 
     /////////////////////////////////
@@ -1353,6 +1353,7 @@ document.addEventListener("DOMContentLoaded", function () {
             pin: title,
             start: "top 20%",
             end: "+=" + dist,
+            markers: true,
             onComplete: () => {
               // Optional: Revert SplitText when animation completes
               // splitText.revert();
@@ -1375,7 +1376,7 @@ document.addEventListener("DOMContentLoaded", function () {
             trigger: container,
             pin: title,
             start: "top 20%",
-            markers: false,
+            markers: true,
             onComplete: () => {
               // Optional: Revert SplitText when animation completes
               // splitText.revert();
@@ -1399,6 +1400,7 @@ document.addEventListener("DOMContentLoaded", function () {
           pin: title,
           start: "top 20%",
           end: "+=" + dist,
+          markers: true,
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
@@ -1418,6 +1420,7 @@ document.addEventListener("DOMContentLoaded", function () {
             trigger: shouldPin ? title : container, // Use title if pinned, container if not
             start: "top 20%",
             end: "+=" + randomDistance,
+            markers: true,
             scrub: true,
           },
         });
