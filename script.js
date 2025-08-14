@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Register ScrollTrigger plugin (works with or without Lenis)
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, SplitText);
 
     // Function to refresh ScrollTrigger instances
     function refreshScrollTriggers() {
