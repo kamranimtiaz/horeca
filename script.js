@@ -92,17 +92,27 @@ document.addEventListener("DOMContentLoaded", function () {
       // Disable lag smoothing for better accuracy in scroll-linked animations
       gsap.ticker.lagSmoothing(0);
     } else {
-      // MOBILE: Your original config + minimal mobile optimizations
+      // MOBILE: Exact values from external code
       const lenis = new Lenis({
-        touchMultiplier: 2,
-        wheelMultiplier: 1,
+        // From external code - mobile config
+        touchMultiplier: 1, // External code uses 1 for mobile (not 1.5!)
+        wheelMultiplier: 0.8, // External code mobile value
         smooth: true,
-        smoothTouch: false, // Keep this false like your original
+        smoothTouch: false, // External code keeps this false
         
-        // ONLY ADD these minimal mobile optimizations:
-        syncTouch: true, // Enable touch sync on mobile
+        // External code mobile optimizations:
+        syncTouch: true,
         syncTouchLerp: 0.075,
-        touchInertiaMultiplier: 35,
+        touchInertiaMultiplier: 25, // External code value
+        
+        // External code uses these mobile-specific values:
+        lerp: 0.05, // Much slower lerp for smoother mobile scrolling
+        duration: 1.5, // Longer duration for mobile
+        overscroll: false, // Disabled on mobile in external code
+        autoResize: true,
+        
+        // External code mobile easing (smoother curve):
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       });
 
       // Same ScrollTrigger integration as your original
