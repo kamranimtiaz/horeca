@@ -75,10 +75,24 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!isMobileViewport()) {
       // DESKTOP: Your exact original configuration
       const lenis = new Lenis({
-        touchMultiplier: 2,
+        touchMultiplier: 1,
         wheelMultiplier: 1,
         smooth: true,
         smoothTouch: false,
+
+
+        syncTouch: true,
+        syncTouchLerp: 0.075,
+        touchInertiaMultiplier: 25, // External code value
+        
+        // External code uses these mobile-specific values:
+        lerp: 0.05, // Much slower lerp for smoother mobile scrolling
+        duration: 1.5, // Longer duration for mobile
+        overscroll: false, // Disabled on mobile in external code
+        autoResize: true,
+        
+        // External code mobile easing (smoother curve):
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
       });
 
       // Keep ScrollTrigger in sync with Lenis
