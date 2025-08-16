@@ -404,7 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
         opacity: 1,
       });
 
-
       const mobileTimeline = createPreloaderTimeline();
 
       mobileTimeline
@@ -492,21 +491,20 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const desktopTimeline = createPreloaderTimeline();
+      const titleChars = titleSplit ? titleSplit.chars : [];
+
 
       desktopTimeline
 
-        .to(
-          titleSplit ? titleSplit.chars : [],
-          {
-            yPercent: 0,
-            opacity: 1,
-            duration: 0.75, // 1 second total duration for the stagger effect
-            ease: "power2.out",
-            stagger: 0.05, // Character by character stagger
-          },
-        )
+        .to(titleSplit ? titleSplit.chars : [], {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.75, // 1 second total duration for the stagger effect
+          ease: "power2.out",
+          stagger: 0.05, // Character by character stagger
+        })
         // 2. Hold for a moment
-        .to({}, { duration: 0.7 })
+        .to({}, { duration: 0.3 })
 
         // 3. Animate title characters out (to -100%) before preloader closes
         .to(titleSplit ? titleSplit.chars : [], {
@@ -517,14 +515,18 @@ document.addEventListener("DOMContentLoaded", function () {
           stagger: 0.03, // Faster stagger for exit
         })
         // 4. Animate preloader out
-        .to(".preloader_wrap", {
-          height: "0svh",
-          duration: 1.2,
-          ease: "power4.out",
-          onComplete: function () {
-            gsap.set(".preloader_wrap", { display: "none" });
+        .to(
+          ".preloader_wrap",
+          {
+            height: "0svh",
+            duration: 1.1,
+            ease: "power4.out",
+            onComplete: function () {
+              gsap.set(".preloader_wrap", { display: "none" });
+            },
           },
-        })
+          (titleChars.length - 1) * 0.03
+        )
 
         // 5. Animate on-load elements (starts 0.5s before preloader finishes)
         .to(
