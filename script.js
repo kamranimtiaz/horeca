@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /////////////////////////////////
     /////////////////////////////////
-    /* Hero Navbar */
+    /* Pre loader animation */
     /////////////////////////////////
     /////////////////////////////////
 
@@ -493,7 +493,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const desktopTimeline = createPreloaderTimeline();
       const titleChars = titleSplit ? titleSplit.chars : [];
 
-
       desktopTimeline
 
         .to(titleSplit ? titleSplit.chars : [], {
@@ -525,7 +524,7 @@ document.addEventListener("DOMContentLoaded", function () {
               gsap.set(".preloader_wrap", { display: "none" });
             },
           },
-          (titleChars.length - 1) * 0.03
+          "<+" + (titleSplit ? (titleSplit.chars.length - 1) * 0.03 + 0.5 : 0.7)
         )
 
         // 5. Animate on-load elements (starts 0.5s before preloader finishes)
@@ -578,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /////////////////////////////////
     /////////////////////////////////
-    /* Hero Navbar */
+    /* Hero */
     /////////////////////////////////
     /////////////////////////////////
 
@@ -893,7 +892,60 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 250);
       });
     }
-    !isMobileViewport() ? initializeNavbarAnimation() : "";
+    // Alternative version using ScrollTrigger (more performant for complex animations)
+    function initializeNavbarScrollBehaviorWithScrollTrigger() {
+      // Only run on desktop
+      if (isMobileViewport()) return;
+
+      const navComponent = document.querySelector(".nav_component");
+      if (!navComponent) return;
+
+      ScrollTrigger.create({
+        start: "top -100", // Start after 100px scroll
+        end: 99999,
+        onUpdate: (self) => {
+          const direction = self.direction;
+
+          if (direction === 1) {
+            // Scrolling down - hide navbar
+            gsap.to(navComponent, {
+              yPercent: -175,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+          } else {
+            // Scrolling up - show navbar
+            gsap.to(navComponent, {
+              yPercent: 0,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+          }
+        },
+      });
+
+      // Always show navbar when at top
+      ScrollTrigger.create({
+        start: "top top",
+        end: "top -100",
+        onEnter: () => {
+          gsap.to(navComponent, {
+            yPercent: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(navComponent, {
+            yPercent: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+      });
+    }
+    !isMobileViewport() ? initializeNavbarAnimation(): "";
+    !isMobileViewport() ? initializeNavbarScrollBehaviorWithScrollTrigger() : "";
 
     /////////////////////////////////
     /////////////////////////////////
@@ -1708,15 +1760,18 @@ document.addEventListener("DOMContentLoaded", function () {
           // Specific case for horizontal scroll with pinning
 
           // Check if gridSection height is less than 70% of viewport height
-          const gridSectionHeight = gridSection
-            ? gridSection.getBoundingClientRect().height
+          const horizontalWrapper = document.querySelector(
+        '[data-gsap-wrapper="horizontal-scroll"]'
+      );
+          const gridSectionHeight = horizontalWrapper
+            ? horizontalWrapper.getBoundingClientRect().height
             : 0;
           const viewportHeight = window.innerHeight;
-          const seventyPercentVH = viewportHeight * 0.7;
+          const seventyPercentVH = viewportHeight * 0.80;
 
           const shouldUseGridSectionAsEndTrigger =
             gridSectionHeight < seventyPercentVH;
-
+          console.log(gridSectionHeight, seventyPercentVH)
           const scrollTriggerConfig = {
             trigger: container,
             pin: title,
