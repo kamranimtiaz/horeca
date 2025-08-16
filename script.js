@@ -404,15 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
         opacity: 1,
       });
 
-      // Split preloader title into characters for mobile
-      if (preloaderTitle) {
-        gsap.set(preloaderTitle, { opacity: 1 });
-        console.log("Mobile: Preloader Title is set to show");
-
-        titleSplit = new SplitText(preloaderTitle, { type: "chars" });
-        console.log("Mobile titleSplit:", titleSplit);
-        gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
-      }
 
       const mobileTimeline = createPreloaderTimeline();
 
@@ -490,16 +481,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // DESKTOP TIMELINE
       console.log("Initializing desktop preloader timeline");
 
-      // Desktop-specific initial states - NO image animation
-      gsap.set(".preloader_image_wrap img", {
-        scale: 1,
-        opacity: 1,
-      });
-
-      // NO title split for desktop - title stays static
+      // Split preloader title into characters for mobile
       if (preloaderTitle) {
         gsap.set(preloaderTitle, { opacity: 1 });
-        console.log("Desktop: Preloader Title is visible but not animated");
+        console.log("Mobile: Preloader Title is set to show");
+
+        titleSplit = new SplitText(preloaderTitle, { type: "chars" });
+        console.log("Mobile titleSplit:", titleSplit);
+        gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
       }
 
       const desktopTimeline = createPreloaderTimeline();
@@ -511,26 +500,26 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             yPercent: 0,
             opacity: 1,
-            duration: 1, // 1 second total duration for the stagger effect
+            duration: 0.75, // 1 second total duration for the stagger effect
             ease: "power2.out",
             stagger: 0.05, // Character by character stagger
           },
         )
         // 2. Hold for a moment
-        .to({}, { duration: 1 })
+        .to({}, { duration: 0.7 })
 
         // 3. Animate title characters out (to -100%) before preloader closes
         .to(titleSplit ? titleSplit.chars : [], {
           yPercent: -100,
           opacity: 0,
-          duration: 0.8,
+          duration: 0.7,
           ease: "power2.in",
           stagger: 0.03, // Faster stagger for exit
         })
         // 4. Animate preloader out
         .to(".preloader_wrap", {
           height: "0svh",
-          duration: 1.5,
+          duration: 1.2,
           ease: "power4.out",
           onComplete: function () {
             gsap.set(".preloader_wrap", { display: "none" });
