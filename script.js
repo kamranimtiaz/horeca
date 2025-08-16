@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   /**/ /////////////////////////////////////// */
-  // // document.fonts.ready.then(() => {
+  document.fonts.ready.then(() => {
   // function isMobileViewport() {
   //   return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
   // }
@@ -79,15 +79,13 @@ document.addEventListener("DOMContentLoaded", function () {
         wheelMultiplier: 1,
         smooth: true,
         smoothTouch: false,
-
-
         syncTouch: true,
         syncTouchLerp: 0.075,
         touchInertiaMultiplier: 25, // External code value
         
         // External code uses these mobile-specific values:
-        lerp: 0.05, // Much slower lerp for smoother mobile scrolling
-        duration: 1.5, // Longer duration for mobile
+        lerp: 0.1, // Much slower lerp for smoother mobile scrolling
+        duration: 1.2, // Longer duration for mobile
         overscroll: false, // Disabled on mobile in external code
         autoResize: true,
         
@@ -109,19 +107,19 @@ document.addEventListener("DOMContentLoaded", function () {
       // MOBILE: Exact values from external code
       const lenis = new Lenis({
         // From external code - mobile config
-        touchMultiplier: 1, // External code uses 1 for mobile (not 1.5!)
+        touchMultiplier: 1.2, // External code uses 1 for mobile (not 1.5!)
         wheelMultiplier: 0.8, // External code mobile value
         smooth: true,
         smoothTouch: false, // External code keeps this false
         
         // External code mobile optimizations:
         syncTouch: true,
-        syncTouchLerp: 0.075,
-        touchInertiaMultiplier: 25, // External code value
+        syncTouchLerp: 0.01,
+        touchInertiaMultiplier: 30, // External code value
         
         // External code uses these mobile-specific values:
-        lerp: 0.05, // Much slower lerp for smoother mobile scrolling
-        duration: 1.5, // Longer duration for mobile
+        lerp: 0.15, // Much slower lerp for smoother mobile scrolling
+        duration: 1.25, // Longer duration for mobile
         overscroll: false, // Disabled on mobile in external code
         autoResize: true,
         
@@ -1453,7 +1451,7 @@ document.addEventListener("DOMContentLoaded", function () {
           pin: title,
           start: "top 20%",
           end: "+=" + dist,
-          markers: true,
+          // markers: true,
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
@@ -1476,7 +1474,7 @@ document.addEventListener("DOMContentLoaded", function () {
           trigger: container,
           pin: title,
           start: "top 20%",
-          markers: true,
+          // markers: true,
           onComplete: () => {
             // Optional: Revert SplitText when animation completes
             // splitText.revert();
@@ -1500,7 +1498,7 @@ document.addEventListener("DOMContentLoaded", function () {
         pin: title,
         start: "top 20%",
         end: "+=" + dist,
-        markers: true,
+        // markers: true,
         onComplete: () => {
           // Optional: Revert SplitText when animation completes
           // splitText.revert();
@@ -1520,7 +1518,7 @@ document.addEventListener("DOMContentLoaded", function () {
           trigger: shouldPin ? title : container, // Use title if pinned, container if not
           start: "top 20%",
           end: "+=" + randomDistance,
-          markers: true,
+          // markers: true,
           scrub: true,
         },
       });
@@ -2379,7 +2377,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
   });
-  // });
+  });
 
   /////////////////////////////////
   /////////////////////////////////
