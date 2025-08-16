@@ -115,13 +115,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // External code mobile optimizations:
         syncTouch: true,
         syncTouchLerp: 0.1,
-        touchInertiaMultiplier: 35, // External code value
+        touchInertiaMultiplier: 25, // External code value
         
         // External code uses these mobile-specific values:
         lerp: 0.08, // Much slower lerp for smoother mobile scrolling
         duration: 1.25, // Longer duration for mobile
-        overscroll: false, // Disabled on mobile in external code
-        autoResize: true,
         
         // External code mobile easing (smoother curve):
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -130,11 +128,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // Same ScrollTrigger integration as your original
       lenis.on("scroll", ScrollTrigger.update);
 
+
       gsap.ticker.add((time) => {
         lenis.raf(time * 1000);
       });
 
       gsap.ticker.lagSmoothing(0);
+
+      ScrollTrigger.normalizeScroll(true);
       
       // Minimal iOS fixes
       document.body.style.webkitOverflowScrolling = 'auto';
