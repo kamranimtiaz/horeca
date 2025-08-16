@@ -107,19 +107,19 @@ document.addEventListener("DOMContentLoaded", function () {
       // MOBILE: Exact values from external code
       const lenis = new Lenis({
         // From external code - mobile config
-        touchMultiplier: 1.2, // External code uses 1 for mobile (not 1.5!)
+        touchMultiplier: 1.25, // External code uses 1 for mobile (not 1.5!)
         wheelMultiplier: 0.8, // External code mobile value
         smooth: true,
         smoothTouch: false, // External code keeps this false
         
         // External code mobile optimizations:
         syncTouch: true,
-        syncTouchLerp: 0.1,
-        touchInertiaMultiplier: 25, // External code value
+        syncTouchLerp: 0.12,
+        touchInertiaMultiplier: 30, // External code value
         
         // External code uses these mobile-specific values:
-        lerp: 0.08, // Much slower lerp for smoother mobile scrolling
-        duration: 1.25, // Longer duration for mobile
+        lerp: 0.1, // Much slower lerp for smoother mobile scrolling
+        duration: 1.4, // Longer duration for mobile
         
         // External code mobile easing (smoother curve):
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
