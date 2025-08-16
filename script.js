@@ -114,11 +114,11 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // External code mobile optimizations:
         syncTouch: true,
-        syncTouchLerp: 0.01,
-        touchInertiaMultiplier: 30, // External code value
+        syncTouchLerp: 0.1,
+        touchInertiaMultiplier: 35, // External code value
         
         // External code uses these mobile-specific values:
-        lerp: 0.15, // Much slower lerp for smoother mobile scrolling
+        lerp: 0.08, // Much slower lerp for smoother mobile scrolling
         duration: 1.25, // Longer duration for mobile
         overscroll: false, // Disabled on mobile in external code
         autoResize: true,
