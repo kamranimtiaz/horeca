@@ -1668,8 +1668,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Use SplitText to split the h2 into individual characters
     const splitText = new SplitText(title, {
-      type: "lines, chars",
-      linesClass: "line",
+      type: "chars",
       charsClass: "letter",
       reduceWhiteSpace: false,
     });
