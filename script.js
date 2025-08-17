@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Re-enable Lenis scrolling when preloader completes
         if (lenis) {
           lenis.start();
+          refreshScrollTriggers();
         }
       },
     });
@@ -352,7 +353,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.fonts.ready
     .then(() => {
       console.log("Fonts loaded via document.fonts.ready - refreshing");
-      refreshScrollTriggers();
 
       /////////////////////////////////
       /////////////////////////////////
