@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   /**/ /////////////////////////////////////// */
-  document.fonts.ready.then(() => {
+  // document.fonts.ready.then(() => {
     // function isMobileViewport() {
     //   return window.innerWidth <= 767; // or any breakpoint you consider "mobile"
     // }
@@ -346,20 +346,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const createPreloaderTimeline = () => {
       return gsap.timeline({
         onStart: () => {
+          // Fallback: also set body overflow hidden
+           document.body.classList.add('u-live-noscroll');
+
           // Disable Lenis scrolling at the start of preloader
+
           if (lenis) {
             lenis.stop();
           }
-          // Fallback: also set body overflow hidden
-          //  document.body.classList.add('u-live-noscroll');
+          
         },
         onComplete: () => {
+
+          // Remove body overflow restriction
+          document.body.classList.remove("u-live-noscroll");
+          
           // Re-enable Lenis scrolling when preloader completes
           if (lenis) {
             lenis.start();
           }
-          // Remove body overflow restriction
-          // document.body.classList.remove("u-live-noscroll");
+          
         },
       });
     };
@@ -407,9 +413,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const mobileTimeline = createPreloaderTimeline();
 
       mobileTimeline
-        // 1. Animate the image from scale 1 to 1.25
+        // 1. Animate the image from scale 1 to 1.1
         .to(".preloader_image_wrap img", {
-          scale: 1.25,
+          scale: 1.1,
           duration: 1.5,
           ease: "power4.out",
         })
@@ -2685,7 +2691,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
     });
-  });
+  // });
 
   /////////////////////////////////
   /////////////////////////////////
