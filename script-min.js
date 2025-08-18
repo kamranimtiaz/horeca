@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-//   window.addEventListener("resize", );
+  //   window.addEventListener("resize", );
 
   // Handle resize events
   let resizeTimeout;
@@ -346,6 +346,30 @@ document.addEventListener("DOMContentLoaded", function () {
         "-=1"
       ); // Start slightly before video animation completes
   }
+
+  // Modal Opening and closing code
+
+  // Disable Lenis for buttons with data-lenis-stop
+  document.querySelectorAll("[data-lenis-stop]").forEach((button) => {
+    button.addEventListener("click", () => {
+      console.log("Popup button clicked");
+      if (lenis) {
+        lenis.stop();
+        document.body.classList.add("u-live-noscroll");
+        console.log("popup opened");
+      }
+    });
+  });
+
+  // Enable Lenis for buttons with data-lenis-start
+  document.querySelectorAll("[data-lenis-start]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (lenis) {
+        lenis.start();
+        document.body.classList.remove("u-live-noscroll");
+      }
+    });
+  });
 
   /////////////////////////////////
   /////////////////////////////////
@@ -1467,9 +1491,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const headingWrapper = container.querySelector(
         '[data-animate-heading="h2"]'
       );
-      const title = headingWrapper
-        ? headingWrapper.querySelector("h2")
-        : null;
+      const title = headingWrapper ? headingWrapper.querySelector("h2") : null;
 
       if (!title) return; // Skip if no h2 found
 
@@ -1585,9 +1607,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const stickyContent = longScrollSection.querySelector(
         "[data-gsap-state='pinned']"
       );
-      const textTop = longScrollSection.querySelector(
-        "[data-gsap-text='top']"
-      );
+      const textTop = longScrollSection.querySelector("[data-gsap-text='top']");
       const textMiddle = longScrollSection.querySelector(
         "[data-gsap-text='middle']"
       );
@@ -1603,9 +1623,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const beforePivot = textMiddle?.querySelector(
         "[data-gsap-pivot='before']"
       );
-      const afterPivot = textMiddle?.querySelector(
-        "[data-gsap-pivot='after']"
-      );
+      const afterPivot = textMiddle?.querySelector("[data-gsap-pivot='after']");
 
       // Guard clause: Skip if essential elements are missing
       if (!stickyContent) {
@@ -1802,11 +1820,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let headerHeight = "8rem"; // rem
 
-    if (
-      accordionContainer &&
-      accordionHeaders.length > 0 &&
-      accordionWrapper
-    ) {
+    if (accordionContainer && accordionHeaders.length > 0 && accordionWrapper) {
       const totalItemsCount = accordionHeaders.length;
       const sectionHeight = accordionContainer.getBoundingClientRect().height;
       const wrapperHeight = accordionWrapper.offsetHeight;
@@ -1841,8 +1855,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      const accordionContainers =
-        document.querySelectorAll("[data-accordion]");
+      const accordionContainers = document.querySelectorAll("[data-accordion]");
 
       ScrollTrigger.create({
         trigger: accordionWrapper,
@@ -1853,9 +1866,9 @@ document.addEventListener("DOMContentLoaded", function () {
             container.classList.add("inview");
           });
 
-          setTimeout(()=>{
+          setTimeout(() => {
             refreshScrollTriggers();
-          }, 50)
+          }, 50);
         },
         onLeaveBack: () => {
           accordionContainers.forEach((container) => {
@@ -1881,9 +1894,7 @@ document.addEventListener("DOMContentLoaded", function () {
         this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
 
         // Background elements
-        this.bgItems = [
-          ...container.querySelectorAll(".feed_bg-content-item"),
-        ];
+        this.bgItems = [...container.querySelectorAll(".feed_bg-content-item")];
         this.bgContainer = container.querySelector(".feed_bg-content");
 
         // Mobile detection (using the same function from your code)
@@ -2216,7 +2227,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // IMPORTANT: Refresh ScrollTrigger after all animations are set up
-    console.log("Font-dependent animations initialized - refreshing ScrollTrigger");
+    console.log(
+      "Font-dependent animations initialized - refreshing ScrollTrigger"
+    );
     // setTimeout(() => {
     //   refreshScrollTriggers();
     // }, 100);
@@ -2227,7 +2240,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready
       .then(() => {
-        console.log("Fonts loaded via document.fonts.ready - initializing animations");
+        console.log(
+          "Fonts loaded via document.fonts.ready - initializing animations"
+        );
         initializeFontDependentAnimations();
       })
       .catch((error) => {
