@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
       syncTouch: true,
       syncTouchLerp: 0.075,
       touchInertiaMultiplier: 25, // External code value
+      prevent: (node) => node.id === "modal_content",
 
       // External code uses these mobile-specific values:
       lerp: 0.1, // Much slower lerp for smoother mobile scrolling
@@ -48,7 +49,8 @@ document.addEventListener("DOMContentLoaded", function () {
       wheelMultiplier: 0.8, // External code mobile value
       smooth: true,
       smoothTouch: false, // External code keeps this false
-
+      prevent: (node) => node.id === "modal_content",
+      
       // External code mobile optimizations:
       syncTouch: true,
       syncTouchLerp: 0.12,
@@ -74,8 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
     ScrollTrigger.normalizeScroll(true);
 
     // Minimal iOS fixes
-    // document.body.style.webkitOverflowScrolling = "auto";
-    // document.body.style.overscrollBehavior = "none";
+    document.body.style.webkitOverflowScrolling = "auto";
+    document.body.style.overscrollBehavior = "none";
 
     console.log("Mobile: Using original config + minimal mobile optimizations");
   }
@@ -355,18 +357,22 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("Popup button clicked");
       if (lenis) {
         lenis.stop();
-        document.body.classList.add("u-live-noscroll");
+        ScrollTrigger.normalizeScroll(false);
+        // document.body.classList.add("u-live-noscroll");
         console.log("popup opened");
       }
     });
   });
+
 
   // Enable Lenis for buttons with data-lenis-start
   document.querySelectorAll("[data-lenis-start]").forEach((button) => {
     button.addEventListener("click", () => {
       if (lenis) {
         lenis.start();
-        document.body.classList.remove("u-live-noscroll");
+        ScrollTrigger.normalizeScroll(true);
+        //  ScrollTrigger.enable();
+        // document.body.classList.remove("u-live-noscroll");
       }
     });
   });
