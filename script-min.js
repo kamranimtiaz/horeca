@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   function isMobileViewport() {
-    return window.innerWidth <= 767;
+    return window.innerWidth <= 991;
   }
 
   let lenis = null;
@@ -356,9 +356,9 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", () => {
       console.log("Popup button clicked");
       if (lenis) {
-        lenis.stop();
+        // lenis.stop();
         ScrollTrigger.normalizeScroll(false);
-        // document.body.classList.add("u-live-noscroll");
+        document.body.classList.add("u-live-noscroll");
         console.log("popup opened");
       }
     });
@@ -369,10 +369,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("[data-lenis-start]").forEach((button) => {
     button.addEventListener("click", () => {
       if (lenis) {
-        lenis.start();
+        // lenis.start();
         ScrollTrigger.normalizeScroll(true);
         //  ScrollTrigger.enable();
-        // document.body.classList.remove("u-live-noscroll");
+        document.body.classList.remove("u-live-noscroll");
       }
     });
   });
