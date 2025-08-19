@@ -348,10 +348,9 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", () => {
       console.log("Popup button clicked");
       if (lenis) {
-        // lenis.stop();
-        ScrollTrigger.normalizeScroll(false);
-        // document.body.classList.add("u-live-noscroll");
-        console.log("popup opened");
+        lenis.stop();
+      } else {
+       document.body.classList.add("u-live-noscroll");
       }
     });
   });
@@ -360,10 +359,9 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("[data-lenis-start]").forEach((button) => {
     button.addEventListener("click", () => {
       if (lenis) {
-        // lenis.start();
-        ScrollTrigger.normalizeScroll(true);
-        //  ScrollTrigger.enable();
-        // document.body.classList.remove("u-live-noscroll");
+        lenis.start();
+      } else{
+        document.body.classList.remove("u-live-noscroll");
       }
     });
   });
