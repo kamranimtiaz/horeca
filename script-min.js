@@ -2,6 +2,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Register ScrollTrigger plugin (works with or without Lenis)
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
+  function detectTouch() {
+    return (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(pointer: coarse)").matches
+    );
+  }
+
+  console.log(detectTouch()); // true/false
+
   function isMobileViewport() {
     return window.innerWidth <= 991;
   }
@@ -11,36 +21,38 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize Lenis for ALL devices - keep your original working config!
   if (!isMobileViewport()) {
     // DESKTOP: Your exact original configuration
-    lenis = new Lenis({
-      touchMultiplier: 1,
-      wheelMultiplier: 1,
-      smooth: true,
-      smoothTouch: false,
-      syncTouch: true,
-      syncTouchLerp: 0.075,
-      touchInertiaMultiplier: 25, // External code value
-      prevent: (node) => node.id === "modal_content",
+    if (!detectTouch) {
+      lenis = new Lenis({
+        touchMultiplier: 1,
+        wheelMultiplier: 1,
+        smooth: true,
+        smoothTouch: false,
+        syncTouch: true,
+        syncTouchLerp: 0.075,
+        touchInertiaMultiplier: 25, // External code value
+        prevent: (node) => node.id === "modal_content",
 
-      // External code uses these mobile-specific values:
-      lerp: 0.1, // Much slower lerp for smoother mobile scrolling
-      duration: 1.2, // Longer duration for mobile
-      overscroll: false, // Disabled on mobile in external code
-      autoResize: true,
+        // External code uses these mobile-specific values:
+        lerp: 0.1, // Much slower lerp for smoother mobile scrolling
+        duration: 1.2, // Longer duration for mobile
+        overscroll: false, // Disabled on mobile in external code
+        autoResize: true,
 
-      // External code mobile easing (smoother curve):
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
+        // External code mobile easing (smoother curve):
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
 
-    // Keep ScrollTrigger in sync with Lenis
-    lenis.on("scroll", ScrollTrigger.update);
+      // Keep ScrollTrigger in sync with Lenis
+      lenis.on("scroll", ScrollTrigger.update);
 
-    // Use GSAP's ticker instead of requestAnimationFrame for smoother sync
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000); // GSAP provides time in seconds; Lenis needs ms
-    });
+      // Use GSAP's ticker instead of requestAnimationFrame for smoother sync
+      gsap.ticker.add((time) => {
+        lenis.raf(time * 1000); // GSAP provides time in seconds; Lenis needs ms
+      });
 
-    // Disable lag smoothing for better accuracy in scroll-linked animations
-    gsap.ticker.lagSmoothing(0);
+      // Disable lag smoothing for better accuracy in scroll-linked animations
+      gsap.ticker.lagSmoothing(0);
+    }
   } else {
     // // MOBILE: Exact values from external code
     // lenis = new Lenis({
@@ -350,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (lenis) {
         lenis.stop();
       } else {
-       document.body.classList.add("u-live-noscroll");
+        document.body.classList.add("u-live-noscroll");
       }
     });
   });
@@ -360,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", () => {
       if (lenis) {
         lenis.start();
-      } else{
+      } else {
         document.body.classList.remove("u-live-noscroll");
       }
     });
@@ -370,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Attach to buttons with class checking
   document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
-      console.log("Menu Opening")
+      console.log("Menu Opening");
       // Check if the button has w--open class
       if (button.classList.contains("w--open")) {
         // Menu is Closing - Enable scrolling
