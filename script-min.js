@@ -41,8 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Disable lag smoothing for better accuracy in scroll-linked animations
     gsap.ticker.lagSmoothing(0);
-  } 
-  else {
+  } else {
     // // MOBILE: Exact values from external code
     // lenis = new Lenis({
     //   // From external code - mobile config
@@ -51,35 +50,26 @@ document.addEventListener("DOMContentLoaded", function () {
     //   smooth: true,
     //   smoothTouch: false, // External code keeps this false
     //   prevent: (node) => node.id === "modal_content",
-
     //   // External code mobile optimizations:
     //   syncTouch: true,
     //   syncTouchLerp: 0.12,
     //   touchInertiaMultiplier: 30, // External code value
-
     //   // External code uses these mobile-specific values:
     //   lerp: 0.1, // Much slower lerp for smoother mobile scrolling
     //   duration: 1.4, // Longer duration for mobile
-
     //   // External code mobile easing (smoother curve):
     //   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     // });
-
     // // Same ScrollTrigger integration as your original
     // lenis.on("scroll", ScrollTrigger.update);
-
     // gsap.ticker.add((time) => {
     //   lenis.raf(time * 1000);
     // });
-
     // gsap.ticker.lagSmoothing(0);
-
     // ScrollTrigger.normalizeScroll(true);
-
     // // Minimal iOS fixes
     // document.body.style.webkitOverflowScrolling = "auto";
     // document.body.style.overscrollBehavior = "none";
-
     // console.log("Mobile: Using original config + minimal mobile optimizations");
     // ScrollTrigger.normalizeScroll(true);
   }
@@ -379,26 +369,21 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Simple toggle function using native isStopped
-function toggleLenis() {
-  if (!lenis) return false;
-  
-  if (!lenis.isStopped) {
-    lenis.stop();
-    // ScrollTrigger.normalizeScroll(false);
-    // document.body.classList.add("u-live-noscroll");
-    return false;
-  } else {
-    lenis.start();
-    // ScrollTrigger.normalizeScroll(true);
-    // document.body.classList.remove("u-live-noscroll");
-    return true;
-  }
-}
-
-// Attach to buttons
-document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
-  button.addEventListener("click", () => toggleLenis());
-});
+  // Attach to buttons with class checking
+  document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      // Check if the button has w--open class
+      if (button.classList.contains("w--open")) {
+        // Button is open - disable scrolling
+        document.body.classList.add("u-live-noscroll");
+        console.log("Modal opened - scrolling disabled");
+      } else {
+        // Button is closed - enable scrolling
+        document.body.classList.remove("u-live-noscroll");
+        console.log("Modal closed - scrolling enabled");
+      }
+    });
+  });
 
   /////////////////////////////////
   /////////////////////////////////
@@ -1267,36 +1252,88 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
 
     function gravityAnimation() {
       const containers = document.querySelectorAll("[data-animate-container]");
-    const gridSection = document.querySelector(
+      const gridSection = document.querySelector(
         '[data-gsap-section="grid-lines"]'
       );
-    containers.forEach((container) => {
-      // Find the h2 inside the container with data-animate-heading
-      const headingWrapper = container.querySelector(
-        '[data-animate-heading="h2"]'
-      );
-      const title = headingWrapper ? headingWrapper.querySelector("h2") : null;
+      containers.forEach((container) => {
+        // Find the h2 inside the container with data-animate-heading
+        const headingWrapper = container.querySelector(
+          '[data-animate-heading="h2"]'
+        );
+        const title = headingWrapper
+          ? headingWrapper.querySelector("h2")
+          : null;
 
-      if (!title) return; // Skip if no h2 found
+        if (!title) return; // Skip if no h2 found
 
-      // Use SplitText to split the h2 into individual characters
-      const splitText = new SplitText(title, {
-        type: "lines, chars",
-        linesClass: "line",
-        charsClass: "letter",
-        reduceWhiteSpace: false,
-      });
+        // Use SplitText to split the h2 into individual characters
+        const splitText = new SplitText(title, {
+          type: "lines, chars",
+          linesClass: "line",
+          charsClass: "letter",
+          reduceWhiteSpace: false,
+        });
 
-      // Calculate the distance for scattering
-      const dist = container.clientHeight - title.clientHeight;
+        // Calculate the distance for scattering
+        const dist = container.clientHeight - title.clientHeight;
 
-      // Check if container should be pinned
-      const shouldPin =
-        container.getAttribute("data-animate-container") === "pinned";
+        // Check if container should be pinned
+        const shouldPin =
+          container.getAttribute("data-animate-container") === "pinned";
 
-      if (!isMobileViewport()) {
-        if (shouldPin) {
-          // Pin the title during scroll (only for containers with "pinned" value)
+        if (!isMobileViewport()) {
+          if (shouldPin) {
+            // Pin the title during scroll (only for containers with "pinned" value)
+            ScrollTrigger.create({
+              trigger: container,
+              pin: title,
+              start: "top 20%",
+              end: "+=" + dist,
+              // markers: true,
+              onComplete: () => {
+                // Optional: Revert SplitText when animation completes
+                // splitText.revert();
+              },
+            });
+          } else {
+            // Specific case for horizontal scroll with pinning
+
+            // Check if gridSection height is less than 70% of viewport height
+            const horizontalWrapper = document.querySelector(
+              '[data-gsap-wrapper="horizontal-scroll"]'
+            );
+            const gridSectionHeight = horizontalWrapper
+              ? horizontalWrapper.getBoundingClientRect().height
+              : 0;
+            const viewportHeight = window.innerHeight;
+            const seventyPercentVH = viewportHeight * 0.8;
+
+            const shouldUseGridSectionAsEndTrigger =
+              gridSectionHeight < seventyPercentVH;
+            console.log(gridSectionHeight, seventyPercentVH);
+            const scrollTriggerConfig = {
+              trigger: container,
+              pin: title,
+              start: "top 20%",
+              // markers: true,
+              onComplete: () => {
+                // Optional: Revert SplitText when animation completes
+                // splitText.revert();
+              },
+            };
+
+            // Conditionally set endTrigger and end based on grid section height
+            if (shouldUseGridSectionAsEndTrigger && gridSection) {
+              scrollTriggerConfig.endTrigger = gridSection;
+              scrollTriggerConfig.end = "bottom bottom";
+            } else {
+              // Default behavior when grid section is tall enough
+              scrollTriggerConfig.end = "+=" + dist;
+            }
+
+            ScrollTrigger.create(scrollTriggerConfig);
+          }
+        } else {
           ScrollTrigger.create({
             trigger: container,
             pin: title,
@@ -1308,81 +1345,30 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
               // splitText.revert();
             },
           });
-        } else {
-          // Specific case for horizontal scroll with pinning
-
-          // Check if gridSection height is less than 70% of viewport height
-          const horizontalWrapper = document.querySelector(
-            '[data-gsap-wrapper="horizontal-scroll"]'
-          );
-          const gridSectionHeight = horizontalWrapper
-            ? horizontalWrapper.getBoundingClientRect().height
-            : 0;
-          const viewportHeight = window.innerHeight;
-          const seventyPercentVH = viewportHeight * 0.8;
-
-          const shouldUseGridSectionAsEndTrigger =
-            gridSectionHeight < seventyPercentVH;
-          console.log(gridSectionHeight, seventyPercentVH);
-          const scrollTriggerConfig = {
-            trigger: container,
-            pin: title,
-            start: "top 20%",
-            // markers: true,
-            onComplete: () => {
-              // Optional: Revert SplitText when animation completes
-              // splitText.revert();
-            },
-          };
-
-          // Conditionally set endTrigger and end based on grid section height
-          if (shouldUseGridSectionAsEndTrigger && gridSection) {
-            scrollTriggerConfig.endTrigger = gridSection;
-            scrollTriggerConfig.end = "bottom bottom";
-          } else {
-            // Default behavior when grid section is tall enough
-            scrollTriggerConfig.end = "+=" + dist;
-          }
-
-          ScrollTrigger.create(scrollTriggerConfig);
         }
-      } else {
-        ScrollTrigger.create({
-          trigger: container,
-          pin: title,
-          start: "top 20%",
-          end: "+=" + dist,
-          // markers: true,
-          onComplete: () => {
-            // Optional: Revert SplitText when animation completes
-            // splitText.revert();
-          },
-        });
-      }
 
-      // Animate each character with random scattering (applies to all containers)
-      const letters = splitText.chars;
-      letters.forEach((letter) => {
-        const randomDistance = Math.random() * dist;
+        // Animate each character with random scattering (applies to all containers)
+        const letters = splitText.chars;
+        letters.forEach((letter) => {
+          const randomDistance = Math.random() * dist;
 
-        gsap.from(letter, {
-          y: randomDistance,
-          ease: "none",
-          scrollTrigger: {
-            trigger: shouldPin ? title : container, // Use title if pinned, container if not
-            start: "top 20%",
-            end: "+=" + randomDistance,
-            // markers: true,
-            scrub: !isMobileViewport() ? true : 1,
-          },
+          gsap.from(letter, {
+            y: randomDistance,
+            ease: "none",
+            scrollTrigger: {
+              trigger: shouldPin ? title : container, // Use title if pinned, container if not
+              start: "top 20%",
+              end: "+=" + randomDistance,
+              // markers: true,
+              scrub: !isMobileViewport() ? true : 1,
+            },
+          });
         });
       });
-    });
-
     }
 
     gravityAnimation();
-    
+
     /////////////////////////////////
     /* GRID LINES ANIMATION */
     /////////////////////////////////
@@ -2084,7 +2070,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
           end: () => `+=${this.numItems * window.innerHeight}`,
           pin: this.feedContainer,
           pinSpacing: true,
-          scrub: !isMobileViewport() ? 0.1: 0.75,
+          scrub: !isMobileViewport() ? 0.1 : 0.75,
           invalidateOnRefresh: false,
           markers: false, // Remove this in production
           immediateRender: false,
