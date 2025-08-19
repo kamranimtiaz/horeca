@@ -41,45 +41,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Disable lag smoothing for better accuracy in scroll-linked animations
     gsap.ticker.lagSmoothing(0);
-  } else {
-    // MOBILE: Exact values from external code
-    lenis = new Lenis({
-      // From external code - mobile config
-      touchMultiplier: 1.25, // External code uses 1 for mobile (not 1.5!)
-      wheelMultiplier: 0.8, // External code mobile value
-      smooth: true,
-      smoothTouch: false, // External code keeps this false
-      prevent: (node) => node.id === "modal_content",
-      
-      // External code mobile optimizations:
-      syncTouch: true,
-      syncTouchLerp: 0.12,
-      touchInertiaMultiplier: 30, // External code value
+  } 
+  else {
+    // // MOBILE: Exact values from external code
+    // lenis = new Lenis({
+    //   // From external code - mobile config
+    //   touchMultiplier: 1.25, // External code uses 1 for mobile (not 1.5!)
+    //   wheelMultiplier: 0.8, // External code mobile value
+    //   smooth: true,
+    //   smoothTouch: false, // External code keeps this false
+    //   prevent: (node) => node.id === "modal_content",
 
-      // External code uses these mobile-specific values:
-      lerp: 0.1, // Much slower lerp for smoother mobile scrolling
-      duration: 1.4, // Longer duration for mobile
+    //   // External code mobile optimizations:
+    //   syncTouch: true,
+    //   syncTouchLerp: 0.12,
+    //   touchInertiaMultiplier: 30, // External code value
 
-      // External code mobile easing (smoother curve):
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
+    //   // External code uses these mobile-specific values:
+    //   lerp: 0.1, // Much slower lerp for smoother mobile scrolling
+    //   duration: 1.4, // Longer duration for mobile
 
-    // Same ScrollTrigger integration as your original
-    lenis.on("scroll", ScrollTrigger.update);
+    //   // External code mobile easing (smoother curve):
+    //   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    // });
 
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
+    // // Same ScrollTrigger integration as your original
+    // lenis.on("scroll", ScrollTrigger.update);
 
-    gsap.ticker.lagSmoothing(0);
+    // gsap.ticker.add((time) => {
+    //   lenis.raf(time * 1000);
+    // });
 
-    ScrollTrigger.normalizeScroll(true);
+    // gsap.ticker.lagSmoothing(0);
 
-    // Minimal iOS fixes
-    document.body.style.webkitOverflowScrolling = "auto";
-    document.body.style.overscrollBehavior = "none";
+    // ScrollTrigger.normalizeScroll(true);
 
-    console.log("Mobile: Using original config + minimal mobile optimizations");
+    // // Minimal iOS fixes
+    // document.body.style.webkitOverflowScrolling = "auto";
+    // document.body.style.overscrollBehavior = "none";
+
+    // console.log("Mobile: Using original config + minimal mobile optimizations");
   }
 
   // Function to refresh ScrollTrigger instances
@@ -358,12 +359,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (lenis) {
         // lenis.stop();
         ScrollTrigger.normalizeScroll(false);
-        document.body.classList.add("u-live-noscroll");
+        // document.body.classList.add("u-live-noscroll");
         console.log("popup opened");
       }
     });
   });
-
 
   // Enable Lenis for buttons with data-lenis-start
   document.querySelectorAll("[data-lenis-start]").forEach((button) => {
@@ -372,10 +372,32 @@ document.addEventListener("DOMContentLoaded", function () {
         // lenis.start();
         ScrollTrigger.normalizeScroll(true);
         //  ScrollTrigger.enable();
-        document.body.classList.remove("u-live-noscroll");
+        // document.body.classList.remove("u-live-noscroll");
       }
     });
   });
+
+  // Simple toggle function using native isStopped
+function toggleLenis() {
+  if (!lenis) return false;
+  
+  if (!lenis.isStopped) {
+    lenis.stop();
+    // ScrollTrigger.normalizeScroll(false);
+    // document.body.classList.add("u-live-noscroll");
+    return false;
+  } else {
+    lenis.start();
+    // ScrollTrigger.normalizeScroll(true);
+    // document.body.classList.remove("u-live-noscroll");
+    return true;
+  }
+}
+
+// Attach to buttons
+document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
+  button.addEventListener("click", () => toggleLenis());
+});
 
   /////////////////////////////////
   /////////////////////////////////
@@ -1238,260 +1260,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /////////////////////////////////
-    /* GRID LINES ANIMATION */
-    /////////////////////////////////
-    const gridSection = document.querySelector(
-      '[data-gsap-section="grid-lines"]'
-    );
-    if (!isMobileViewport() && gridSection) {
-      const pinnedContent = gridSection.querySelector(
-        '[data-gsap-state="pinned"]'
-      );
-      const horizontalWrapper = gridSection.querySelector(
-        '[data-gsap-wrapper="horizontal-scroll"]'
-      );
-      const scrollItems = gridSection.querySelectorAll(
-        '[data-gsap-item="scroll-item"]'
-      );
-      const horizontalLines = gridSection.querySelectorAll(
-        '[data-gsap-lines="horizontal"]'
-      );
-      const verticalLines = gridSection.querySelectorAll(
-        '[data-gsap-lines="vertical"]'
-      );
-
-      const itemCount =
-        parseInt(gridSection.getAttribute("data-gsap-items")) ||
-        scrollItems.length;
-
-      if (pinnedContent && horizontalWrapper && scrollItems.length > 0) {
-        // Store split text instances for cleanup
-        let cardSplitInstances = [];
-
-        // Initialize card animations - set initial states
-        scrollItems.forEach((item) => {
-          const heading = item.querySelector(
-            '[data-animate-heading="card-heading"]'
-          );
-          const textElement = item.querySelector(
-            '[data-animate-text="card-para"]'
-          );
-          const footer = item.querySelector(
-            '[data-gsap-animate="card-footer"]'
-          );
-
-          // Set initial state for heading
-          if (heading) {
-            gsap.set(heading, {
-              opacity: 0,
-              y: 10,
-            });
-          }
-
-          // Set initial state and split paragraph
-          if (textElement) {
-            const paragraph = textElement.querySelector("p");
-            if (paragraph) {
-              // Split paragraph into lines
-              const splitText = new SplitText(paragraph, {
-                type: "lines",
-                linesClass: "card-line",
-              });
-
-              // Store split instance for cleanup
-              cardSplitInstances.push({
-                element: paragraph,
-                split: splitText,
-              });
-
-              // Set initial state for lines
-              gsap.set(splitText.lines, {
-                opacity: 0,
-                y: 20,
-              });
-            }
-          }
-
-          // Set initial state for footer
-          if (footer) {
-            gsap.set(footer, {
-              opacity: 0,
-              y: 15,
-            });
-          }
-        });
-
-        // Set initial line state
-        gsap.set(horizontalLines, {
-          height: "1px",
-          width: "0%",
-        });
-
-        gsap.set(verticalLines, {
-          height: "0%",
-          width: "1px",
-        });
-
-        // Line animations timeline
-        const linesTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: horizontalWrapper,
-            start: "top 50%",
-            toggleActions: "play none none none",
-          },
-        });
-
-        linesTimeline
-          .to(horizontalLines, {
-            width: "100%",
-            duration: 1,
-            ease: "power4.out",
-          })
-          .to(
-            verticalLines,
-            {
-              height: "100%",
-              duration: 1,
-              ease: "power4.out",
-              stagger: 0.2,
-            },
-            0.3 // Start vertical lines slightly after horizontal
-          );
-
-        // Card animations - start after lines animation completes
-        const cardAnimationsTimeline = gsap.timeline({
-          delay: 0.5, // Small delay after lines complete
-        });
-
-        scrollItems.forEach((item, index) => {
-          const heading = item.querySelector(
-            '[data-animate-heading="card-heading"]'
-          );
-          const textElement = item.querySelector(
-            '[data-animate-text="card-para"]'
-          );
-          const footer = item.querySelector(
-            '[data-gsap-animate="card-footer"]'
-          );
-
-          // Calculate stagger delay for this card
-          const cardDelay = index * 0.3; // 0.3s stagger between cards
-
-          // Animate heading
-          if (heading) {
-            cardAnimationsTimeline.to(
-              heading,
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                ease: "power2.out",
-              },
-              cardDelay
-            );
-          }
-
-          // Animate paragraph lines
-          if (textElement) {
-            const paragraph = textElement.querySelector("p");
-            if (paragraph) {
-              // Find the split instance for this paragraph
-              const splitInstance = cardSplitInstances.find(
-                (instance) => instance.element === paragraph
-              );
-
-              if (splitInstance && splitInstance.split.lines) {
-                cardAnimationsTimeline.to(
-                  splitInstance.split.lines,
-                  {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    ease: "power2.out",
-                    stagger: 0.08, // Stagger between lines within the paragraph
-                  },
-                  cardDelay + 0.2 // Start 0.2s after heading
-                );
-              }
-            }
-          }
-
-          // Animate footer
-          if (footer) {
-            cardAnimationsTimeline.to(
-              footer,
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                ease: "power2.out",
-              },
-              cardDelay + 0.5 // Start 0.5s after heading (after paragraph animation starts)
-            );
-          }
-        });
-
-        // Add card animations to the lines timeline
-        linesTimeline.add(cardAnimationsTimeline, -0.25); // Start 0.25s before lines timeline ends
-
-        // 🧠 Dynamically calculate the total scroll distance in px
-        const wrapperWidth = horizontalWrapper.scrollWidth;
-        const visibleWidth = horizontalWrapper.offsetWidth;
-        const totalScrollDistance = wrapperWidth - visibleWidth;
-
-        // Set height of the pinned section based on scroll distance
-        const requiredHeight = totalScrollDistance + window.innerHeight;
-
-        gsap.set(gridSection, {
-          minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
-        });
-
-        let gridScrollTrigger = gsap.timeline({
-          scrollTrigger: {
-            trigger: horizontalWrapper,
-            start: "bottom 99.8%", // When section top hits 30% from top
-            endTrigger: gridSection,
-            end: "bottom bottom",
-            scrub: 1,
-            pin: pinnedContent,
-            pinSpacing: true,
-            invalidateOnRefresh: false,
-            markers: false,
-          },
-        });
-
-        if (scrollItems.length > 1) {
-          gridScrollTrigger
-            .to({}, { duration: 0.1 }) // 10% delay (no movement)
-            .to(
-              horizontalWrapper,
-              {
-                x: -totalScrollDistance,
-                ease: "none",
-                duration: 0.9, // Remaining 90% of the timeline
-              },
-              0.1 // Start at 10% progress
-            );
-        }
-
-        // Cleanup function for split text instances
-        window.addEventListener("beforeunload", () => {
-          cardSplitInstances.forEach((instance) => {
-            if (instance.split && instance.split.revert) {
-              instance.split.revert();
-            }
-          });
-        });
-      }
-    }
-
-    /////////////////////////////////
     /* H2 PINNED WITHOUT GRAVITY */
     /////////////////////////////////
     // Find all containers with the data attribute
 
-    const containers = document.querySelectorAll("[data-animate-container]");
-
+    function gravityAnimation() {
+      const containers = document.querySelectorAll("[data-animate-container]");
+    const gridSection = document.querySelector(
+        '[data-gsap-section="grid-lines"]'
+      );
     containers.forEach((container) => {
       // Find the h2 inside the container with data-animate-heading
       const headingWrapper = container.querySelector(
@@ -1601,6 +1378,262 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
+    }
+
+    gravityAnimation();
+    
+    /////////////////////////////////
+    /* GRID LINES ANIMATION */
+    /////////////////////////////////
+    function gridLinesAnmation() {
+      const gridSection = document.querySelector(
+        '[data-gsap-section="grid-lines"]'
+      );
+      if (!isMobileViewport() && gridSection) {
+        const pinnedContent = gridSection.querySelector(
+          '[data-gsap-state="pinned"]'
+        );
+        const horizontalWrapper = gridSection.querySelector(
+          '[data-gsap-wrapper="horizontal-scroll"]'
+        );
+        const scrollItems = gridSection.querySelectorAll(
+          '[data-gsap-item="scroll-item"]'
+        );
+        const horizontalLines = gridSection.querySelectorAll(
+          '[data-gsap-lines="horizontal"]'
+        );
+        const verticalLines = gridSection.querySelectorAll(
+          '[data-gsap-lines="vertical"]'
+        );
+
+        const itemCount =
+          parseInt(gridSection.getAttribute("data-gsap-items")) ||
+          scrollItems.length;
+
+        if (pinnedContent && horizontalWrapper && scrollItems.length > 0) {
+          // Store split text instances for cleanup
+          let cardSplitInstances = [];
+
+          // Initialize card animations - set initial states
+          scrollItems.forEach((item) => {
+            const heading = item.querySelector(
+              '[data-animate-heading="card-heading"]'
+            );
+            const textElement = item.querySelector(
+              '[data-animate-text="card-para"]'
+            );
+            const footer = item.querySelector(
+              '[data-gsap-animate="card-footer"]'
+            );
+
+            // Set initial state for heading
+            if (heading) {
+              gsap.set(heading, {
+                opacity: 0,
+                y: 10,
+              });
+            }
+
+            // Set initial state and split paragraph
+            if (textElement) {
+              const paragraph = textElement.querySelector("p");
+              if (paragraph) {
+                // Split paragraph into lines
+                const splitText = new SplitText(paragraph, {
+                  type: "lines",
+                  linesClass: "card-line",
+                });
+
+                // Store split instance for cleanup
+                cardSplitInstances.push({
+                  element: paragraph,
+                  split: splitText,
+                });
+
+                // Set initial state for lines
+                gsap.set(splitText.lines, {
+                  opacity: 0,
+                  y: 20,
+                });
+              }
+            }
+
+            // Set initial state for footer
+            if (footer) {
+              gsap.set(footer, {
+                opacity: 0,
+                y: 15,
+              });
+            }
+          });
+
+          // Set initial line state
+          gsap.set(horizontalLines, {
+            height: "1px",
+            width: "0%",
+          });
+
+          gsap.set(verticalLines, {
+            height: "0%",
+            width: "1px",
+          });
+
+          // Line animations timeline
+          const linesTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: horizontalWrapper,
+              start: "top 50%",
+              toggleActions: "play none none none",
+            },
+          });
+
+          linesTimeline
+            .to(horizontalLines, {
+              width: "100%",
+              duration: 1,
+              ease: "power4.out",
+            })
+            .to(
+              verticalLines,
+              {
+                height: "100%",
+                duration: 1,
+                ease: "power4.out",
+                stagger: 0.2,
+              },
+              0.3 // Start vertical lines slightly after horizontal
+            );
+
+          // Card animations - start after lines animation completes
+          const cardAnimationsTimeline = gsap.timeline({
+            delay: 0.5, // Small delay after lines complete
+          });
+
+          scrollItems.forEach((item, index) => {
+            const heading = item.querySelector(
+              '[data-animate-heading="card-heading"]'
+            );
+            const textElement = item.querySelector(
+              '[data-animate-text="card-para"]'
+            );
+            const footer = item.querySelector(
+              '[data-gsap-animate="card-footer"]'
+            );
+
+            // Calculate stagger delay for this card
+            const cardDelay = index * 0.3; // 0.3s stagger between cards
+
+            // Animate heading
+            if (heading) {
+              cardAnimationsTimeline.to(
+                heading,
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  ease: "power2.out",
+                },
+                cardDelay
+              );
+            }
+
+            // Animate paragraph lines
+            if (textElement) {
+              const paragraph = textElement.querySelector("p");
+              if (paragraph) {
+                // Find the split instance for this paragraph
+                const splitInstance = cardSplitInstances.find(
+                  (instance) => instance.element === paragraph
+                );
+
+                if (splitInstance && splitInstance.split.lines) {
+                  cardAnimationsTimeline.to(
+                    splitInstance.split.lines,
+                    {
+                      opacity: 1,
+                      y: 0,
+                      duration: 0.5,
+                      ease: "power2.out",
+                      stagger: 0.08, // Stagger between lines within the paragraph
+                    },
+                    cardDelay + 0.2 // Start 0.2s after heading
+                  );
+                }
+              }
+            }
+
+            // Animate footer
+            if (footer) {
+              cardAnimationsTimeline.to(
+                footer,
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  ease: "power2.out",
+                },
+                cardDelay + 0.5 // Start 0.5s after heading (after paragraph animation starts)
+              );
+            }
+          });
+
+          // Add card animations to the lines timeline
+          linesTimeline.add(cardAnimationsTimeline, -0.25); // Start 0.25s before lines timeline ends
+
+          // 🧠 Dynamically calculate the total scroll distance in px
+          const wrapperWidth = horizontalWrapper.scrollWidth;
+          const visibleWidth = horizontalWrapper.offsetWidth;
+          const totalScrollDistance = wrapperWidth - visibleWidth;
+
+          // Set height of the pinned section based on scroll distance
+          const requiredHeight = totalScrollDistance + window.innerHeight;
+
+          gsap.set(gridSection, {
+            minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
+          });
+
+          let gridScrollTrigger = gsap.timeline({
+            scrollTrigger: {
+              trigger: horizontalWrapper,
+              start: "bottom 99.8%", // When section top hits 30% from top
+              endTrigger: gridSection,
+              end: "bottom bottom",
+              scrub: 1,
+              pin: pinnedContent,
+              pinSpacing: true,
+              invalidateOnRefresh: false,
+              markers: false,
+            },
+          });
+
+          if (scrollItems.length > 1) {
+            gridScrollTrigger
+              .to({}, { duration: 0.1 }) // 10% delay (no movement)
+              .to(
+                horizontalWrapper,
+                {
+                  x: -totalScrollDistance,
+                  ease: "none",
+                  duration: 0.9, // Remaining 90% of the timeline
+                },
+                0.1 // Start at 10% progress
+              );
+          }
+
+          // Cleanup function for split text instances
+          window.addEventListener("beforeunload", () => {
+            cardSplitInstances.forEach((instance) => {
+              if (instance.split && instance.split.revert) {
+                instance.split.revert();
+              }
+            });
+          });
+        }
+      }
+    }
+
+    gridLinesAnmation();
+
     /////////////////////////////////
     /* TEXT SCALE TO FILL THE PAGE */
     /////////////////////////////////
@@ -1702,7 +1735,7 @@ document.addEventListener("DOMContentLoaded", function () {
               ? (progress - 0.3) / 0.55
               : 0 // Desktop: start at 30%, finish at 85%
             : progress >= 0.45
-            ? (progress - 0.4) / 0.2
+            ? (progress - 0.45) / 0.2
             : 0; // Mobile: start at 45%, finish at 75%
 
           const progress3 =
@@ -1871,10 +1904,11 @@ document.addEventListener("DOMContentLoaded", function () {
           accordionContainers.forEach((container) => {
             container.classList.add("inview");
           });
-
-          setTimeout(() => {
-            refreshScrollTriggers();
-          }, 50);
+          if (!isMobileViewport()) {
+            setTimeout(() => {
+              refreshScrollTriggers();
+            }, 100);
+          }
         },
         onLeaveBack: () => {
           accordionContainers.forEach((container) => {
