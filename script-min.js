@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return window.innerWidth <= 991;
   }
 
-  let lenis = null;
+  let lenis = false;
 
   // Initialize Lenis for ALL devices - keep your original working config!
   if (!isMobileViewport()) {
@@ -1185,7 +1185,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
           start: "top top",
           end: "bottom center",
           endTrigger: ".g_component_layout",
-          scrub: true,
+          scrub: !isMobileViewport() ? true : 1,
           pin: wrapper,
           pinSpacing: false,
         },
@@ -1198,7 +1198,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
           trigger: card, // Listens to the position of content
           start: "top -80%", // Starts when the top exceeds 80% of the viewport
           end: "+=" + 0.2 * window.innerHeight, // Ends 20% later
-          scrub: true, // Progresses with the scroll
+          scrub: !isMobileViewport() ? true : 1, // Progresses with the scroll
         },
       });
     });
@@ -1373,7 +1373,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
             start: "top 20%",
             end: "+=" + randomDistance,
             // markers: true,
-            scrub: true,
+            scrub: !isMobileViewport() ? true : 1,
           },
         });
       });
@@ -1725,7 +1725,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
         start: "top top",
         end: "bottom bottom",
         // markers: false,
-        scrub: true,
+        scrub: !isMobileViewport() ? true : 1,
         onUpdate: (self) => {
           const progress = self.progress;
           console.log(`Long scroll section ${index + 1} progress:`, progress);
@@ -2084,7 +2084,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
           end: () => `+=${this.numItems * window.innerHeight}`,
           pin: this.feedContainer,
           pinSpacing: true,
-          scrub: 0.1,
+          scrub: !isMobileViewport() ? 0.1: 0.75,
           invalidateOnRefresh: false,
           markers: false, // Remove this in production
           immediateRender: false,
@@ -2203,7 +2203,7 @@ document.querySelectorAll("[data-lenis-toggle]").forEach(button => {
             trigger: line, // Use the line itself as trigger
             start: "top bottom", // When line top hits viewport bottom
             end: `top bottom-=${lineHeight}px`, // End when line travels exactly its height
-            scrub: true,
+            scrub: !isMobileViewport() ? true : 1,
             // markers: true, // Remove in production
           },
         });
