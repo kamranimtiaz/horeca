@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // document.body.style.overscrollBehavior = "none";
 
     // console.log("Mobile: Using original config + minimal mobile optimizations");
+    ScrollTrigger.normalizeScroll(true);
   }
 
   // Function to refresh ScrollTrigger instances
