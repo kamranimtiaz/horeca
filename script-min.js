@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   function detectTouch() {
+    console.log("Touch device")
     return (
       "ontouchstart" in window ||
       navigator.maxTouchPoints > 0 ||
@@ -1936,7 +1937,7 @@ document.addEventListener("DOMContentLoaded", function () {
         this.bgContainer = container.querySelector(".feed_bg-content");
 
         // Mobile detection (using the same function from your code)
-        this.isMobile = window.innerWidth <= 767;
+        this.isMobile = isMobileViewport();
 
         // Animation properties - adjust for mobile
         this.targetZValue = 1;
