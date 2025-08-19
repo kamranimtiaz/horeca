@@ -370,14 +370,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // Attach to buttons with class checking
   document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
+      console.log("Menu Opening")
       // Check if the button has w--open class
       if (button.classList.contains("w--open")) {
-        // Button is open - disable scrolling
-        document.body.classList.add("u-live-noscroll");
+        // Menu is Closing - Enable scrolling
+        document.body.classList.remove("u-live-noscroll");
         console.log("Modal opened - scrolling disabled");
       } else {
-        // Button is closed - enable scrolling
-        document.body.classList.remove("u-live-noscroll");
+        // Menu is Closing - Disable scrolling
+        document.body.classList.add("u-live-noscroll");
         console.log("Modal closed - scrolling enabled");
       }
     });
