@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   function detectTouch() {
-    console.log("Touch device")
+    // console.log("Touch device");
     return (
       "ontouchstart" in window ||
       navigator.maxTouchPoints > 0 ||
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
-  console.log(detectTouch()); // true/false
+  // console.log(detectTouch()); // true/false
 
   function isMobileViewport() {
     return window.innerWidth <= 991;
@@ -20,71 +20,42 @@ document.addEventListener("DOMContentLoaded", function () {
   let lenis = false;
 
   // Initialize Lenis for ALL devices - keep your original working config!
-  if (!isMobileViewport()) {
-    // DESKTOP: Your exact original configuration
-    if (!detectTouch) {
-      lenis = new Lenis({
-        touchMultiplier: 1,
-        wheelMultiplier: 1,
-        smooth: true,
-        smoothTouch: false,
-        syncTouch: true,
-        syncTouchLerp: 0.075,
-        touchInertiaMultiplier: 25, // External code value
-        prevent: (node) => node.id === "modal_content",
+  function shouldInitializeLenis() {
+    const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
+    const canHover = window.matchMedia("(hover: hover)").matches;
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileUA =
+      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        userAgent
+      );
 
-        // External code uses these mobile-specific values:
-        lerp: 0.1, // Much slower lerp for smoother mobile scrolling
-        duration: 1.2, // Longer duration for mobile
-        overscroll: false, // Disabled on mobile in external code
-        autoResize: true,
+    // Don't initialize if primary input is touch or known mobile device
+    return !isPrimaryTouch && !isMobileUA && canHover;
+  }
 
-        // External code mobile easing (smoother curve):
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      });
+  if (!isMobileViewport() && shouldInitializeLenis()) {
+    lenis = new Lenis({
+      touchMultiplier: 1.25,
+      wheelMultiplier: 1,
+      smooth: true,
+      smoothTouch: false,
+      syncTouch: true,
+      syncTouchLerp: 0.125,
+      touchInertiaMultiplier: 35,
+      prevent: (node) => node.id === "modal_content",
+      lerp: 0.1,
+      duration: 1.2,
+      overscroll: false,
+      autoResize: true,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    });
 
-      // Keep ScrollTrigger in sync with Lenis
-      lenis.on("scroll", ScrollTrigger.update);
-
-      // Use GSAP's ticker instead of requestAnimationFrame for smoother sync
-      gsap.ticker.add((time) => {
-        lenis.raf(time * 1000); // GSAP provides time in seconds; Lenis needs ms
-      });
-
-      // Disable lag smoothing for better accuracy in scroll-linked animations
-      gsap.ticker.lagSmoothing(0);
-    }
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
   } else {
-    // // MOBILE: Exact values from external code
-    // lenis = new Lenis({
-    //   // From external code - mobile config
-    //   touchMultiplier: 1.25, // External code uses 1 for mobile (not 1.5!)
-    //   wheelMultiplier: 0.8, // External code mobile value
-    //   smooth: true,
-    //   smoothTouch: false, // External code keeps this false
-    //   prevent: (node) => node.id === "modal_content",
-    //   // External code mobile optimizations:
-    //   syncTouch: true,
-    //   syncTouchLerp: 0.12,
-    //   touchInertiaMultiplier: 30, // External code value
-    //   // External code uses these mobile-specific values:
-    //   lerp: 0.1, // Much slower lerp for smoother mobile scrolling
-    //   duration: 1.4, // Longer duration for mobile
-    //   // External code mobile easing (smoother curve):
-    //   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    // });
-    // // Same ScrollTrigger integration as your original
-    // lenis.on("scroll", ScrollTrigger.update);
-    // gsap.ticker.add((time) => {
-    //   lenis.raf(time * 1000);
-    // });
-    // gsap.ticker.lagSmoothing(0);
-    // ScrollTrigger.normalizeScroll(true);
-    // // Minimal iOS fixes
-    // document.body.style.webkitOverflowScrolling = "auto";
-    // document.body.style.overscrollBehavior = "none";
-    // console.log("Mobile: Using original config + minimal mobile optimizations");
-    // ScrollTrigger.normalizeScroll(true);
   }
 
   // Function to refresh ScrollTrigger instances
@@ -106,9 +77,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const isMobileNow = isMobileViewport();
 
       if (wasMobile !== isMobileNow) {
-        console.log(
-          "Viewport changed - consider page reload for optimal experience"
-        );
+        // console.log(
+        //   "Viewport changed - consider page reload for optimal experience"
+        // );
       }
     }, 250);
   });
@@ -176,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // PRELOADER ANIMATION - RUNS IMMEDIATELY
   if (isMobileViewport()) {
     // MOBILE TIMELINE
-    console.log("Initializing mobile preloader timeline");
+    // console.log("Initializing mobile preloader timeline");
 
     // Mobile-specific initial states
     gsap.set(".preloader_image_wrap img", {
@@ -258,15 +229,15 @@ document.addEventListener("DOMContentLoaded", function () {
       ); // Start slightly before video animation completes
   } else {
     // DESKTOP TIMELINE
-    console.log("Initializing desktop preloader timeline");
+    // console.log("Initializing desktop preloader timeline");
 
     // Split preloader title into characters for desktop
     if (preloaderTitle) {
       gsap.set(preloaderTitle, { opacity: 1 });
-      console.log("Desktop: Preloader Title is set to show");
+      // console.log("Desktop: Preloader Title is set to show");
 
       titleSplit = new SplitText(preloaderTitle, { type: "chars" });
-      console.log("Desktop titleSplit:", titleSplit);
+      // console.log("Desktop titleSplit:", titleSplit);
       gsap.set(titleSplit.chars, { yPercent: 100, opacity: 0 });
     }
 
@@ -359,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Disable Lenis for buttons with data-lenis-stop
   document.querySelectorAll("[data-lenis-stop]").forEach((button) => {
     button.addEventListener("click", () => {
-      console.log("Popup button clicked");
+      // console.log("Popup button clicked");
       if (lenis) {
         lenis.stop();
       } else {
@@ -383,16 +354,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Attach to buttons with class checking
   document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
-      console.log("Menu Opening");
+      // console.log("Menu Opening");
       // Check if the button has w--open class
       if (button.classList.contains("w--open")) {
         // Menu is Closing - Enable scrolling
         document.body.classList.remove("u-live-noscroll");
-        console.log("Modal opened - scrolling disabled");
+        // console.log("Modal opened - scrolling disabled");
       } else {
         // Menu is Closing - Disable scrolling
         document.body.classList.add("u-live-noscroll");
-        console.log("Modal closed - scrolling enabled");
+        // console.log("Modal closed - scrolling enabled");
       }
     });
   });
@@ -405,7 +376,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to initialize all font-dependent animations
   function initializeFontDependentAnimations() {
-    console.log("Initializing font-dependent animations");
+    // console.log("Initializing font-dependent animations");
 
     /////////////////////////////////
     /* Hero Navbar */
@@ -509,7 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
       function openMenu() {
         if (isOpen) return;
 
-        console.log("Opening menu...");
+        // console.log("Opening menu...");
         isOpen = true;
 
         // Kill any existing animations
@@ -519,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
         hoverInTl = gsap.timeline({
           onComplete: () => {
             hoverInTl = null;
-            console.log("Open animation completed");
+            // console.log("Open animation completed");
           },
         });
 
@@ -587,7 +558,7 @@ document.addEventListener("DOMContentLoaded", function () {
       function closeMenu() {
         if (!isOpen) return;
 
-        console.log("Closing menu...");
+        // console.log("Closing menu...");
         isOpen = false;
 
         // Kill any existing animations
@@ -608,7 +579,7 @@ document.addEventListener("DOMContentLoaded", function () {
               pointerEvents: "none",
             });
 
-            console.log("Close animation completed, menu reset");
+            // console.log("Close animation completed, menu reset");
           },
         });
 
@@ -682,12 +653,12 @@ document.addEventListener("DOMContentLoaded", function () {
       // Event listeners - SIMPLIFIED
       if (navButtonsMenu) {
         navButtonsMenu.addEventListener("mouseenter", () => {
-          console.log("Mouse enter - opening menu");
+          // console.log("Mouse enter - opening menu");
           openMenu();
         });
 
         navButtonsMenu.addEventListener("mouseleave", () => {
-          console.log("Mouse leave - closing menu");
+          // console.log("Mouse leave - closing menu");
           closeMenu();
         });
       }
@@ -726,34 +697,103 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Alternative version using ScrollTrigger (more performant for complex animations)
+    // function initializeNavbarScrollBehaviorWithScrollTrigger() {
+    //   // Only run on desktop
+    //   if (isMobileViewport()) return;
+
+    //   const navComponent = document.querySelector(".nav_component");
+    //   if (!navComponent) return;
+
+    //   ScrollTrigger.create({
+    //     start: "top -100", // Start after 100px scroll
+    //     end: 99999,
+    //     onUpdate: (self) => {
+    //       const direction = self.direction;
+
+    //       if (direction === 1) {
+    //         // Scrolling down - hide navbar
+    //         gsap.to(navComponent, {
+    //           yPercent: -175,
+    //           duration: 0.5,
+    //           ease: "power2.out",
+    //         });
+    //       } else {
+    //         // Scrolling up - show navbar
+    //         gsap.to(navComponent, {
+    //           yPercent: 0,
+    //           duration: 0.5,
+    //           ease: "power2.out",
+    //         });
+    //       }
+    //     },
+    //   });
+
+    //   // Always show navbar when at top
+    //   ScrollTrigger.create({
+    //     start: "top top",
+    //     end: "top -100",
+    //     onEnter: () => {
+    //       gsap.to(navComponent, {
+    //         yPercent: 0,
+    //         duration: 0.5,
+    //         ease: "power2.out",
+    //       });
+    //     },
+    //     onLeaveBack: () => {
+    //       gsap.to(navComponent, {
+    //         yPercent: 0,
+    //         duration: 0.5,
+    //         ease: "power2.out",
+    //       });
+    //     },
+    //   });
+    // }
+
+    // 💡 RECOMMENDED FIX - Replace your current function with this
     function initializeNavbarScrollBehaviorWithScrollTrigger() {
-      // Only run on desktop
       if (isMobileViewport()) return;
 
       const navComponent = document.querySelector(".nav_component");
       if (!navComponent) return;
 
+      let lastDirection = 0;
+      let scrollBuffer = 0;
+      const SCROLL_THRESHOLD = 80; // Pixels to scroll before changing state
+
       ScrollTrigger.create({
-        start: "top -100", // Start after 100px scroll
+        start: "top -100",
         end: 99999,
         onUpdate: (self) => {
           const direction = self.direction;
 
-          if (direction === 1) {
-            // Scrolling down - hide navbar
-            gsap.to(navComponent, {
-              yPercent: -175,
-              duration: 0.5,
-              ease: "power2.out",
-            });
+          // Accumulate scroll in the current direction
+          if (direction === lastDirection) {
+            scrollBuffer += Math.abs(self.getVelocity() / 60); // Normalize velocity
           } else {
-            // Scrolling up - show navbar
-            gsap.to(navComponent, {
-              yPercent: 0,
-              duration: 0.5,
-              ease: "power2.out",
-            });
+            scrollBuffer = 0; // Reset if direction changed
           }
+
+          // Only trigger animation if we've scrolled enough
+          if (scrollBuffer > SCROLL_THRESHOLD) {
+            if (direction === 1) {
+              // Scrolling down - hide navbar
+              gsap.to(navComponent, {
+                yPercent: -175,
+                duration: 0.6,
+                ease: "power2.out",
+              });
+            } else {
+              // Scrolling up - show navbar
+              gsap.to(navComponent, {
+                yPercent: 0,
+                duration: 0.6,
+                ease: "power2.out",
+              });
+            }
+            scrollBuffer = 0; // Reset buffer after triggering
+          }
+
+          lastDirection = direction;
         },
       });
 
@@ -767,6 +807,7 @@ document.addEventListener("DOMContentLoaded", function () {
             duration: 0.5,
             ease: "power2.out",
           });
+          scrollBuffer = 0;
         },
         onLeaveBack: () => {
           gsap.to(navComponent, {
@@ -774,6 +815,7 @@ document.addEventListener("DOMContentLoaded", function () {
             duration: 0.5,
             ease: "power2.out",
           });
+          scrollBuffer = 0;
         },
       });
     }
@@ -953,10 +995,6 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         const nextTextElement = nextText ? nextText.querySelector("p") : null;
 
-        console.log(
-          `Transitioning from slide ${currentIndex} to slide ${nextIndex}`
-        );
-
         // Create single timeline
         const tl = gsap.timeline({
           onComplete: () => {
@@ -966,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             currentIndex = nextIndex;
             isFirstAnimation = false;
-            console.log(`Current slide is now: ${currentIndex}`);
+            // console.log(`Current slide is now: ${currentIndex}`);
           },
         });
 
@@ -1144,7 +1182,7 @@ document.addEventListener("DOMContentLoaded", function () {
         start: () => (isMobileViewport() ? "top 80%" : "top 50%"),
         once: true,
         onEnter: () => {
-          console.log("Hero section triggered, starting slideshow");
+          // console.log("Hero section triggered, starting slideshow");
           // Start first animation
           changeSlide();
 
@@ -1299,7 +1337,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ScrollTrigger.create({
               trigger: container,
               pin: title,
-              start: "top 20%",
+              start: "top 15%",
               end: "+=" + dist,
               // markers: true,
               onComplete: () => {
@@ -1318,15 +1356,15 @@ document.addEventListener("DOMContentLoaded", function () {
               ? horizontalWrapper.getBoundingClientRect().height
               : 0;
             const viewportHeight = window.innerHeight;
-            const seventyPercentVH = viewportHeight * 0.8;
+            const seventyPercentVH = viewportHeight * 0.7;
 
             const shouldUseGridSectionAsEndTrigger =
               gridSectionHeight < seventyPercentVH;
-            console.log(gridSectionHeight, seventyPercentVH);
+            // console.log(gridSectionHeight, seventyPercentVH);
             const scrollTriggerConfig = {
               trigger: container,
               pin: title,
-              start: "top 20%",
+              start: "top 15%",
               // markers: true,
               onComplete: () => {
                 // Optional: Revert SplitText when animation completes
@@ -1349,7 +1387,7 @@ document.addEventListener("DOMContentLoaded", function () {
           ScrollTrigger.create({
             trigger: container,
             pin: title,
-            start: "top 20%",
+            start: "top 15%",
             end: "+=" + dist,
             // markers: true,
             onComplete: () => {
@@ -1693,11 +1731,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         pivotOffsetX = pivotCenterX - textMiddleCenterX;
 
-        console.log("Simple setup:", {
-          pivotOffsetX: pivotOffsetX,
-          textMiddleCenterX: textMiddleCenterX,
-          pivotCenterX: pivotCenterX,
-        });
+        // console.log("Simple setup:", {
+        //   pivotOffsetX: pivotOffsetX,
+        //   textMiddleCenterX: textMiddleCenterX,
+        //   pivotCenterX: pivotCenterX,
+        // });
 
         // Set initial state for animation
         gsap.set(textMiddle, {
@@ -1726,7 +1764,7 @@ document.addEventListener("DOMContentLoaded", function () {
         scrub: !isMobileViewport() ? true : 1,
         onUpdate: (self) => {
           const progress = self.progress;
-          console.log(`Long scroll section ${index + 1} progress:`, progress);
+          // console.log(`Long scroll section ${index + 1} progress:`, progress);
           // Calculate progress values
           const progress1 = Math.min(progress / 0.6, 1);
           const progress2 = !isMobileViewport()
@@ -1862,10 +1900,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const totalItemsCount = accordionHeaders.length;
       const sectionHeight = accordionContainer.getBoundingClientRect().height;
       const wrapperHeight = accordionWrapper.offsetHeight;
-      const headerHeightPx =
-        window.innerWidth > 768
-          ? `${wrapperHeight / totalItemsCount}px`
-          : headerHeight;
+      const headerHeightPx = !isMobileViewport()
+        ? `${wrapperHeight / totalItemsCount}px`
+        : headerHeight;
       const sectionHeightPx = `${sectionHeight}px`;
 
       // Set global CSS variables on :root
@@ -1886,7 +1923,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const itemPosition = index + 1;
 
         header.style.setProperty("--item-position", itemPosition);
-        if (window.matchMedia("(min-width: 769px)").matches) {
+        if (!isMobileViewport()) {
           setTimeout(() => {
             header.style.position = "absolute";
           }, 1000);
@@ -1904,9 +1941,7 @@ document.addEventListener("DOMContentLoaded", function () {
             container.classList.add("inview");
           });
           if (!isMobileViewport()) {
-            setTimeout(() => {
-              refreshScrollTriggers();
-            }, 100);
+            refreshScrollTriggers();
           }
         },
         onLeaveBack: () => {
@@ -2172,7 +2207,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     squeezeElements.forEach((element, i) => {
       // Split the text into lines using SplitText plugin
-      console.log(`Animating line of element ${element}}`);
+      // console.log(`Animating line of element ${element}}`);
       const splitText = new SplitText(element, {
         type: "lines",
         linesClass: "squeeze-line",
@@ -2266,9 +2301,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // IMPORTANT: Refresh ScrollTrigger after all animations are set up
-    console.log(
-      "Font-dependent animations initialized - refreshing ScrollTrigger"
-    );
+    // console.log(
+    //   "Font-dependent animations initialized - refreshing ScrollTrigger"
+    // );
     // setTimeout(() => {
     //   refreshScrollTriggers();
     // }, 100);
@@ -2279,24 +2314,24 @@ document.addEventListener("DOMContentLoaded", function () {
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready
       .then(() => {
-        console.log(
-          "Fonts loaded via document.fonts.ready - initializing animations"
-        );
+        // console.log(
+        //   "Fonts loaded via document.fonts.ready - initializing animations"
+        // );
         initializeFontDependentAnimations();
       })
       .catch((error) => {
-        console.log("document.fonts.ready failed, using fallback:", error);
+        // console.log("document.fonts.ready failed, using fallback:", error);
         // Fallback: wait a bit then initialize
         setTimeout(() => {
-          console.log("Fallback initialization after timeout");
+          // console.log("Fallback initialization after timeout");
           initializeFontDependentAnimations();
         }, 1000);
       });
   } else {
     // Fallback for browsers that don't support document.fonts.ready
-    console.log("document.fonts.ready not supported, using timeout fallback");
+    // console.log("document.fonts.ready not supported, using timeout fallback");
     setTimeout(() => {
-      console.log("Timeout fallback initialization");
+      // console.log("Timeout fallback initialization");
       initializeFontDependentAnimations();
     }, 1000);
   }
