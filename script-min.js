@@ -19,66 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let lenis = false;
 
- 
-
-  // Instagram in-app browser fix: lock hero height to the initial small viewport
-    // to prevent 100vh/100svh growth when the top/bottom bars collapse
-    (function lockHeroHeightForInstagram() {
-      const ua = navigator.userAgent || navigator.vendor || "";
-      const isInstagram = /instagram/i.test(ua);
-      if (!isInstagram) return;
-
-      const getSmallViewportHeight = () => {
-        if (window.visualViewport && typeof window.visualViewport.height === "number") {
-          return Math.round(window.visualViewport.height);
-        }
-        return Math.round(Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight));
-      };
-
-      const applyVhLock = () => {
-        const initialVH = getSmallViewportHeight();
-        document.documentElement.style.setProperty("--vh-fixed", initialVH + "px");
-
-        const targets = [
-          document.querySelector(".section_hero"),
-        ].filter(Boolean);
-
-        targets.forEach((el) => {
-          el.style.minHeight = "var(--vh-fixed)";
-        });
-      };
-
-      // Apply once at start
-      applyVhLock();
-
-      // Only recompute on orientation or substantial width change, not on bar hide/show
-      let lockedWidth = window.innerWidth;
-      const maybeReapply = () => {
-        if (Math.abs(window.innerWidth - lockedWidth) < 50) return;
-        lockedWidth = window.innerWidth;
-        applyVhLock();
-      };
-
-      window.addEventListener("orientationchange", () => setTimeout(maybeReapply, 300), { passive: true });
-      window.addEventListener("resize", () => setTimeout(maybeReapply, 300), { passive: true });
-      // Ignore visualViewport height-only resizes to avoid jumps
-      if (window.visualViewport) {
-        const vv = window.visualViewport;
-        let lastVVWidth = vv.width;
-        vv.addEventListener(
-          "resize",
-          () => {
-            if (Math.abs(vv.width - lastVVWidth) >= 1) {
-              lastVVWidth = vv.width;
-              maybeReapply();
-            }
-          },
-          { passive: true }
-        );
-      }
-    })();
-
-     // Initialize Lenis for ALL devices - keep your original working config!
+  // Initialize Lenis for ALL devices - keep your original working config!
   function shouldInitializeLenis() {
     const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
     const canHover = window.matchMedia("(hover: hover)").matches;
@@ -128,20 +69,20 @@ document.addEventListener("DOMContentLoaded", function () {
   //   window.addEventListener("resize", );
 
   // Handle resize events
-  let resizeTimeout;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      const wasMobile = lenis === null;
-      const isMobileNow = isMobileViewport();
+  // let resizeTimeout;
+  // window.addEventListener("resize", () => {
+  //   clearTimeout(resizeTimeout);
+  //   resizeTimeout = setTimeout(() => {
+  //     const wasMobile = lenis === null;
+  //     const isMobileNow = isMobileViewport();
 
-      if (wasMobile !== isMobileNow) {
-        // console.log(
-        //   "Viewport changed - consider page reload for optimal experience"
-        // );
-      }
-    }, 250);
-  });
+  //     if (wasMobile !== isMobileNow) {
+  //       // console.log(
+  //       //   "Viewport changed - consider page reload for optimal experience"
+  //       // );
+  //     }
+  //   }, 250);
+  // });
 
   /////////////////////////////////
   /////////////////////////////////
@@ -440,41 +381,36 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Refresh page on window resize with debouncing - iOS Safari fix
-  let resizeRefreshTimeout;
-  let initialWidth = window.innerWidth;
-  let initialHeight = window.innerHeight;
+  // let resizeRefreshTimeout;
+  // let initialWidth = window.innerWidth;
+  // let initialHeight = window.innerHeight;
 
-  window.addEventListener("resize", () => {
-    // Clear any existing timeout
-    clearTimeout(resizeRefreshTimeout);
+  // window.addEventListener("resize", () => {
+  //   // Clear any existing timeout
+  //   clearTimeout(resizeRefreshTimeout);
 
-    // Set a new timeout to refresh after resize stops
-    resizeRefreshTimeout = setTimeout(() => {
-      const currentWidth = window.innerWidth;
-      const currentHeight = window.innerHeight;
-      console.log("window resized");
-      // Calculate changes
-      const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
-      const heightChanged =
-        Math.abs(currentHeight - initialHeight) >
-        (window.innerWidth > 992 ? 10 : 200); // 100px tolerance for height
+  //   // Set a new timeout to refresh after resize stops
+  //   resizeRefreshTimeout = setTimeout(() => {
+  //     const currentWidth = window.innerWidth;
+  //     const currentHeight = window.innerHeight;
+  //     console.log("window resized");
+  //     // Calculate changes
+  //     const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
+  //     const heightChanged =
+  //       Math.abs(currentHeight - initialHeight) >
+  //       (window.innerWidth > 992 ? 10 : 150); // 100px tolerance for height
 
-      // Only refresh if BOTH width AND height changed significantly
-      // This prevents iOS Safari address bar hide/show from triggering refresh
-      if (widthChanged || heightChanged) {
-        window.location.reload();
-      }
+  //     // Only refresh if BOTH width AND height changed significantly
+  //     // This prevents iOS Safari address bar hide/show from triggering refresh
+  //     if (widthChanged || heightChanged) {
+  //       window.location.reload();
+  //     }
 
-      // Update stored dimensions for next comparison
-      initialWidth = currentWidth;
-      initialHeight = currentHeight;
-    }, 500); // Wait 500ms after resize stops before checking
-  });
-
-  ScrollTrigger.config({
-    // limitCallbacks: true,
-    ignoreMobileResize: false,
-  });
+  //     // Update stored dimensions for next comparison
+  //     initialWidth = currentWidth;
+  //     initialHeight = currentHeight;
+  //   }, 500); // Wait 500ms after resize stops before checking
+  // });
 
   /////////////////////////////////
   /////////////////////////////////
