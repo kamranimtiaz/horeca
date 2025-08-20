@@ -413,8 +413,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   ScrollTrigger.config({
-    limitCallbacks: true,
-    ignoreMobileResize: true,
+    // limitCallbacks: true,
+    ignoreMobileResize: false,
   });
 
   /////////////////////////////////
