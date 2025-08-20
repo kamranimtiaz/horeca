@@ -380,18 +380,35 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Refresh page on window resize with debouncing
-let resizeRefreshTimeout;
+  // Refresh page on window resize with debouncing - iOS Safari fix
+  let resizeRefreshTimeout;
+  let initialWidth = window.innerWidth;
+  let initialHeight = window.innerHeight;
 
-window.addEventListener('resize', () => {
-  // Clear any existing timeout
-  clearTimeout(resizeRefreshTimeout);
-  
-  // Set a new timeout to refresh after resize stops
-  resizeRefreshTimeout = setTimeout(() => {
-    window.location.reload();
-  }, 500); // Wait 500ms after resize stops before refreshing
-});
+  window.addEventListener("resize", () => {
+    // Clear any existing timeout
+    clearTimeout(resizeRefreshTimeout);
+
+    // Set a new timeout to refresh after resize stops
+    resizeRefreshTimeout = setTimeout(() => {
+      const currentWidth = window.innerWidth;
+      const currentHeight = window.innerHeight;
+
+      // Calculate changes
+      const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
+      const heightChanged = Math.abs(currentHeight - initialHeight) > 100; // 100px tolerance for height
+
+      // Only refresh if BOTH width AND height changed significantly
+      // This prevents iOS Safari address bar hide/show from triggering refresh
+      if (widthChanged && heightChanged) {
+        window.location.reload();
+      }
+
+      // Update stored dimensions for next comparison
+      initialWidth = currentWidth;
+      initialHeight = currentHeight;
+    }, 500); // Wait 500ms after resize stops before checking
+  });
 
   /////////////////////////////////
   /////////////////////////////////
