@@ -368,6 +368,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Remove u-live-noscroll class when nav links are clicked
+  document.querySelectorAll(".nav_1_links_link").forEach((link) => {
+    link.addEventListener("click", () => {
+      document.body.classList.remove("u-live-noscroll");
+
+      // Also restart Lenis if it exists (based on your existing code pattern)
+      if (typeof lenis !== "undefined" && lenis) {
+        lenis.start();
+      }
+    });
+  });
+
+  // Refresh page on window resize with debouncing
+let resizeRefreshTimeout;
+
+window.addEventListener('resize', () => {
+  // Clear any existing timeout
+  clearTimeout(resizeRefreshTimeout);
+  
+  // Set a new timeout to refresh after resize stops
+  resizeRefreshTimeout = setTimeout(() => {
+    window.location.reload();
+  }, 500); // Wait 500ms after resize stops before refreshing
+});
+
   /////////////////////////////////
   /////////////////////////////////
   /* ALL OTHER ANIMATIONS - WAIT FOR FONTS */
