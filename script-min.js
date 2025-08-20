@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
       const heightChanged =
         Math.abs(currentHeight - initialHeight) >
-        (window.innerWidth > 992 ? 10 : 100); // 100px tolerance for height
+        (window.innerWidth > 992 ? 10 : 150); // 100px tolerance for height
 
       // Only refresh if BOTH width AND height changed significantly
       // This prevents iOS Safari address bar hide/show from triggering refresh
