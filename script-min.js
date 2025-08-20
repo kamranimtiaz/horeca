@@ -393,10 +393,12 @@ document.addEventListener("DOMContentLoaded", function () {
     resizeRefreshTimeout = setTimeout(() => {
       const currentWidth = window.innerWidth;
       const currentHeight = window.innerHeight;
-      console.log("window resized")
+      console.log("window resized");
       // Calculate changes
       const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
-      const heightChanged = Math.abs(currentHeight - initialHeight) > ( window.innerWidth > 992 ? 10 : 100) // 100px tolerance for height
+      const heightChanged =
+        Math.abs(currentHeight - initialHeight) >
+        (window.innerWidth > 992 ? 10 : 100); // 100px tolerance for height
 
       // Only refresh if BOTH width AND height changed significantly
       // This prevents iOS Safari address bar hide/show from triggering refresh
@@ -408,6 +410,11 @@ document.addEventListener("DOMContentLoaded", function () {
       initialWidth = currentWidth;
       initialHeight = currentHeight;
     }, 500); // Wait 500ms after resize stops before checking
+  });
+
+  ScrollTrigger.config({
+    limitCallbacks: true,
+    ignoreMobileResize: true,
   });
 
   /////////////////////////////////
@@ -1660,8 +1667,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     gridLinesAnmation();
 
-
-     /////////////////////////////////
+    /////////////////////////////////
     /* ACCORDION */
     /////////////////////////////////
 
@@ -1728,7 +1734,6 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
     }
-
 
     /////////////////////////////////
     /* TEXT SCALE TO FILL THE PAGE */
@@ -1943,7 +1948,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }, 500);
 
-   
     /////////////////////////////////
     /* Footer social Cards*/
     /////////////////////////////////
