@@ -393,14 +393,14 @@ document.addEventListener("DOMContentLoaded", function () {
     resizeRefreshTimeout = setTimeout(() => {
       const currentWidth = window.innerWidth;
       const currentHeight = window.innerHeight;
-
+      console.log("window resized")
       // Calculate changes
       const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
-      const heightChanged = Math.abs(currentHeight - initialHeight) > 100; // 100px tolerance for height
+      const heightChanged = Math.abs(currentHeight - initialHeight) > ( window.innerWidth > 992 ? 10 : 100) // 100px tolerance for height
 
       // Only refresh if BOTH width AND height changed significantly
       // This prevents iOS Safari address bar hide/show from triggering refresh
-      if (widthChanged && heightChanged) {
+      if (widthChanged || heightChanged) {
         window.location.reload();
       }
 
@@ -1660,6 +1660,76 @@ document.addEventListener("DOMContentLoaded", function () {
 
     gridLinesAnmation();
 
+
+     /////////////////////////////////
+    /* ACCORDION */
+    /////////////////////////////////
+
+    const accordionContainer = document.querySelector('[data-gsap="inview"]');
+    const accordionHeaders = document.querySelectorAll(".accordion_header");
+    const accordionWrapper = document.querySelector(
+      '[data-gsap="accordion-wrapper"]'
+    );
+
+    let headerHeight = "8rem"; // rem
+
+    if (accordionContainer && accordionHeaders.length > 0 && accordionWrapper) {
+      const totalItemsCount = accordionHeaders.length;
+      const sectionHeight = accordionContainer.getBoundingClientRect().height;
+      const wrapperHeight = accordionWrapper.offsetHeight;
+      const headerHeightPx = !isMobileViewport()
+        ? `${wrapperHeight / totalItemsCount}px`
+        : headerHeight;
+      const sectionHeightPx = `${sectionHeight}px`;
+
+      // Set global CSS variables on :root
+      document.documentElement.style.setProperty(
+        "--total-items",
+        totalItemsCount
+      );
+      document.documentElement.style.setProperty(
+        "--section-height",
+        sectionHeightPx
+      );
+      document.documentElement.style.setProperty(
+        "--header-height",
+        headerHeightPx
+      );
+
+      accordionHeaders.forEach((header, index) => {
+        const itemPosition = index + 1;
+
+        header.style.setProperty("--item-position", itemPosition);
+        if (!isMobileViewport()) {
+          setTimeout(() => {
+            header.style.position = "absolute";
+          }, 1000);
+        }
+      });
+
+      const accordionContainers = document.querySelectorAll("[data-accordion]");
+
+      ScrollTrigger.create({
+        trigger: accordionWrapper,
+        start: `top bottom-=${wrapperHeight}`,
+        // start: `top bottom-=${headerHeight}`,
+        onEnter: () => {
+          accordionContainers.forEach((container) => {
+            container.classList.add("inview");
+          });
+          if (!isMobileViewport()) {
+            refreshScrollTriggers();
+          }
+        },
+        onLeaveBack: () => {
+          accordionContainers.forEach((container) => {
+            container.classList.remove("inview");
+          });
+        },
+      });
+    }
+
+
     /////////////////////////////////
     /* TEXT SCALE TO FILL THE PAGE */
     /////////////////////////////////
@@ -1873,74 +1943,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }, 500);
 
-    /////////////////////////////////
-    /* ACCORDION */
-    /////////////////////////////////
-
-    const accordionContainer = document.querySelector('[data-gsap="inview"]');
-    const accordionHeaders = document.querySelectorAll(".accordion_header");
-    const accordionWrapper = document.querySelector(
-      '[data-gsap="accordion-wrapper"]'
-    );
-
-    let headerHeight = "8rem"; // rem
-
-    if (accordionContainer && accordionHeaders.length > 0 && accordionWrapper) {
-      const totalItemsCount = accordionHeaders.length;
-      const sectionHeight = accordionContainer.getBoundingClientRect().height;
-      const wrapperHeight = accordionWrapper.offsetHeight;
-      const headerHeightPx = !isMobileViewport()
-        ? `${wrapperHeight / totalItemsCount}px`
-        : headerHeight;
-      const sectionHeightPx = `${sectionHeight}px`;
-
-      // Set global CSS variables on :root
-      document.documentElement.style.setProperty(
-        "--total-items",
-        totalItemsCount
-      );
-      document.documentElement.style.setProperty(
-        "--section-height",
-        sectionHeightPx
-      );
-      document.documentElement.style.setProperty(
-        "--header-height",
-        headerHeightPx
-      );
-
-      accordionHeaders.forEach((header, index) => {
-        const itemPosition = index + 1;
-
-        header.style.setProperty("--item-position", itemPosition);
-        if (!isMobileViewport()) {
-          setTimeout(() => {
-            header.style.position = "absolute";
-          }, 1000);
-        }
-      });
-
-      const accordionContainers = document.querySelectorAll("[data-accordion]");
-
-      ScrollTrigger.create({
-        trigger: accordionWrapper,
-        start: `top bottom-=${wrapperHeight}`,
-        // start: `top bottom-=${headerHeight}`,
-        onEnter: () => {
-          accordionContainers.forEach((container) => {
-            container.classList.add("inview");
-          });
-          if (!isMobileViewport()) {
-            refreshScrollTriggers();
-          }
-        },
-        onLeaveBack: () => {
-          accordionContainers.forEach((container) => {
-            container.classList.remove("inview");
-          });
-        },
-      });
-    }
-
+   
     /////////////////////////////////
     /* Footer social Cards*/
     /////////////////////////////////
