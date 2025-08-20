@@ -19,7 +19,66 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let lenis = false;
 
-  // Initialize Lenis for ALL devices - keep your original working config!
+ 
+
+  // Instagram in-app browser fix: lock hero height to the initial small viewport
+    // to prevent 100vh/100svh growth when the top/bottom bars collapse
+    (function lockHeroHeightForInstagram() {
+      const ua = navigator.userAgent || navigator.vendor || "";
+      const isInstagram = /instagram/i.test(ua);
+      if (!isInstagram) return;
+
+      const getSmallViewportHeight = () => {
+        if (window.visualViewport && typeof window.visualViewport.height === "number") {
+          return Math.round(window.visualViewport.height);
+        }
+        return Math.round(Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight));
+      };
+
+      const applyVhLock = () => {
+        const initialVH = getSmallViewportHeight();
+        document.documentElement.style.setProperty("--vh-fixed", initialVH + "px");
+
+        const targets = [
+          document.querySelector(".section_hero"),
+        ].filter(Boolean);
+
+        targets.forEach((el) => {
+          el.style.minHeight = "var(--vh-fixed)";
+        });
+      };
+
+      // Apply once at start
+      applyVhLock();
+
+      // Only recompute on orientation or substantial width change, not on bar hide/show
+      let lockedWidth = window.innerWidth;
+      const maybeReapply = () => {
+        if (Math.abs(window.innerWidth - lockedWidth) < 50) return;
+        lockedWidth = window.innerWidth;
+        applyVhLock();
+      };
+
+      window.addEventListener("orientationchange", () => setTimeout(maybeReapply, 300), { passive: true });
+      window.addEventListener("resize", () => setTimeout(maybeReapply, 300), { passive: true });
+      // Ignore visualViewport height-only resizes to avoid jumps
+      if (window.visualViewport) {
+        const vv = window.visualViewport;
+        let lastVVWidth = vv.width;
+        vv.addEventListener(
+          "resize",
+          () => {
+            if (Math.abs(vv.width - lastVVWidth) >= 1) {
+              lastVVWidth = vv.width;
+              maybeReapply();
+            }
+          },
+          { passive: true }
+        );
+      }
+    })();
+
+     // Initialize Lenis for ALL devices - keep your original working config!
   function shouldInitializeLenis() {
     const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
     const canHover = window.matchMedia("(hover: hover)").matches;
