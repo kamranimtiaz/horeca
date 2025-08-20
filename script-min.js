@@ -696,59 +696,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Alternative version using ScrollTrigger (more performant for complex animations)
-    // function initializeNavbarScrollBehaviorWithScrollTrigger() {
-    //   // Only run on desktop
-    //   if (isMobileViewport()) return;
-
-    //   const navComponent = document.querySelector(".nav_component");
-    //   if (!navComponent) return;
-
-    //   ScrollTrigger.create({
-    //     start: "top -100", // Start after 100px scroll
-    //     end: 99999,
-    //     onUpdate: (self) => {
-    //       const direction = self.direction;
-
-    //       if (direction === 1) {
-    //         // Scrolling down - hide navbar
-    //         gsap.to(navComponent, {
-    //           yPercent: -175,
-    //           duration: 0.5,
-    //           ease: "power2.out",
-    //         });
-    //       } else {
-    //         // Scrolling up - show navbar
-    //         gsap.to(navComponent, {
-    //           yPercent: 0,
-    //           duration: 0.5,
-    //           ease: "power2.out",
-    //         });
-    //       }
-    //     },
-    //   });
-
-    //   // Always show navbar when at top
-    //   ScrollTrigger.create({
-    //     start: "top top",
-    //     end: "top -100",
-    //     onEnter: () => {
-    //       gsap.to(navComponent, {
-    //         yPercent: 0,
-    //         duration: 0.5,
-    //         ease: "power2.out",
-    //       });
-    //     },
-    //     onLeaveBack: () => {
-    //       gsap.to(navComponent, {
-    //         yPercent: 0,
-    //         duration: 0.5,
-    //         ease: "power2.out",
-    //       });
-    //     },
-    //   });
-    // }
-
     // 💡 RECOMMENDED FIX - Replace your current function with this
     function initializeNavbarScrollBehaviorWithScrollTrigger() {
       if (isMobileViewport()) return;
