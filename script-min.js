@@ -1380,7 +1380,7 @@ document.addEventListener("DOMContentLoaded", function () {
             pin: title,
             start: "top 15%",
             end: "+=" + dist,
-            // markers: true,
+            markers: true,
             onComplete: () => {
               // Optional: Revert SplitText when animation completes
               // splitText.revert();
@@ -1398,9 +1398,9 @@ document.addEventListener("DOMContentLoaded", function () {
             ease: "none",
             scrollTrigger: {
               trigger: shouldPin ? title : container, // Use title if pinned, container if not
-              start: "top 20%",
+              start: "top 15%",
               end: "+=" + randomDistance,
-              // markers: true,
+              markers: true,
               scrub: !isMobileViewport() ? true : 1,
             },
           });
