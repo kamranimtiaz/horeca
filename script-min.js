@@ -1346,7 +1346,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const gridSectionHeight = horizontalWrapper
               ? horizontalWrapper.getBoundingClientRect().height
               : 0;
-            const viewportHeight = window.innerHeight;
+            const viewportHeight = 832 //window.innerHeight;
             const seventyPercentVH = viewportHeight * 0.7;
 
             const shouldUseGridSectionAsEndTrigger =
@@ -1356,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", function () {
               trigger: container,
               pin: title,
               start: "top 15%",
-              // markers: true,
+              markers: true,
               onComplete: () => {
                 // Optional: Revert SplitText when animation completes
                 // splitText.revert();
