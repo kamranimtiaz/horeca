@@ -2,6 +2,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Register ScrollTrigger plugin (works with or without Lenis)
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
+  // Reliable dynamic viewport height helper (handles toolbar show/hide)
+  function getViewportHeight() {
+    const vv = window.visualViewport;
+    if (vv && vv.height) return Math.round(vv.height);
+    const doc = document.documentElement;
+    return Math.round((doc && doc.clientHeight) || window.innerHeight);
+  }
+
   function detectTouch() {
     // console.log("Touch device");
     return (
@@ -84,7 +92,93 @@ document.addEventListener("DOMContentLoaded", function () {
   //   }, 250);
   // });
 
+
+  // Modal Opening and closing code
+
+  // Disable Lenis for buttons with data-lenis-stop
+  document.querySelectorAll("[data-lenis-stop]").forEach((button) => {
+    button.addEventListener("click", () => {
+      // console.log("Popup button clicked");
+      if (lenis) {
+        lenis.stop();
+      } else {
+        document.body.classList.add("u-live-noscroll");
+      }
+    });
+  });
+
+  // Enable Lenis for buttons with data-lenis-start
+  document.querySelectorAll("[data-lenis-start]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (lenis) {
+        lenis.start();
+      } else {
+        document.body.classList.remove("u-live-noscroll");
+      }
+    });
+  });
+
+  // Simple toggle function using native isStopped
+  // Attach to buttons with class checking
+  document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      // console.log("Menu Opening");
+      // Check if the button has w--open class
+      if (button.classList.contains("w--open")) {
+        // Menu is Closing - Enable scrolling
+        document.body.classList.remove("u-live-noscroll");
+        // console.log("Modal opened - scrolling disabled");
+      } else {
+        // Menu is Closing - Disable scrolling
+        document.body.classList.add("u-live-noscroll");
+        // console.log("Modal closed - scrolling enabled");
+      }
+    });
+  });
+
+  // Remove u-live-noscroll class when nav links are clicked
+  document.querySelectorAll(".nav_1_links_link").forEach((link) => {
+    link.addEventListener("click", () => {
+      document.body.classList.remove("u-live-noscroll");
+
+      // Also restart Lenis if it exists (based on your existing code pattern)
+      if (typeof lenis !== "undefined" && lenis) {
+        lenis.start();
+      }
+    });
+  });
+
+  // On resize, do a full reload to keep pinned animations sane
+  let resizeRefreshTimeout;
+  let initialWidth = window.innerWidth;
+  let initialHeight = getViewportHeight();
+
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeRefreshTimeout);
+    resizeRefreshTimeout = setTimeout(() => {
+      const currentWidth = window.innerWidth;
+      const currentHeight = getViewportHeight();
+      const widthChanged = Math.abs(currentWidth - initialWidth) > 10;
+      const heightChanged = Math.abs(currentHeight - initialHeight) > (window.innerWidth > 992 ? 10 : 120);
+      if (widthChanged || heightChanged) {
+        window.location.reload();
+      }
+      initialWidth = currentWidth;
+      initialHeight = currentHeight;
+    }, 300);
+  });
+
   /////////////////////////////////
+  /////////////////////////////////
+  /* ALL OTHER ANIMATIONS - WAIT FOR FONTS */
+  /////////////////////////////////
+  /////////////////////////////////
+
+  // Function to initialize all font-dependent animations
+  function initializeFontDependentAnimations() {
+    // console.log("Initializing font-dependent animations");
+
+    /////////////////////////////////
   /////////////////////////////////
   /* Pre loader animation - RUNS IMMEDIATELY */
   /////////////////////////////////
@@ -324,103 +418,6 @@ document.addEventListener("DOMContentLoaded", function () {
         "-=1"
       ); // Start slightly before video animation completes
   }
-
-  // Modal Opening and closing code
-
-  // Disable Lenis for buttons with data-lenis-stop
-  document.querySelectorAll("[data-lenis-stop]").forEach((button) => {
-    button.addEventListener("click", () => {
-      // console.log("Popup button clicked");
-      if (lenis) {
-        lenis.stop();
-      } else {
-        document.body.classList.add("u-live-noscroll");
-      }
-    });
-  });
-
-  // Enable Lenis for buttons with data-lenis-start
-  document.querySelectorAll("[data-lenis-start]").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (lenis) {
-        lenis.start();
-      } else {
-        document.body.classList.remove("u-live-noscroll");
-      }
-    });
-  });
-
-  // Simple toggle function using native isStopped
-  // Attach to buttons with class checking
-  document.querySelectorAll("[data-lenis-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      // console.log("Menu Opening");
-      // Check if the button has w--open class
-      if (button.classList.contains("w--open")) {
-        // Menu is Closing - Enable scrolling
-        document.body.classList.remove("u-live-noscroll");
-        // console.log("Modal opened - scrolling disabled");
-      } else {
-        // Menu is Closing - Disable scrolling
-        document.body.classList.add("u-live-noscroll");
-        // console.log("Modal closed - scrolling enabled");
-      }
-    });
-  });
-
-  // Remove u-live-noscroll class when nav links are clicked
-  document.querySelectorAll(".nav_1_links_link").forEach((link) => {
-    link.addEventListener("click", () => {
-      document.body.classList.remove("u-live-noscroll");
-
-      // Also restart Lenis if it exists (based on your existing code pattern)
-      if (typeof lenis !== "undefined" && lenis) {
-        lenis.start();
-      }
-    });
-  });
-
-  // Refresh page on window resize with debouncing - iOS Safari fix
-  let resizeRefreshTimeout;
-  let initialWidth = window.innerWidth;
-  let initialHeight = window.innerHeight;
-
-  window.addEventListener("resize", () => {
-    // Clear any existing timeout
-    clearTimeout(resizeRefreshTimeout);
-
-    // Set a new timeout to refresh after resize stops
-    resizeRefreshTimeout = setTimeout(() => {
-      const currentWidth = window.innerWidth;
-      const currentHeight = window.innerHeight;
-      console.log("window resized");
-      // Calculate changes
-      const widthChanged = Math.abs(currentWidth - initialWidth) > 10; // 10px tolerance
-      const heightChanged =
-        Math.abs(currentHeight - initialHeight) >
-        (window.innerWidth > 992 ? 10 : 150); // 100px tolerance for height
-
-      // Only refresh if BOTH width AND height changed significantly
-      // This prevents iOS Safari address bar hide/show from triggering refresh
-      if (widthChanged || heightChanged) {
-        window.location.reload();
-      }
-
-      // Update stored dimensions for next comparison
-      initialWidth = currentWidth;
-      initialHeight = currentHeight;
-    }, 500); // Wait 500ms after resize stops before checking
-  });
-
-  /////////////////////////////////
-  /////////////////////////////////
-  /* ALL OTHER ANIMATIONS - WAIT FOR FONTS */
-  /////////////////////////////////
-  /////////////////////////////////
-
-  // Function to initialize all font-dependent animations
-  function initializeFontDependentAnimations() {
-    // console.log("Initializing font-dependent animations");
 
     /////////////////////////////////
     /* Hero Navbar */
@@ -1223,7 +1220,7 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollTrigger: {
           trigger: card, // Listens to the position of content
           start: "top -80%", // Starts when the top exceeds 80% of the viewport
-          end: "+=" + 0.2 * window.innerHeight, // Ends 20% later
+          end: "+=" + 0.2 * getViewportHeight(), // Ends 20% later
           scrub: !isMobileViewport() ? true : 1, // Progresses with the scroll
         },
       });
@@ -1309,8 +1306,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Use SplitText to split the h2 into individual characters
         const splitText = new SplitText(title, {
-          type: "lines, chars",
-          linesClass: "line",
+          type: "chars",
           charsClass: "letter",
           reduceWhiteSpace: false,
         });
@@ -1346,7 +1342,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const gridSectionHeight = horizontalWrapper
               ? horizontalWrapper.getBoundingClientRect().height
               : 0;
-            const viewportHeight = 832 //window.innerHeight;
+            const viewportHeight = getViewportHeight();
             const seventyPercentVH = viewportHeight * 0.7;
 
             const shouldUseGridSectionAsEndTrigger =
@@ -1614,7 +1610,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const totalScrollDistance = wrapperWidth - visibleWidth;
 
           // Set height of the pinned section based on scroll distance
-          const requiredHeight = totalScrollDistance + window.innerHeight;
+          const requiredHeight = totalScrollDistance + getViewportHeight();
 
           gsap.set(gridSection, {
             minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
@@ -1629,7 +1625,7 @@ document.addEventListener("DOMContentLoaded", function () {
               scrub: 1,
               pin: pinnedContent,
               pinSpacing: true,
-              invalidateOnRefresh: false,
+              invalidateOnRefresh: true,
               markers: false,
             },
           });
@@ -1811,7 +1807,7 @@ document.addEventListener("DOMContentLoaded", function () {
         pin: stickyContent,
         markers: false,
         pinSpacing: false,
-        invalidateOnRefresh: false,
+        invalidateOnRefresh: true,
       });
 
       // Create the long scroll animation
@@ -2017,7 +2013,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         this.feedSection.style.height = `${
-          (this.numItems + 1) * isMobileViewport() ? (window.screen.height - 70) : window.innerHeight
+          (this.numItems + 1) * getViewportHeight()
         }px`;
 
         this.createScrollTriggers();
@@ -2105,11 +2101,11 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: this.feedContainer,
           start: "top top",
-          end: () => `+=${this.numItems * isMobileViewport() ? (window.screen.height - 70) : window.innerHeight }`,
+          end: () => `+=${this.numItems * getViewportHeight()}`,
           pin: this.feedContainer,
           pinSpacing: true,
           scrub: !isMobileViewport() ? 0.1 : 0.75,
-          invalidateOnRefresh: false,
+          invalidateOnRefresh: true,
           markers: false, // Remove this in production
           immediateRender: false,
           onUpdate: (self) => {
@@ -2152,6 +2148,7 @@ document.addEventListener("DOMContentLoaded", function () {
               left: "50%",
               xPercent: -50,
             });
+            // Keep feed height fixed for this pageview (no dynamic resize here)
           },
           onLeave: () => {
             // Optional: fade out background when leaving the section
