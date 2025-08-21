@@ -1330,7 +1330,7 @@ document.addEventListener("DOMContentLoaded", function () {
               pin: title,
               start: "top 15%",
               end: "+=" + dist,
-              // markers: true,
+              markers: true,
               onComplete: () => {
                 // Optional: Revert SplitText when animation completes
                 // splitText.revert();
