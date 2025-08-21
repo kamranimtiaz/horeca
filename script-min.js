@@ -2017,7 +2017,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         this.feedSection.style.height = `${
-          (this.numItems + 1) * window.innerHeight
+          (this.numItems + 1) * isMobileViewport() ? (window.screen.height - 70) : window.innerHeight
         }px`;
 
         this.createScrollTriggers();
@@ -2105,7 +2105,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ScrollTrigger.create({
           trigger: this.feedContainer,
           start: "top top",
-          end: () => `+=${this.numItems * window.innerHeight}`,
+          end: () => `+=${this.numItems * isMobileViewport() ? (window.screen.height - 70) : window.innerHeight }`,
           pin: this.feedContainer,
           pinSpacing: true,
           scrub: !isMobileViewport() ? 0.1 : 0.75,
