@@ -168,21 +168,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  /////////////////////////////////
+  
   /////////////////////////////////
   /* ALL OTHER ANIMATIONS - WAIT FOR FONTS */
   /////////////////////////////////
-  /////////////////////////////////
+  
 
   // Function to initialize all font-dependent animations
   function initializeFontDependentAnimations() {
     // console.log("Initializing font-dependent animations");
 
-    /////////////////////////////////
   /////////////////////////////////
   /* Pre loader animation - RUNS IMMEDIATELY */
   /////////////////////////////////
-  /////////////////////////////////
+
 
   const createPreloaderTimeline = () => {
     return gsap.timeline({
@@ -1326,7 +1325,7 @@ document.addEventListener("DOMContentLoaded", function () {
               pin: title,
               start: "top 15%",
               end: "+=" + dist,
-              markers: true,
+              // markers: true,
               onComplete: () => {
                 // Optional: Revert SplitText when animation completes
                 // splitText.revert();
@@ -1352,7 +1351,7 @@ document.addEventListener("DOMContentLoaded", function () {
               trigger: container,
               pin: title,
               start: "top 15%",
-              markers: true,
+              // markers: true,
               onComplete: () => {
                 // Optional: Revert SplitText when animation completes
                 // splitText.revert();
@@ -1376,7 +1375,7 @@ document.addEventListener("DOMContentLoaded", function () {
             pin: title,
             start: "top 15%",
             end: "+=" + dist,
-            markers: true,
+            // markers: true,
             onComplete: () => {
               // Optional: Revert SplitText when animation completes
               // splitText.revert();
@@ -1396,7 +1395,7 @@ document.addEventListener("DOMContentLoaded", function () {
               trigger: shouldPin ? title : container, // Use title if pinned, container if not
               start: "top 15%",
               end: "+=" + randomDistance,
-              markers: true,
+              // markers: true,
               scrub: !isMobileViewport() ? true : 1,
             },
           });
