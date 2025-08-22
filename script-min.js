@@ -151,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // On resize, do a full reload to keep pinned animations sane
   let resizeRefreshTimeout;
   let initialWidth = window.innerWidth;
-  let initialHeight = getViewportHeight();
 
   window.addEventListener("resize", () => {
     clearTimeout(resizeRefreshTimeout);
@@ -159,12 +158,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const currentWidth = window.innerWidth;
       const currentHeight = getViewportHeight();
       const widthChanged = Math.abs(currentWidth - initialWidth) > 10;
-      const heightChanged = Math.abs(currentHeight - initialHeight) > (window.innerWidth > 992 ? 10 : 120);
-      if (widthChanged || heightChanged) {
+      if (widthChanged) {
         window.location.reload();
       }
       initialWidth = currentWidth;
-      initialHeight = currentHeight;
+
     }, 300);
   });
 
@@ -1305,8 +1303,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Use SplitText to split the h2 into individual characters
         const splitText = new SplitText(title, {
-          type: "chars",
+          type: "chars, lines",
           charsClass: "letter",
+          linesClass: "gravity-line",
           reduceWhiteSpace: false,
         });
 
