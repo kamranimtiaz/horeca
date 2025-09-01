@@ -2132,246 +2132,204 @@ document.addEventListener("DOMContentLoaded", function () {
       // }
 
       class FeedItemsAnimation {
-        constructor(container) {
-          // Element selections based on your HTML structure
-          this.container = container;
-          this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
-          this.feedSection = container.querySelector(".section_feed");
-          this.feedWrapper = container.querySelector(".feed_cms_wrapper");
-          this.feedContainer = container.querySelector(".feed_container");
-          this.feedWrapper = container.querySelector(".feed_cms_wrap");
-          this.feedList = container.querySelector(".feed_cms_list"); // The actual grid container
+  constructor(container) {
+    this.container = container;
+    this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
+    this.feedSection = container.querySelector(".section_feed");
+    this.feedWrapper = container.querySelector(".feed_cms_wrap");
+    this.feedContainer = container.querySelector(".feed_container");
+    this.feedList = container.querySelector(".feed_cms_list");
 
-          // Background elements
-          this.bgItems = [
-            ...container.querySelectorAll(".feed_bg-content-item"),
-          ];
-          this.bgContainer = container.querySelector(".feed_bg-content");
+    // Cache feed images once instead of querying every frame
+    this.feedImages = this.feedItems.map((item) =>
+      item.querySelector(".feed_img")
+    );
 
-          // Mobile detection (using the same function from your code)
-          this.isMobile = window.innerWidth <= 767;
+    // Background elements
+    this.bgItems = [...container.querySelectorAll(".feed_bg-content-item")];
+    this.bgContainer = container.querySelector(".feed_bg-content");
 
-          // Animation properties - adjust for mobile
-          this.targetZValue = 1;
-          this.closestItem = null;
-          this.closestZDifference = Infinity;
-          this.currIndex = 0;
-          this.newIndex = 0;
-          this.numItems = this.feedItems.length;
-          this.progress = 0;
+    this.isMobile = window.innerWidth <= 767;
 
-          // Z-depth configuration based on device
-          this.zDepthConfig = {
-            desktop: {
-              initialSpacing: -1800, // Original spacing for desktop
-              totalRange: 3000, // Total range for normalization
-              maxOffset: 1800 * this.numItems,
-            },
-            mobile: {
-              initialSpacing: -900, // Half the spacing = items start closer
-              totalRange: 1500, // Adjusted range for normalization
-              maxOffset: 900 * this.numItems,
-            },
-          };
+    this.targetZValue = 1;
+    this.closestItem = null;
+    this.closestZDifference = Infinity;
+    this.currIndex = 0;
+    this.newIndex = 0;
+    this.numItems = this.feedItems.length;
+    this.progress = 0;
 
-          this.currentConfig = this.isMobile
-            ? this.zDepthConfig.mobile
-            : this.zDepthConfig.desktop;
+    this.zDepthConfig = {
+      desktop: {
+        initialSpacing: -1800,
+        totalRange: 3000,
+        maxOffset: 1800 * this.numItems,
+      },
+      mobile: {
+        initialSpacing: -900,
+        totalRange: 1500,
+        maxOffset: 900 * this.numItems,
+      },
+    };
 
-          this.init();
-        }
+    this.currentConfig = this.isMobile
+      ? this.zDepthConfig.mobile
+      : this.zDepthConfig.desktop;
 
-        init() {
-          // Initial setup for feed items with mobile-specific positioning
-          gsap.set(this.feedItems, {
-            z: (index) => (index + 1) * this.currentConfig.initialSpacing,
-            zIndex: (index) => index * -1,
-            opacity: 0,
-          });
+    this.init();
+  }
 
-          // Initial setup for background items
-          if (this.bgContainer && this.bgItems.length > 0) {
-            // Set background container to opacity 0 initially
-            gsap.set(this.bgContainer, {
-              opacity: 0,
-            });
+  init() {
+    gsap.set(this.feedItems, {
+      z: (index) => (index + 1) * this.currentConfig.initialSpacing,
+      zIndex: (index) => index * -1,
+      opacity: 0,
+    });
 
-            // Set all background items to opacity 0 initially
-            gsap.set(this.bgItems, {
-              opacity: 0,
-            });
-          }
+    if (this.bgContainer && this.bgItems.length > 0) {
+      gsap.set(this.bgContainer, { opacity: 0 });
+      gsap.set(this.bgItems, { opacity: 0 });
+    }
 
-          this.feedSection.style.height = `${
-            (this.numItems + 1) * window.innerHeight
-          }px`;
+    this.feedSection.style.height = `${
+      (this.numItems + 1) * window.innerHeight
+    }px`;
 
-          this.createScrollTriggers();
-          this.getProgress();
-        }
+    this.createScrollTriggers();
+    this.getProgress();
+  }
 
-        // Main progress calculation and item positioning
-        getProgress = () => {
-          this.resetClosestItem();
+  getProgress = () => {
+    this.resetClosestItem();
 
-          this.feedItems.forEach((item) => {
-            // Use mobile-specific range for normalization
-            let normalizedZ = gsap.utils.normalize(
-              -this.currentConfig.totalRange,
-              0,
-              gsap.getProperty(item, "z")
-            );
-            item.setAttribute("data-z", normalizedZ);
+    this.feedItems.forEach((item, index) => {
+      const z = gsap.getProperty(item, "z");
+      const normalizedZ = gsap.utils.normalize(
+        -this.currentConfig.totalRange,
+        0,
+        z
+      );
 
-            // Animate opacity based on z position
-            gsap.to(item, { opacity: normalizedZ + 0.2 });
+      item.dataset.z = normalizedZ;
 
-            // Scale images based on z position with mobile-specific scaling
-            const itemImage = item.querySelector(".feed_img");
-            if (itemImage) {
-              // Slightly different scaling for mobile to account for closer starting position
-              const scaleMultiplier = this.isMobile ? 0.6 : 0.5;
-              const baseScale = this.isMobile ? 0.8 : 0.75;
+      // ✅ use set instead of to (no tween creation per frame)
+      gsap.set(item, { opacity: normalizedZ + 0.2 });
 
-              gsap.to(itemImage, {
-                scale: normalizedZ * scaleMultiplier + baseScale,
-                ease: "expo.out",
-                duration: 0.5,
-              });
-            }
+      const itemImage = this.feedImages[index];
+      if (itemImage) {
+        const scaleMultiplier = this.isMobile ? 0.6 : 0.5;
+        const baseScale = this.isMobile ? 0.8 : 0.75;
 
-            // Find closest item to target z value
-            let zDifference = Math.abs(normalizedZ - this.targetZValue);
-            if (zDifference < this.closestZDifference) {
-              this.closestZDifference = zDifference;
-              this.closestItem = item;
-            }
-          });
-
-          // Update current index and handle background transitions
-          const newIndex = this.feedItems.indexOf(this.closestItem);
-
-          if (newIndex !== this.currIndex) {
-            this.handleBackgroundTransition(newIndex);
-            this.currIndex = newIndex;
-          }
-        };
-
-        handleBackgroundTransition = (newIndex) => {
-          if (!this.bgItems.length) return;
-
-          // Fade out current background item if it exists
-          if (this.currIndex >= 0 && this.bgItems[this.currIndex]) {
-            gsap.to(this.bgItems[this.currIndex], {
-              opacity: 0,
-              duration: 0.3,
-              ease: "power2.out",
-            });
-          }
-
-          // Fade in new background item
-          if (this.bgItems[newIndex]) {
-            gsap.to(this.bgItems[newIndex], {
-              opacity: 1,
-              duration: 0.3,
-              ease: "power2.out",
-            });
-          }
-
-          this.newIndex = newIndex;
-        };
-
-        resetClosestItem = () => {
-          this.closestItem = null;
-          this.closestZDifference = Infinity;
-        };
-
-        createScrollTriggers() {
-          // Main scroll animation for feed items z-positioning
-          ScrollTrigger.create({
-            trigger: this.feedContainer,
-            start: "top top",
-            end: () => `+=${this.numItems * window.innerHeight}`,
-            pin: this.feedContainer,
-            pinSpacing: true,
-            scrub: 0.1,
-            invalidateOnRefresh: true,
-            markers: false, // Remove this in production
-            immediateRender: false,
-            onUpdate: (self) => {
-              this.progress = self.progress;
-              this.progress = gsap.utils.clamp(0, 1, this.progress);
-
-              // Calculate z-offset using mobile-specific values
-              let zOffset = this.progress * this.currentConfig.maxOffset;
-              gsap.set(this.feedItems, {
-                z: (index) =>
-                  (index + 1) * this.currentConfig.initialSpacing + zOffset,
-              });
-
-              this.getProgress();
-            },
-            onEnter: () => {
-              // Show background container when entering the trigger area
-              if (this.bgContainer) {
-                gsap.to(this.bgContainer, {
-                  opacity: 1,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-
-              // Show first background item
-              if (this.bgItems[0]) {
-                gsap.to(this.bgItems[0], {
-                  opacity: 1,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            },
-            onStart: () => {
-              // Ensure the pinned element starts at the top
-              gsap.set(this.feedList, {
-                position: "fixed",
-                top: 0,
-                left: "50%",
-                xPercent: -50,
-              });
-            },
-            onLeave: () => {
-              // Optional: fade out background when leaving the section
-              if (this.bgContainer) {
-                gsap.to(this.bgContainer, {
-                  opacity: 0,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            },
-            onLeaveBack: () => {
-              // Hide background when scrolling back up and leaving the trigger area
-              if (this.bgContainer) {
-                gsap.to(this.bgContainer, {
-                  opacity: 0,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            },
-            onEnterBack: () => {
-              // Show background again when entering back
-              if (this.bgContainer) {
-                gsap.to(this.bgContainer, {
-                  opacity: 1,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            },
-          });
-        }
+        gsap.set(itemImage, {
+          scale: normalizedZ * scaleMultiplier + baseScale,
+        });
       }
+
+      const zDifference = Math.abs(normalizedZ - this.targetZValue);
+      if (zDifference < this.closestZDifference) {
+        this.closestZDifference = zDifference;
+        this.closestItem = item;
+      }
+    });
+
+    const newIndex = this.feedItems.indexOf(this.closestItem);
+    if (newIndex !== this.currIndex) {
+      this.handleBackgroundTransition(newIndex);
+      this.currIndex = newIndex;
+    }
+  };
+
+  handleBackgroundTransition = (newIndex) => {
+    if (!this.bgItems.length) return;
+
+    if (this.currIndex >= 0 && this.bgItems[this.currIndex]) {
+      gsap.to(this.bgItems[this.currIndex], {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
+
+    if (this.bgItems[newIndex]) {
+      gsap.to(this.bgItems[newIndex], {
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
+
+    this.newIndex = newIndex;
+  };
+
+  resetClosestItem = () => {
+    this.closestItem = null;
+    this.closestZDifference = Infinity;
+  };
+
+  createScrollTriggers() {
+    ScrollTrigger.create({
+      trigger: this.feedContainer,
+      start: "top top",
+      end: () => `+=${this.numItems * window.innerHeight}`,
+      pin: this.feedContainer,
+      pinSpacing: true,
+      scrub: 0.3, // ✅ smoother scrub (less CPU than 0.1)
+      invalidateOnRefresh: true,
+      markers: false,
+      immediateRender: false,
+
+      onUpdate: (self) => {
+        this.progress = gsap.utils.clamp(0, 1, self.progress);
+        const zOffset = this.progress * this.currentConfig.maxOffset;
+
+        // ✅ batch update all items in one gsap.set
+        gsap.set(this.feedItems, {
+          z: (index) =>
+            (index + 1) * this.currentConfig.initialSpacing + zOffset,
+        });
+
+        this.getProgress();
+      },
+
+      onEnter: () => {
+        if (this.bgContainer) {
+          gsap.to(this.bgContainer, { opacity: 1, duration: 0.3 });
+        }
+        if (this.bgItems[0]) {
+          gsap.to(this.bgItems[0], { opacity: 1, duration: 0.3 });
+        }
+      },
+
+      onStart: () => {
+        gsap.set(this.feedList, {
+          position: "fixed",
+          top: 0,
+          left: "50%",
+          xPercent: -50,
+        });
+      },
+
+      onLeave: () => {
+        if (this.bgContainer) {
+          gsap.to(this.bgContainer, { opacity: 0, duration: 0.3 });
+        }
+      },
+
+      onLeaveBack: () => {
+        if (this.bgContainer) {
+          gsap.to(this.bgContainer, { opacity: 0, duration: 0.3 });
+        }
+      },
+
+      onEnterBack: () => {
+        if (this.bgContainer) {
+          gsap.to(this.bgContainer, { opacity: 1, duration: 0.3 });
+        }
+      },
+    });
+  }
+}
+
 
       const feedAnimation = new FeedItemsAnimation(document);
       // setTimeout(() => {
