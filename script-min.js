@@ -43,13 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!isMobileViewport() && shouldInitializeLenis()) {
     lenis = new Lenis({
-      touchMultiplier: 1.25,
       wheelMultiplier: 1,
       smooth: true,
-      smoothTouch: false,
-      syncTouch: true,
-      syncTouchLerp: 0.125,
-      touchInertiaMultiplier: 35,
       prevent: (node) => node.id === "modal_content",
       lerp: 0.1,
       duration: 1.2,
@@ -63,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
       lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
+    ScrollTrigger.normalizeScroll(true);
   } else {
   }
 
