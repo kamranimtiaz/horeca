@@ -58,8 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
       lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
-    ScrollTrigger.normalizeScroll(true);
+    
   } else {
+    ScrollTrigger.normalizeScroll(true);
   }
 
   // Function to refresh ScrollTrigger instances
