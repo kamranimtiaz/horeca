@@ -2,46 +2,151 @@ document.addEventListener("DOMContentLoaded", function () {
   // Register ScrollTrigger plugin (works with or without Lenis)
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
-  // Reliable dynamic viewport height helper (handles toolbar show/hide)
-  function getViewportHeight() {
-    const vv = window.visualViewport;
-    if (vv && vv.height) return Math.round(vv.height);
-    const doc = document.documentElement;
-    return Math.round((doc && doc.clientHeight) || window.innerHeight);
+  const MOBILE_SCROLLER = ".page_wrap";
+
+  window.isMobile = function () {
+    let userAgentCheck = false;
+
+    if (
+      navigator.userAgentData &&
+      navigator.userAgentData.mobile !== undefined
+    ) {
+      userAgentCheck = navigator.userAgentData.mobile;
+    } else {
+      userAgentCheck =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+    }
+
+    return userAgentCheck;
+  };
+
+  function getScrollContainer() {
+    if (isMobile()) {
+      return (
+        document.querySelector(MOBILE_SCROLLER) ||
+        document.querySelector("main") ||
+        window
+      );
+    }
+    return window;
   }
 
-  function detectTouch() {
-    // console.log("Touch device");
-    return (
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia("(pointer: coarse)").matches
-    );
+  let currentScroller = getScrollContainer();
+  ScrollTrigger.defaults({ scroller: currentScroller });
+
+  function updateViewportHeight() {
+    if (isMobile()) {
+      document.documentElement.style.setProperty(
+        "--dvh",
+        `${window.innerHeight / 100}px`
+      );
+      document.documentElement.style.setProperty(
+        "--dvw",
+        `${window.innerWidth / 100}px`
+      );
+    } else {
+      document.documentElement.style.removeProperty("--dvh");
+      document.documentElement.style.removeProperty("--dvw");
+    }
   }
 
-  // console.log(detectTouch()); // true/false
+  function configureScrollEnvironment() {
+    updateViewportHeight();
 
-  function isMobileViewport() {
-    return window.innerWidth <= 991;
+    const newScroller = getScrollContainer();
+    if (newScroller !== currentScroller) {
+      currentScroller = newScroller;
+      ScrollTrigger.defaults({ scroller: currentScroller });
+    }
+
+    if (isMobile()) {
+      document.body.classList.add("disable-cursor", "viewport-mobile");
+
+      if (document.body.classList.contains("enable-lenis")) {
+        document.body.classList.replace("enable-lenis", "fixed-viewport");
+      } else {
+        document.body.classList.add("fixed-viewport");
+      }
+    } else {
+      document.body.classList.remove(
+        "disable-cursor",
+        "viewport-mobile",
+        "fixed-viewport"
+      );
+      document.body.classList.add("enable-lenis");
+    }
   }
 
-  let lenis = false;
+  configureScrollEnvironment();
+
+  function bindInPageLinks() {
+    const scroller = currentScroller;
+
+    if (!scroller || scroller === window) {
+      return;
+    }
+
+    const anchors = document.querySelectorAll('a[href^="#"]');
+
+    anchors.forEach((anchor) => {
+      if (anchor.dataset.anchorBound === "true") return;
+
+      const href = anchor.getAttribute("href");
+
+      if (!href || href.length <= 1) {
+        return;
+      }
+
+      let target = null;
+      try {
+        target = document.querySelector(href);
+      } catch (error) {
+        target = null;
+      }
+
+      if (!target) {
+        return;
+      }
+
+      anchor.dataset.anchorBound = "true";
+
+      anchor.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const scrollerRect = scroller.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const targetOffset = targetRect.top - scrollerRect.top + scroller.scrollTop;
+
+        if (typeof scroller.scrollTo === "function") {
+          scroller.scrollTo({
+            top: targetOffset,
+            behavior: "smooth",
+          });
+        } else {
+          scroller.scrollTop = targetOffset;
+        }
+
+        if (history.pushState) {
+          history.pushState(null, "", href);
+        } else {
+          window.location.hash = href;
+        }
+      });
+    });
+  }
+
+  bindInPageLinks();
+
+  let lenis = null;
 
   // Initialize Lenis for ALL devices - keep your original working config!
   function shouldInitializeLenis() {
-    const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
-    const canHover = window.matchMedia("(hover: hover)").matches;
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isMobileUA =
-      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-        userAgent
-      );
-
-    // Don't initialize if primary input is touch or known mobile device
-    return !isPrimaryTouch && !isMobileUA && canHover;
+    return !isMobile();
   }
 
-  if (!isMobileViewport() && shouldInitializeLenis()) {
+  if (shouldInitializeLenis()) {
     lenis = new Lenis({
       wheelMultiplier: 1,
       smooth: true,
@@ -58,10 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
-    
-  } else {
-    ScrollTrigger.normalizeScroll(true);
-  }
+  } 
 
   // Function to refresh ScrollTrigger instances
   function refreshScrollTriggers() {
@@ -70,25 +172,6 @@ document.addEventListener("DOMContentLoaded", function () {
       lenis.resize();
     }
   }
-
-  //   window.addEventListener("resize", );
-
-  // Handle resize events
-  // let resizeTimeout;
-  // window.addEventListener("resize", () => {
-  //   clearTimeout(resizeTimeout);
-  //   resizeTimeout = setTimeout(() => {
-  //     const wasMobile = lenis === null;
-  //     const isMobileNow = isMobileViewport();
-
-  //     if (wasMobile !== isMobileNow) {
-  //       // console.log(
-  //       //   "Viewport changed - consider page reload for optimal experience"
-  //       // );
-  //     }
-  //   }, 250);
-  // });
-
 
   // Modal Opening and closing code
 
@@ -150,10 +233,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let initialWidth = window.innerWidth;
 
   window.addEventListener("resize", () => {
+    configureScrollEnvironment();
+    bindInPageLinks();
     clearTimeout(resizeRefreshTimeout);
     resizeRefreshTimeout = setTimeout(() => {
       const currentWidth = window.innerWidth;
-      const currentHeight = getViewportHeight();
       const widthChanged = Math.abs(currentWidth - initialWidth) > 10;
       if (widthChanged) {
         window.location.reload();
@@ -163,7 +247,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
   });
 
-  
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      configureScrollEnvironment();
+      bindInPageLinks();
+    }, 100);
+  });
+
   /////////////////////////////////
   /* ALL OTHER ANIMATIONS - WAIT FOR FONTS */
   /////////////////////////////////
@@ -233,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // PRELOADER ANIMATION - RUNS IMMEDIATELY
-  if (isMobileViewport()) {
+  if (isMobile()) {
     // MOBILE TIMELINE
     // console.log("Initializing mobile preloader timeline");
 
@@ -733,7 +823,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 💡 RECOMMENDED FIX - Replace your current function with this
     function initializeNavbarScrollBehaviorWithScrollTrigger() {
-      if (isMobileViewport()) return;
+      if (isMobile()) return;
 
       const navComponent = document.querySelector(".nav_component");
       if (!navComponent) return;
@@ -802,8 +892,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    !isMobileViewport() ? initializeNavbarAnimation() : "";
-    !isMobileViewport()
+    !isMobile() ? initializeNavbarAnimation() : "";
+    !isMobile()
       ? initializeNavbarScrollBehaviorWithScrollTrigger()
       : "";
 
@@ -1161,7 +1251,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Start when hero section hits 20% from top
       ScrollTrigger.create({
         trigger: ".section_hero",
-        start: () => (isMobileViewport() ? "top 80%" : "top 50%"),
+        start: () => (isMobile() ? "top 80%" : "top 50%"),
         once: true,
         onEnter: () => {
           // console.log("Hero section triggered, starting slideshow");
@@ -1202,7 +1292,7 @@ document.addEventListener("DOMContentLoaded", function () {
           start: "top top",
           end: "bottom center",
           endTrigger: ".g_component_layout",
-          scrub: !isMobileViewport() ? true : 1,
+          scrub: !isMobile() ? true : 1,
           pin: wrapper,
           pinSpacing: false,
         },
@@ -1214,8 +1304,8 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollTrigger: {
           trigger: card, // Listens to the position of content
           start: "top -80%", // Starts when the top exceeds 80% of the viewport
-          end: "+=" + 0.2 * getViewportHeight(), // Ends 20% later
-          scrub: !isMobileViewport() ? true : 1, // Progresses with the scroll
+          end: "+=" + 0.2 * window.innerHeight, // Ends 20% later
+          scrub: !isMobile() ? true : 1, // Progresses with the scroll
         },
       });
     });
@@ -1313,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const shouldPin =
           container.getAttribute("data-animate-container") === "pinned";
 
-        if (!isMobileViewport()) {
+        if (!isMobile()) {
           if (shouldPin) {
             // Pin the title during scroll (only for containers with "pinned" value)
             ScrollTrigger.create({
@@ -1337,7 +1427,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const gridSectionHeight = horizontalWrapper
               ? horizontalWrapper.getBoundingClientRect().height
               : 0;
-            const viewportHeight = getViewportHeight();
+            const viewportHeight = window.innerHeight;
             const seventyPercentVH = viewportHeight * 0.7;
 
             const shouldUseGridSectionAsEndTrigger =
@@ -1392,7 +1482,7 @@ document.addEventListener("DOMContentLoaded", function () {
               start: "top 15%",
               end: "+=" + randomDistance,
               // markers: true,
-              scrub: !isMobileViewport() ? true : 1,
+              scrub: !isMobile() ? true : 1,
             },
           });
         });
@@ -1408,7 +1498,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const gridSection = document.querySelector(
         '[data-gsap-section="grid-lines"]'
       );
-      if (!isMobileViewport() && gridSection) {
+      if (!isMobile() && gridSection) {
         const pinnedContent = gridSection.querySelector(
           '[data-gsap-state="pinned"]'
         );
@@ -1605,7 +1695,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const totalScrollDistance = wrapperWidth - visibleWidth;
 
           // Set height of the pinned section based on scroll distance
-          const requiredHeight = totalScrollDistance + getViewportHeight();
+          const requiredHeight = totalScrollDistance + window.innerHeight;
 
           gsap.set(gridSection, {
             minHeight: `${requiredHeight}px`, // or height if you're sure it won't change
@@ -1669,7 +1759,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const totalItemsCount = accordionHeaders.length;
       const sectionHeight = accordionContainer.getBoundingClientRect().height;
       const wrapperHeight = accordionWrapper.offsetHeight;
-      const headerHeightPx = !isMobileViewport()
+      const headerHeightPx = !isMobile()
         ? `${wrapperHeight / totalItemsCount}px`
         : headerHeight;
       const sectionHeightPx = `${sectionHeight}px`;
@@ -1692,7 +1782,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const itemPosition = index + 1;
 
         header.style.setProperty("--item-position", itemPosition);
-        if (!isMobileViewport()) {
+        if (!isMobile()) {
           setTimeout(() => {
             header.style.position = "absolute";
           }, 1000);
@@ -1709,7 +1799,7 @@ document.addEventListener("DOMContentLoaded", function () {
           accordionContainers.forEach((container) => {
             container.classList.add("inview");
           });
-          if (!isMobileViewport()) {
+          if (!isMobile()) {
             refreshScrollTriggers();
           }
         },
@@ -1811,13 +1901,13 @@ document.addEventListener("DOMContentLoaded", function () {
         start: "top top",
         end: "bottom bottom",
         // markers: false,
-        scrub: !isMobileViewport() ? true : 1,
+        scrub: !isMobile() ? true : 1,
         onUpdate: (self) => {
           const progress = self.progress;
           // console.log(`Long scroll section ${index + 1} progress:`, progress);
           // Calculate progress values
           const progress1 = Math.min(progress / 0.6, 1);
-          const progress2 = !isMobileViewport()
+          const progress2 = !isMobile()
             ? progress >= 0.3
               ? (progress - 0.3) / 0.55
               : 0 // Desktop: start at 30%, finish at 85%
@@ -1853,7 +1943,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Simple middle text animation
           if (textMiddle && pivotElement) {
-            const currentScale = !isMobileViewport()
+            const currentScale = !isMobile()
               ? Math.max(0, progress1 * 2.25)
               : Math.max(0, progress1 * 2.95); // Scale based on progress1, larger on desktop
             // Clamp to minimum 0
@@ -1954,7 +2044,7 @@ document.addEventListener("DOMContentLoaded", function () {
     //     this.bgContainer = container.querySelector(".feed_bg-content");
 
     //     // Mobile detection (using the same function from your code)
-    //     this.isMobile = isMobileViewport();
+    //     this.isMobile = isMobile();
 
     //     // Animation properties - adjust for mobile
     //     this.targetZValue = 1;
@@ -2008,7 +2098,7 @@ document.addEventListener("DOMContentLoaded", function () {
     //     }
 
     //     this.feedSection.style.height = `${
-    //       (this.numItems + 1) * getViewportHeight()
+    //       (this.numItems + 1) * window.innerHeight
     //     }px`;
 
     //     this.createScrollTriggers();
@@ -2096,10 +2186,10 @@ document.addEventListener("DOMContentLoaded", function () {
     //     ScrollTrigger.create({
     //       trigger: this.feedContainer,
     //       start: "top top",
-    //       end: () => `+=${this.numItems * getViewportHeight()}`,
+    //       end: () => `+=${this.numItems * window.innerHeight}`,
     //       pin: this.feedContainer,
     //       pinSpacing: true,
-    //       scrub: !isMobileViewport() ? 0.1 : 0.75,
+    //       scrub: !isMobile() ? 0.1 : 0.75,
     //       invalidateOnRefresh: true,
     //       markers: false, // Remove this in production
     //       immediateRender: false,
@@ -2196,7 +2286,7 @@ document.addEventListener("DOMContentLoaded", function () {
     this.bgItems = [...container.querySelectorAll(".feed_bg-content-item")];
     this.bgContainer = container.querySelector(".feed_bg-content");
 
-    this.isMobile = window.innerWidth <= 767;
+    this.isMobile = isMobile();
 
     this.targetZValue = 1;
     this.closestItem = null;
@@ -2417,7 +2507,7 @@ document.addEventListener("DOMContentLoaded", function () {
             trigger: line, // Use the line itself as trigger
             start: "top bottom", // When line top hits viewport bottom
             end: `top bottom-=${lineHeight}px`, // End when line travels exactly its height
-            scrub: !isMobileViewport() ? true : 1,
+            scrub: !isMobile() ? true : 1,
             // markers: true, // Remove in production
           },
         });
