@@ -2135,6 +2135,13 @@ document.addEventListener("DOMContentLoaded", function () {
   constructor(container) {
     this.container = container;
     this.feedItems = [...container.querySelectorAll(".feed_cms_item")];
+
+    // Guard clause
+    if (this.feedItems.length === 0) {
+      console.warn('No feed items found - skipping feed animation');
+      return;
+    }
+
     this.feedSection = container.querySelector(".section_feed");
     this.feedWrapper = container.querySelector(".feed_cms_wrap");
     this.feedContainer = container.querySelector(".feed_container");
