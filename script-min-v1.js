@@ -2287,6 +2287,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     this.isMobile = isMobile();
 
+    // Get scroller height (use scroller container height on mobile, window height on desktop)
+    this.scrollerHeight = this.isMobile
+      ? (currentScroller && currentScroller !== window
+          ? currentScroller.clientHeight
+          : window.innerHeight)
+      : window.innerHeight;
+
     this.targetZValue = 1;
     this.closestItem = null;
     this.closestZDifference = Infinity;
@@ -2330,7 +2337,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Set height on the scroll wrapper for sticky positioning
     if (this.feedScrollWrapper) {
       this.feedScrollWrapper.style.height = `${
-        (this.numItems + 1) * window.innerHeight
+        (this.numItems + 1) * this.scrollerHeight
       }px`;
     }
 
