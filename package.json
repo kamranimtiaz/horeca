@@ -1,10 +1,12 @@
 {
   "devDependencies": {
+    "nodemon": "^3.1.11",
     "terser": "^5.44.1"
   },
   "scripts": {
     "minify": "terser horeca/script.js -o horeca/script-min.js -c -m",
-    "minify:all": "terser horeca/*.js -o horeca/dist/bundle.min.js -c -m"
-  }
+    "minify:all": "terser horeca/*.js -o horeca/dist/bundle.min.js -c -m",
+    "watch": "nodemon --watch script-min.js --exec ./minify.sh"
 
+  }
 }

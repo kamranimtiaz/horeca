@@ -1884,16 +1884,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
 
-      // Pin the sticky content
-      ScrollTrigger.create({
-        trigger: longScrollSection,
-        start: "top top",
-        end: "bottom bottom",
-        pin: stickyContent,
-        markers: false,
-        pinSpacing: false,
-        invalidateOnRefresh: true,
-      });
+      // Sticky content pinning removed - using CSS position: sticky instead
 
       // Create the long scroll animation
       ScrollTrigger.create({
@@ -2281,6 +2272,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     this.feedSection = container.querySelector(".section_feed");
     this.feedWrapper = container.querySelector(".feed_cms_wrap");
+    this.feedScrollWrapper = container.querySelector(".feed_scroll_wrapper");
     this.feedContainer = container.querySelector(".feed_container");
     this.feedList = container.querySelector(".feed_cms_list");
 
@@ -2294,6 +2286,13 @@ document.addEventListener("DOMContentLoaded", function () {
     this.bgContainer = container.querySelector(".feed_bg-content");
 
     this.isMobile = isMobile();
+
+    // Get scroller height (use scroller container height on mobile, window height on desktop)
+    this.scrollerHeight = this.isMobile
+      ? (currentScroller && currentScroller !== window
+          ? currentScroller.clientHeight
+          : window.innerHeight)
+      : window.innerHeight;
 
     this.targetZValue = 1;
     this.closestItem = null;
@@ -2335,9 +2334,12 @@ document.addEventListener("DOMContentLoaded", function () {
       gsap.set(this.bgItems, { opacity: 0 });
     }
 
-    this.feedSection.style.height = `${
-      (this.numItems + 1) * window.innerHeight
-    }px`;
+    // Set height on the scroll wrapper for sticky positioning
+    if (this.feedScrollWrapper) {
+      this.feedScrollWrapper.style.height = `${
+        (this.numItems + 1) * this.scrollerHeight
+      }px`;
+    }
 
     this.createScrollTriggers();
     this.getProgress();
@@ -2411,12 +2413,11 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   createScrollTriggers() {
+    // Feed container pinning removed - using CSS position: sticky instead
     ScrollTrigger.create({
-      trigger: this.feedContainer,
+      trigger: this.feedScrollWrapper || this.feedContainer,
       start: "top top",
-      end: () => `+=${this.numItems * window.innerHeight}`,
-      pin: this.feedContainer,
-      pinSpacing: true,
+      end: "bottom bottom",
       scrub: 0.3, // ✅ smoother scrub (less CPU than 0.1)
       invalidateOnRefresh: true,
       markers: false,
