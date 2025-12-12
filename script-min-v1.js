@@ -1884,16 +1884,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
 
-      // Pin the sticky content
-      ScrollTrigger.create({
-        trigger: longScrollSection,
-        start: "top top",
-        end: "bottom bottom",
-        pin: stickyContent,
-        markers: false,
-        pinSpacing: false,
-        invalidateOnRefresh: true,
-      });
+      // Sticky content pinning removed - using CSS position: sticky instead
 
       // Create the long scroll animation
       ScrollTrigger.create({
