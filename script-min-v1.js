@@ -2272,6 +2272,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     this.feedSection = container.querySelector(".section_feed");
     this.feedWrapper = container.querySelector(".feed_cms_wrap");
+    this.feedScrollWrapper = container.querySelector(".feed_scroll_wrapper");
     this.feedContainer = container.querySelector(".feed_container");
     this.feedList = container.querySelector(".feed_cms_list");
 
@@ -2326,9 +2327,12 @@ document.addEventListener("DOMContentLoaded", function () {
       gsap.set(this.bgItems, { opacity: 0 });
     }
 
-    this.feedSection.style.height = `${
-      (this.numItems + 1) * window.innerHeight
-    }px`;
+    // Set height on the scroll wrapper for sticky positioning
+    if (this.feedScrollWrapper) {
+      this.feedScrollWrapper.style.height = `${
+        (this.numItems + 1) * window.innerHeight
+      }px`;
+    }
 
     this.createScrollTriggers();
     this.getProgress();
@@ -2402,12 +2406,11 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   createScrollTriggers() {
+    // Feed container pinning removed - using CSS position: sticky instead
     ScrollTrigger.create({
-      trigger: this.feedContainer,
+      trigger: this.feedScrollWrapper || this.feedContainer,
       start: "top top",
-      end: () => `+=${this.numItems * window.innerHeight}`,
-      pin: this.feedContainer,
-      pinSpacing: true,
+      end: "bottom bottom",
       scrub: 0.3, // ✅ smoother scrub (less CPU than 0.1)
       invalidateOnRefresh: true,
       markers: false,
